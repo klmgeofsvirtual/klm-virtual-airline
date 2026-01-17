@@ -1,0 +1,983 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KLM Virtual Airline | Royal Dutch Virtual</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        /* KLM Brand Colors */
+        :root {
+            --klm-blue: #00A1DE;
+            --klm-dark: #0077A3;
+            --klm-sky: #E5F6FF;
+        }
+        .text-klm { color: var(--klm-blue); }
+        .bg-klm { background-color: var(--klm-blue); }
+        .bg-klm-dark { background-color: var(--klm-dark); }
+        .hover-bg-klm:hover { background-color: var(--klm-dark); }
+        
+        body { font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+        /* Animations */
+        .fade-in { animation: fadeIn 0.4s ease-in-out; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Nav Active State */
+        .nav-link.active {
+            color: var(--klm-blue);
+            font-weight: 700;
+        }
+        .nav-link.active::after {
+            content: '';
+            display: block;
+            width: 100%;
+            height: 2px;
+            background: var(--klm-blue);
+            margin-top: 2px;
+        }
+
+        /* Hero Image Overlay */
+        .hero-overlay {
+            background: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.2));
+        }
+
+        /* Rank Epaulettes CSS */
+        .epaulette {
+            background: #1e293b; /* Slate 800 */
+            width: 60px;
+            height: 80px;
+            border-radius: 4px 4px 20px 20px;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            align-items: center;
+            padding-bottom: 10px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+        .stripe {
+            width: 80%;
+            height: 6px;
+            background: #eab308; /* Gold */
+            margin-top: 4px;
+        }
+
+        /* MAP STYLES */
+        #fleet-map {
+            width: 100%;
+            height: 500px;
+            background: #1a1a1a;
+            z-index: 1;
+        }
+        .leaflet-popup-content-wrapper {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 4px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .leaflet-popup-content {
+            margin: 10px;
+            font-family: 'Segoe UI', sans-serif;
+            font-size: 13px;
+        }
+        .map-filter-controls {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            background: white;
+            padding: 10px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        }
+    </style>
+    <!-- Leaflet CSS & JS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+</head>
+<body class="bg-slate-50 text-slate-800 flex flex-col min-h-screen">
+
+    <!-- Navigation -->
+    <nav class="sticky top-0 z-50 bg-white/95 backdrop-blur-md shadow-sm border-b border-slate-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-20">
+                <!-- Logo Area -->
+                <div class="flex items-center cursor-pointer" onclick="router('home')">
+                    <!-- Logo Source controlled by JS 'siteImages' variable below -->
+                    <img id="nav-logo" src="" alt="KLM Logo" class="h-8 md:h-10 mr-3">
+                    <div class="hidden md:flex flex-col leading-tight border-l border-slate-300 pl-3 ml-2">
+                        <span class="font-bold text-slate-900 text-sm tracking-wide">VIRTUAL</span>
+                        <span class="text-xs text-slate-500 uppercase tracking-widest">Airline</span>
+                    </div>
+                </div>
+
+                <!-- Desktop Menu -->
+                <div class="hidden md:flex items-center space-x-8">
+                    <button onclick="router('home')" class="nav-link text-slate-600 hover:text-klm transition-colors font-medium py-2">Home</button>
+                    <button onclick="router('fleet')" class="nav-link text-slate-600 hover:text-klm transition-colors font-medium py-2">Fleet</button>
+                    <button onclick="router('routes')" class="nav-link text-slate-600 hover:text-klm transition-colors font-medium py-2">Routes</button>
+                    <button onclick="router('sop')" class="nav-link text-slate-600 hover:text-klm transition-colors font-medium py-2">SOP</button>
+                    <button onclick="router('community')" class="nav-link text-slate-600 hover:text-klm transition-colors font-medium py-2">Community</button>
+                    
+                    <!-- Updated Join Link -->
+                    <a href="https://discord.gg/Zj9BrrxU" target="_blank" class="bg-klm text-white px-6 py-2.5 rounded-full font-bold hover-bg-klm transition shadow-lg shadow-sky-100 flex items-center">
+                        <i data-lucide="user-plus" class="w-4 h-4 mr-2"></i> Join Crew
+                    </a>
+                </div>
+
+                <!-- Mobile menu button -->
+                <div class="md:hidden flex items-center">
+                    <button onclick="toggleMobileMenu()" class="text-slate-600 hover:text-klm focus:outline-none p-2">
+                        <i data-lucide="menu" class="h-7 w-7"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <!-- Mobile Menu Dropdown -->
+        <div id="mobile-menu" class="hidden md:hidden bg-white border-t border-slate-100 shadow-xl absolute w-full left-0 z-40">
+            <div class="p-4 space-y-2">
+                <button onclick="router('home'); toggleMobileMenu()" class="block w-full text-left px-4 py-3 rounded-lg hover:bg-slate-50 text-slate-700 font-medium">Home</button>
+                <button onclick="router('fleet'); toggleMobileMenu()" class="block w-full text-left px-4 py-3 rounded-lg hover:bg-slate-50 text-slate-700 font-medium">Fleet</button>
+                <button onclick="router('routes'); toggleMobileMenu()" class="block w-full text-left px-4 py-3 rounded-lg hover:bg-slate-50 text-slate-700 font-medium">Routes</button>
+                <button onclick="router('sop'); toggleMobileMenu()" class="block w-full text-left px-4 py-3 rounded-lg hover:bg-slate-50 text-slate-700 font-medium">SOP</button>
+                <button onclick="router('community'); toggleMobileMenu()" class="block w-full text-left px-4 py-3 rounded-lg hover:bg-slate-700 text-slate-700 font-medium">Community</button>
+                <a href="https://discord.gg/Zj9BrrxU" target="_blank" class="block w-full text-left px-4 py-3 rounded-lg bg-slate-50 text-klm font-bold">Join Discord</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content Area -->
+    <main id="app-content" class="flex-grow">
+        <!-- Pages will be injected here by JS -->
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-slate-900 text-slate-400 py-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8 border-b border-slate-800 pb-8">
+                <div class="col-span-1 md:col-span-2">
+                    <!-- Footer Logo controlled by JS 'siteImages' variable below -->
+                    <img id="footer-logo" src="" alt="KLM Logo" class="h-8 mb-4 brightness-0 invert opacity-80">
+                    <p class="text-sm leading-relaxed max-w-sm">
+                        Experience the Royal Dutch way of flying. We are a non-profit virtual airline simulation community. 
+                        We are not affiliated with the real KLM Royal Dutch Airlines.
+                    </p>
+                </div>
+                <div>
+                    <h4 class="text-white font-bold mb-4 uppercase text-xs tracking-wider">Operations</h4>
+                    <ul class="space-y-2 text-sm">
+                        <li><button onclick="router('sop')" class="hover:text-white transition">Pilot Handbook (SOP)</button></li>
+                        <li><button onclick="router('fleet')" class="hover:text-white transition">Fleet Information</button></li>
+                        <li><button onclick="router('routes')" class="hover:text-white transition">Route Map</button></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="text-white font-bold mb-4 uppercase text-xs tracking-wider">Management</h4>
+                    <ul class="space-y-2 text-sm">
+                        <li class="flex items-center"><i data-lucide="user" class="w-3 h-3 mr-2"></i> mileflight (CEO)</li>
+                        <li class="flex items-center"><i data-lucide="user" class="w-3 h-3 mr-2"></i> JustFrost (Temp CEO)</li>
+                        <li class="flex items-center"><i data-lucide="user" class="w-3 h-3 mr-2"></i> Nihid9044 (CMO)</li>
+                        <li class="flex items-center"><i data-lucide="map-pin" class="w-3 h-3 mr-2"></i> Hub: Amsterdam (EHAM)</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="flex flex-col md:flex-row justify-between items-center text-xs text-slate-500">
+                <span>&copy; 2025 KLM Virtual Airline. All rights reserved.</span>
+                <div class="flex space-x-4 mt-4 md:mt-0">
+                    <a href="#" class="hover:text-white transition"><i data-lucide="twitter" class="w-4 h-4"></i></a>
+                    <a href="#" class="hover:text-white transition"><i data-lucide="instagram" class="w-4 h-4"></i></a>
+                    <a href="#" class="hover:text-white transition"><i data-lucide="message-circle" class="w-4 h-4"></i></a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // ==========================================
+        //  IMAGE CONFIGURATION - EDIT THIS SECTION
+        // ==========================================
+        
+        const siteImages = {
+            // Main Logo (Top Left & Footer)
+            logo: "https://upload.wikimedia.org/wikipedia/commons/c/c7/KLM_logo.svg",
+
+            // Large Hero Images for each page header
+            homeHero: "https://content.r9cdn.net/rimg/dimg/aa/3f/bf32fc29-al-KL-168342f6d92.jpg?width=1366&height=768&xhint=1075&yhint=770&crop=true",
+            fleetHeader: "https://images.squarespace-cdn.com/content/v1/513bcb31e4b0df53688faccb/1465974398569-OX4HIEZ4213UPO7JLFPN/KLM+orange+aircraft",
+            routesHeader: "https://prod-img.telegraaf.nl/public/incoming/n38dez-air-france-vliegers-worden-ingezet-om-een-boeing-777-te-vliegen./alternates/SIXTEEN_NINE_128/Air%20France-vliegers%20worden%20ingezet%20om%20een%20Boeing%20777%20te%20vliegen.",
+            sopHeader: "https://klmflightacademy.nl/wp-content/uploads/2021/10/737-cockpit.jpg",
+            communityHeader: "https://s3.amazonaws.com/marquee-test-akiaisur2rgicbmpehea/L8ArtPS8Rgirr3CCcZOI_JPG%20-%20High-res-Billy%20Bishop%20Tower.jpg"
+        };
+
+        // ==========================================
+        //  FLEET DATA - EDIT AIRCRAFT IMAGES HERE
+        // ==========================================
+
+        const fleetData = [
+            { 
+                type: "Embraer 190", 
+                role: "Cityhopper", 
+                pax: 94, 
+                config: "84 Eco / 10 Bus", 
+                count: 21, 
+                // PASTE IMAGE LINK BELOW
+                img: "https://upload.wikimedia.org/wikipedia/commons/c/c6/Berlin_Brandenburg_Airport_KLM_Cityhopper_Embraer_E195-E2_PH-NXC_%28DSC02878%29.jpg" 
+            },
+            { 
+                type: "Embraer 195-E2", 
+                role: "Cityhopper", 
+                pax: 94, 
+                config: "84 Eco / 10 Bus", 
+                count: 25, 
+                // PASTE IMAGE LINK BELOW
+                img: "https://img.static-kl.com/transform/53cea398-7cff-4e3f-a7b1-496d4552fb10/" 
+            },
+            { 
+                type: "Boeing 737-800", 
+                role: "Short Haul", 
+                pax: 182, 
+                config: "162 Eco / 20 Bus", 
+                count: 30, 
+                // PASTE IMAGE LINK BELOW
+                img: "https://upload.wikimedia.org/wikipedia/commons/1/18/KLM_Boeing_737-800_PH-BCD_%2826038861623%29.jpg" 
+            },
+            { 
+                type: "Airbus A321neo", 
+                role: "Short Haul", 
+                pax: 223, 
+                config: "203 Eco / 20 Bus", 
+                count: 22, 
+                // PASTE IMAGE LINK BELOW
+                img: "https://img.static-kl.com/transform/8806738a-a661-4934-a177-95adef39307d/" 
+            },
+            { 
+                type: "Airbus A330-200", 
+                role: "Medium Haul", 
+                pax: 316, 
+                config: "298 Eco / 18 Bus", 
+                count: 6, 
+                // PASTE IMAGE LINK BELOW
+                img: "https://cdn.flightsim.to/images/27/inibuilds-a330-300-klm-fleet-pack-55321-1735741086-uIy_G.jpg?width=1400" 
+            },
+            { 
+                type: "Boeing 777-300ER", 
+                role: "Long Haul", 
+                pax: 373, 
+                config: "346 Eco / 27 Bus", 
+                count: 16, 
+                // PASTE IMAGE LINK BELOW
+                img: "https://www.aerotime.aero/images/klm_boeing_777-300er_orange_pride_livery.jpg" 
+            },
+            { 
+                type: "Boeing 787-9", 
+                role: "Dreamliner", 
+                pax: 275, 
+                config: "245 Eco / 30 Bus", 
+                count: 13, 
+                // PASTE IMAGE LINK BELOW
+                img: "https://content.presspage.com/uploads/162/1920_25508202-10155250600310773-6357422191407278812-n.jpg" 
+            },
+            { 
+                type: "Boeing 787-10", 
+                role: "Dreamliner", 
+                pax: 318, 
+                config: "280 Eco / 38 Bus", 
+                count: 14, 
+                // PASTE IMAGE LINK BELOW
+                img: "https://content.presspage.com/uploads/162/1920_paulridderhof30jun196473-465547.jpg?10000" 
+            },
+        ];
+
+        // --- Data & Content ---
+
+        const routeData = {
+            "Europe": [
+                { city: "London Heathrow", code: "EGLL", out: "1001, 1003, 1005+", in: "1002, 1004, 1006+" },
+                { city: "Paris CDG", code: "LFPG", out: "1401, 1403, 1411", in: "1402, 1404, 1412" },
+                { city: "Berlin", code: "EDDB", out: "1775, 1777, 1779+", in: "1770, 1772, 1776+" },
+                { city: "Rome", code: "LIRF", out: "1601, 1603, 1607+", in: "1600, 1602, 1604+" },
+                { city: "Madrid", code: "LEMD", out: "1501, 1503, 1505+", in: "1500, 1502, 1504+" },
+                { city: "Vienna", code: "LOWW", out: "1901, 1905, 1907+", in: "1900, 1902, 1906+" },
+                { city: "Brussels", code: "EBBR", out: "1701, 1703, 1705+", in: "1700, 1702, 1704+" },
+                { city: "Zurich", code: "LSZH", out: "1917, 1919, 1921+", in: "1916, 1918, 1920+" },
+            ],
+            "North America": [
+                { city: "New York JFK", code: "KJFK", out: "641, 643", in: "642, 644" },
+                { city: "Atlanta", code: "KATL", out: "621, 623", in: "622, 624" },
+                { city: "Los Angeles", code: "KLAX", out: "601", in: "602" },
+                { city: "Chicago", code: "KORD", out: "611", in: "612" },
+                { city: "Toronto", code: "CYYZ", out: "691, 695", in: "692, 696" },
+            ],
+            "Asia": [
+                { city: "Tokyo Narita", code: "RJAA", out: "861", in: "862" },
+                { city: "Seoul", code: "RKSI", out: "855", in: "856" },
+                { city: "Singapore", code: "WSSS", out: "835", in: "836" },
+                { city: "Hong Kong", code: "VHHH", out: "887", in: "888" },
+            ],
+            "South America": [
+                { city: "São Paulo", code: "SBGR", out: "791", in: "792" },
+                { city: "Buenos Aires", code: "SAEZ", out: "701", in: "702" },
+                { city: "Bogotá", code: "SKBO", out: "741", in: "742" },
+                { city: "St. Maarten", code: "TNCM", out: "777", in: "778" },
+            ]
+        };
+
+        // --- Pages HTML Templates ---
+
+        const pages = {
+            home: `
+                <div class="relative bg-slate-900 text-white fade-in">
+                    <div class="absolute inset-0">
+                        <img src="${siteImages.homeHero}" 
+                             class="w-full h-full object-cover opacity-60" alt="KLM Plane">
+                        <div class="absolute inset-0 bg-gradient-to-t from-slate-900 via-transparent to-transparent"></div>
+                    </div>
+                    <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-32 pb-40 text-center lg:text-left">
+                        <div class="inline-block bg-klm/90 text-white text-sm font-bold px-4 py-1.5 rounded-full mb-6 backdrop-blur-sm">
+                            HUB: AMSTERDAM (EHAM)
+                        </div>
+                        <h1 class="text-5xl md:text-7xl font-extrabold tracking-tight mb-6 leading-tight">
+                            Flying the World,<br>
+                            <span class="text-klm">Virtually.</span>
+                        </h1>
+                        <p class="text-xl md:text-2xl text-slate-200 mb-10 max-w-2xl font-light">
+                            Join the premier virtual airline community. Simulating the professionalism of KLM Royal Dutch Airlines across the globe.
+                        </p>
+                        <div class="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
+                            <button onclick="router('routes')" class="bg-klm hover:bg-white hover:text-klm text-white px-8 py-4 rounded-lg font-bold text-lg transition duration-300 flex items-center justify-center">
+                                <i data-lucide="map" class="w-5 h-5 mr-2"></i> View Destinations
+                            </button>
+                            <button onclick="router('sop')" class="bg-transparent border-2 border-white hover:bg-white hover:text-slate-900 text-white px-8 py-4 rounded-lg font-bold text-lg transition duration-300 flex items-center justify-center">
+                                <i data-lucide="book-open" class="w-5 h-5 mr-2"></i> Read Handbook
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Features Section -->
+                <div class="py-24 bg-white">
+                    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-12">
+                            <div class="text-center p-6 rounded-2xl bg-slate-50 border border-slate-100 shadow-sm hover:shadow-lg transition duration-300">
+                                <div class="bg-blue-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6">
+                                    <i data-lucide="globe" class="w-8 h-8 text-klm"></i>
+                                </div>
+                                <h3 class="text-xl font-bold mb-3">Global Network</h3>
+                                <p class="text-slate-600">Connecting Amsterdam to over 50 destinations across 6 continents.</p>
+                            </div>
+                            <div class="text-center p-6 rounded-2xl bg-slate-50 border border-slate-100 shadow-sm hover:shadow-lg transition duration-300">
+                                <div class="bg-blue-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6">
+                                    <i data-lucide="users" class="w-8 h-8 text-klm"></i>
+                                </div>
+                                <h3 class="text-xl font-bold mb-3">Active Community</h3>
+                                <p class="text-slate-600">A welcoming group of aviation enthusiasts and professional virtual pilots.</p>
+                            </div>
+                            <div class="text-center p-6 rounded-2xl bg-slate-50 border border-slate-100 shadow-sm hover:shadow-lg transition duration-300">
+                                <div class="bg-blue-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6">
+                                    <i data-lucide="award" class="w-8 h-8 text-klm"></i>
+                                </div>
+                                <h3 class="text-xl font-bold mb-3">Realistic Ops</h3>
+                                <p class="text-slate-600">Fly real-world schedules with accurate fleet configurations and SOPs.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `,
+            fleet: `
+                <!-- Fleet Header -->
+                <div class="relative bg-slate-900 h-64 md:h-80 overflow-hidden fade-in">
+                    <img src="${siteImages.fleetHeader}" class="w-full h-full object-cover opacity-50">
+                    <div class="absolute inset-0 flex items-center justify-center">
+                        <div class="text-center">
+                            <h1 class="text-4xl md:text-5xl font-bold text-white mb-2">Our Fleet</h1>
+                            <p class="text-slate-200 text-lg">Modern, Efficient, Comfortable.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Fleet Grid -->
+                <div class="py-16 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 bg-white fade-in">
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                        ${fleetData.map(plane => `
+                            <div class="bg-white rounded-xl shadow-md overflow-hidden border border-slate-200 hover:shadow-xl transition group">
+                                <div class="h-48 overflow-hidden relative">
+                                    <img src="${plane.img}" class="w-full h-full object-cover transform group-hover:scale-110 transition duration-700">
+                                    <div class="absolute top-4 right-4 bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full text-xs font-bold text-slate-800 shadow-sm">
+                                        Qty: ${plane.count}
+                                    </div>
+                                </div>
+                                <div class="p-6">
+                                    <div class="flex justify-between items-start mb-2">
+                                        <h3 class="text-xl font-bold text-slate-900">${plane.type}</h3>
+                                    </div>
+                                    <div class="inline-block bg-sky-50 text-sky-700 text-xs font-semibold px-2 py-1 rounded mb-4">
+                                        ${plane.role}
+                                    </div>
+                                    <div class="space-y-3 border-t border-slate-100 pt-4">
+                                        <div class="flex justify-between text-sm">
+                                            <span class="text-slate-500 flex items-center"><i data-lucide="users" class="w-4 h-4 mr-2"></i> Capacity</span>
+                                            <span class="font-medium text-slate-900">${plane.pax} Pax</span>
+                                        </div>
+                                        <div class="flex justify-between text-sm">
+                                            <span class="text-slate-500 flex items-center"><i data-lucide="layout" class="w-4 h-4 mr-2"></i> Config</span>
+                                            <span class="font-medium text-slate-900">${plane.config}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `,
+            routes: `
+                <!-- Routes Header -->
+                <div class="relative bg-slate-900 h-64 md:h-80 overflow-hidden fade-in">
+                    <img src="${siteImages.routesHeader}" class="w-full h-full object-cover opacity-50">
+                    <div class="absolute inset-0 flex items-center justify-center">
+                        <div class="text-center">
+                            <h1 class="text-4xl md:text-5xl font-bold text-white mb-2">Route Network</h1>
+                            <p class="text-slate-200 text-lg">Connecting the world to Amsterdam.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- MAP CONTAINER (Moved here) -->
+                <div class="relative w-full border-b border-slate-200">
+                    <div id="fleet-map"></div>
+                    <div class="map-filter-controls">
+                        <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Filter by Aircraft</label>
+                        <select id="aircraft-filter" onchange="filterMapRoutes(this.value)" class="bg-slate-50 border border-slate-300 text-slate-900 text-sm rounded focus:ring-klm focus:border-klm block w-full p-2">
+                            <option value="ALL">Show All Fleet</option>
+                            <option value="E190">Embraer 190</option>
+                            <option value="E195">Embraer 195</option>
+                            <option value="B737-800">Boeing 737-800</option>
+                            <option value="A321neo">Airbus A321neo</option>
+                            <option value="A330-200">Airbus A330-200</option>
+                            <option value="B777-300ER">Boeing 777-300ER</option>
+                            <option value="B787-9">Boeing 787-9</option>
+                            <option value="B787-10">Boeing 787-10</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Route Filter UI -->
+                <div class="py-12 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 bg-slate-50 fade-in">
+                    <div class="flex flex-wrap justify-center gap-2 mb-12">
+                        ${Object.keys(routeData).map(region => `
+                            <button onclick="renderRouteGrid('${region}')" 
+                                class="route-btn px-6 py-2 rounded-full border border-slate-300 bg-white text-slate-600 font-medium hover:border-klm hover:text-klm transition focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-klm"
+                                id="btn-${region}">
+                                ${region}
+                            </button>
+                        `).join('')}
+                    </div>
+                    <div id="route-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <!-- Filled by JS -->
+                    </div>
+                </div>
+            `,
+            sop: `
+                <!-- SOP Header -->
+                <div class="relative bg-slate-900 h-64 md:h-80 overflow-hidden fade-in">
+                    <img src="${siteImages.sopHeader}" class="w-full h-full object-cover opacity-50">
+                    <div class="absolute inset-0 flex items-center justify-center">
+                        <div class="text-center">
+                            <h1 class="text-4xl md:text-5xl font-bold text-white mb-2">Pilot Handbook</h1>
+                            <p class="text-slate-200 text-lg">Standard Operating Procedures</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16 space-y-12 fade-in">
+                    
+                    <!-- Pre-Flight -->
+                    <section class="bg-white p-8 rounded-2xl shadow-sm border-l-4 border-klm">
+                        <h2 class="text-2xl font-bold text-slate-900 mb-6 flex items-center">
+                            <i data-lucide="clipboard-list" class="text-klm mr-3"></i> Pre-Flight & Departure
+                        </h2>
+                        <div class="space-y-4 text-slate-600">
+                            <div class="flex gap-4 p-4 bg-slate-50 rounded-lg">
+                                <span class="font-bold text-slate-900 min-w-[60px]">Timing</span>
+                                <p>Preparation must start <span class="font-semibold text-klm">30+ minutes</span> before departure. Close doors 5-15 mins before scheduled departure.</p>
+                            </div>
+                            <div class="flex gap-4 p-4 bg-slate-50 rounded-lg">
+                                <span class="font-bold text-slate-900 min-w-[60px]">Planning</span>
+                                <p>Mandatory flight plan via SimBrief. Check <span class="font-mono bg-slate-200 px-1 rounded">#routes</span> for assigned aircraft type.</p>
+                            </div>
+                            <div class="flex gap-4 p-4 bg-slate-50 rounded-lg">
+                                <span class="font-bold text-slate-900 min-w-[60px]">Taxi</span>
+                                <p>Maximum taxi speed <span class="font-semibold text-klm">25 kts</span> (Ground). Perform Takeoff Config check before taxi.</p>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- In-Flight -->
+                    <section class="bg-white p-8 rounded-2xl shadow-sm border-l-4 border-klm">
+                        <h2 class="text-2xl font-bold text-slate-900 mb-6 flex items-center">
+                            <i data-lucide="gauge" class="text-klm mr-3"></i> Cruise & Restrictions
+                        </h2>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div class="border border-slate-200 p-4 rounded text-center">
+                                <div class="text-xs text-slate-500 uppercase font-bold">Below 3,000ft</div>
+                                <div class="text-xl font-bold text-klm">Max 200 kts</div>
+                            </div>
+                            <div class="border border-slate-200 p-4 rounded text-center">
+                                <div class="text-xs text-slate-500 uppercase font-bold">3,000ft - 10,000ft</div>
+                                <div class="text-xl font-bold text-klm">Max 250 kts</div>
+                            </div>
+                            <div class="border border-slate-200 p-4 rounded text-center">
+                                <div class="text-xs text-slate-500 uppercase font-bold">Above 10,000ft</div>
+                                <div class="text-xl font-bold text-klm">300-350 kts</div>
+                            </div>
+                            <div class="border border-slate-200 p-4 rounded text-center">
+                                <div class="text-xs text-slate-500 uppercase font-bold">Traffic Separation</div>
+                                <div class="text-xl font-bold text-klm">1000 ft Vertical</div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Arrival -->
+                    <section class="bg-white p-8 rounded-2xl shadow-sm border-l-4 border-klm">
+                        <h2 class="text-2xl font-bold text-slate-900 mb-6 flex items-center">
+                            <i data-lucide="plane-landing" class="text-klm mr-3"></i> Arrival & Logging
+                        </h2>
+                        <ul class="space-y-4 text-slate-600 list-none">
+                            <li class="flex items-start">
+                                <i data-lucide="check-circle-2" class="text-green-500 w-5 h-5 mr-3 mt-1"></i>
+                                <span>Start descent preparation at <strong>10,000 ft</strong>. Landing checklist complete by <strong>5,000 ft</strong>.</span>
+                            </li>
+                            <li class="flex items-start">
+                                <i data-lucide="alert-triangle" class="text-amber-500 w-5 h-5 mr-3 mt-1"></i>
+                                <span><strong>Go-Around Policy:</strong> Must go-around if unstable below 500ft. Max 3 attempts, then divert to alternate.</span>
+                            </li>
+                             <li class="flex items-start">
+                                <i data-lucide="arrow-right-circle" class="text-blue-500 w-5 h-5 mr-3 mt-1"></i>
+                                <span>Taxi to gate at max <strong>30 kts</strong>.</span>
+                            </li>
+                        </ul>
+                        
+                        <div class="mt-6 bg-slate-100 p-5 rounded-lg border border-slate-200">
+                            <h3 class="font-bold text-slate-900 mb-2 flex items-center"><i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Logbook Requirements</h3>
+                            <p class="text-sm text-slate-600 mb-2">Submit in <code>#logs</code> channel:</p>
+                            <div class="grid grid-cols-2 md:grid-cols-3 gap-2 text-xs font-mono text-slate-700">
+                                <div class="bg-white p-2 rounded">Dep Airport</div>
+                                <div class="bg-white p-2 rounded">Arr Airport</div>
+                                <div class="bg-white p-2 rounded">Flight Time</div>
+                                <div class="bg-white p-2 rounded">Pilot Name</div>
+                                <div class="bg-white p-2 rounded">Aircraft Note</div>
+                                <div class="bg-white p-2 rounded text-klm font-bold">Screenshot*</div>
+                            </div>
+                            <p class="text-xs text-slate-500 mt-2">*Image must show aircraft + nav map.</p>
+                        </div>
+                    </section>
+                </div>
+            `,
+            community: `
+                <!-- Community Header -->
+                <div class="relative bg-slate-900 h-64 md:h-80 overflow-hidden fade-in">
+                    <img src="${siteImages.communityHeader}" class="w-full h-full object-cover opacity-50">
+                    <div class="absolute inset-0 flex items-center justify-center">
+                        <div class="text-center">
+                            <h1 class="text-4xl md:text-5xl font-bold text-white mb-2">Community Policy</h1>
+                            <p class="text-slate-200 text-lg">Professionalism, Respect, and Passion for Aviation.</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Pilot Ranks Section -->
+                <div class="bg-white py-16 border-b border-slate-100">
+                    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+                        <div class="text-center mb-12">
+                            <h2 class="text-3xl font-bold text-slate-900">Career Progression</h2>
+                            <p class="text-slate-500 mt-2">Earn your stripes. Climb the ranks by logging flight hours.</p>
+                        </div>
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-8">
+                            <!-- Trainee -->
+                            <div class="flex flex-col items-center">
+                                <div class="epaulette mb-4">
+                                    <div class="stripe"></div>
+                                </div>
+                                <h3 class="font-bold text-slate-800">Trainee</h3>
+                                <p class="text-xs text-slate-500 font-mono">0 - 20 HRS</p>
+                            </div>
+                            <!-- Junior Officer -->
+                            <div class="flex flex-col items-center">
+                                <div class="epaulette mb-4">
+                                    <div class="stripe"></div>
+                                    <div class="stripe"></div>
+                                </div>
+                                <h3 class="font-bold text-slate-800">Junior Officer</h3>
+                                <p class="text-xs text-slate-500 font-mono">20 - 50 HRS</p>
+                            </div>
+                            <!-- First Officer -->
+                            <div class="flex flex-col items-center">
+                                <div class="epaulette mb-4">
+                                    <div class="stripe"></div>
+                                    <div class="stripe"></div>
+                                    <div class="stripe"></div>
+                                </div>
+                                <h3 class="font-bold text-slate-800">First Officer</h3>
+                                <p class="text-xs text-slate-500 font-mono">50 - 150 HRS</p>
+                            </div>
+                            <!-- Captain -->
+                            <div class="flex flex-col items-center">
+                                <div class="epaulette mb-4">
+                                    <div class="stripe"></div>
+                                    <div class="stripe"></div>
+                                    <div class="stripe"></div>
+                                    <div class="stripe"></div>
+                                </div>
+                                <h3 class="font-bold text-slate-800">Captain</h3>
+                                <p class="text-xs text-slate-500 font-mono">150+ HRS</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16 fade-in">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <!-- Policy Cards -->
+                        <div class="bg-white p-8 rounded-xl shadow-md border-t-4 border-klm hover:-translate-y-1 transition duration-300 group relative">
+                            <div class="text-5xl font-black text-slate-200 mb-4 absolute top-4 right-6 opacity-0 group-hover:opacity-100 transition-opacity duration-300 select-none">01</div>
+                            <h3 class="text-xl font-bold text-slate-900 mb-2 relative z-10">Professional Conduct</h3>
+                            <p class="text-slate-600 relative z-10">All members are expected to communicate with courtesy. Harassment or disrespect is strictly prohibited.</p>
+                        </div>
+
+                        <div class="bg-white p-8 rounded-xl shadow-md border-t-4 border-klm hover:-translate-y-1 transition duration-300 group relative">
+                            <div class="text-5xl font-black text-slate-200 mb-4 absolute top-4 right-6 opacity-0 group-hover:opacity-100 transition-opacity duration-300 select-none">02</div>
+                            <h3 class="text-xl font-bold text-slate-900 mb-2 relative z-10">Honesty & Integrity</h3>
+                            <p class="text-slate-600 relative z-10">Information shared must be accurate. Impersonation or false claims about operations are not tolerated.</p>
+                        </div>
+
+                        <div class="bg-white p-8 rounded-xl shadow-md border-t-4 border-slate-300 hover:-translate-y-1 transition duration-300 group relative">
+                            <div class="text-5xl font-black text-slate-200 mb-4 absolute top-4 right-6 opacity-0 group-hover:opacity-100 transition-opacity duration-300 select-none">03</div>
+                            <h3 class="text-xl font-bold text-slate-900 mb-2 relative z-10">Safe Environment</h3>
+                            <p class="text-slate-600 relative z-10">Strictly SFW content only. No inappropriate, suggestive, or explicit material allowed.</p>
+                        </div>
+
+                        <div class="bg-white p-8 rounded-xl shadow-md border-t-4 border-slate-300 hover:-translate-y-1 transition duration-300 group relative">
+                            <div class="text-5xl font-black text-slate-200 mb-4 absolute top-4 right-6 opacity-0 group-hover:opacity-100 transition-opacity duration-300 select-none">04</div>
+                            <h3 class="text-xl font-bold text-slate-900 mb-2 relative z-10">Privacy First</h3>
+                            <p class="text-slate-600 relative z-10">Do not share personal details or private messages without permission.</p>
+                        </div>
+                        
+                         <div class="bg-white p-8 rounded-xl shadow-md border-t-4 border-slate-300 hover:-translate-y-1 transition duration-300 group relative">
+                            <div class="text-5xl font-black text-slate-200 mb-4 absolute top-4 right-6 opacity-0 group-hover:opacity-100 transition-opacity duration-300 select-none">05</div>
+                            <h3 class="text-xl font-bold text-slate-900 mb-2 relative z-10">Chain of Command</h3>
+                            <p class="text-slate-600 relative z-10">Staff instructions are final. Respect leadership decisions to maintain order.</p>
+                        </div>
+
+                        <div class="bg-white p-8 rounded-xl shadow-md border-t-4 border-klm hover:-translate-y-1 transition duration-300 group relative">
+                            <div class="text-5xl font-black text-slate-200 mb-4 absolute top-4 right-6 opacity-0 group-hover:opacity-100 transition-opacity duration-300 select-none">06</div>
+                            <h3 class="text-xl font-bold text-slate-900 mb-2 relative z-10">Positive Spirit</h3>
+                            <p class="text-slate-600 relative z-10">Encourage good flying practices and help others. Build a friendly environment.</p>
+                        </div>
+                    </div>
+                </div>
+            `
+        };
+
+        // --- Router Logic ---
+
+        function router(pageName) {
+            const contentDiv = document.getElementById('app-content');
+            
+            // 1. Inject HTML
+            if (pages[pageName]) {
+                contentDiv.innerHTML = pages[pageName];
+            } else {
+                contentDiv.innerHTML = pages['home'];
+            }
+
+            // 2. Execute Page-Specific Scripts
+            if (pageName === 'routes') {
+                renderRouteGrid('Europe'); // Default view
+                // Initialize map after DOM injection
+                setTimeout(initFleetMap, 100);
+            }
+            
+            // 3. Update Icons
+            lucide.createIcons();
+
+            // 4. Scroll Top
+            window.scrollTo(0, 0);
+
+            // 5. Update Active State in Nav
+            document.querySelectorAll('.nav-link').forEach(btn => {
+                if(btn.getAttribute('onclick').includes(pageName)) {
+                    btn.classList.add('active');
+                } else {
+                    btn.classList.remove('active');
+                }
+            });
+        }
+
+        // Helper for Routes Page
+        function renderRouteGrid(region) {
+            const grid = document.getElementById('route-grid');
+            const data = routeData[region] || [];
+            
+            // Update buttons state
+            document.querySelectorAll('.route-btn').forEach(btn => {
+                if(btn.id === `btn-${region}`) {
+                    btn.classList.add('bg-klm', 'text-white', 'border-klm');
+                    btn.classList.remove('bg-white', 'text-slate-600');
+                } else {
+                    btn.classList.remove('bg-klm', 'text-white', 'border-klm');
+                    btn.classList.add('bg-white', 'text-slate-600');
+                }
+            });
+
+            // Populate Grid
+            grid.innerHTML = data.map(route => `
+                <div class="bg-white p-5 rounded-lg border border-slate-200 shadow-sm hover:shadow-md transition">
+                    <div class="flex justify-between items-center mb-3">
+                        <h4 class="font-bold text-lg text-slate-800">${route.city}</h4>
+                        <span class="bg-slate-100 text-slate-600 text-xs font-mono font-bold px-2 py-1 rounded border border-slate-200">${route.code}</span>
+                    </div>
+                    <div class="space-y-2 text-sm border-t border-slate-100 pt-3">
+                        <div class="flex">
+                            <span class="font-bold text-klm w-12">OUT</span>
+                            <span class="text-slate-600">${route.out}</span>
+                        </div>
+                        <div class="flex">
+                            <span class="font-bold text-klm w-12">IN</span>
+                            <span class="text-slate-600">${route.in}</span>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+            
+            // Add Fade effect to grid
+            grid.classList.remove('fade-in');
+            void grid.offsetWidth; // trigger reflow
+            grid.classList.add('fade-in');
+        }
+
+        function toggleMobileMenu() {
+            document.getElementById('mobile-menu').classList.toggle('hidden');
+        }
+
+        // --- INIT ---
+        
+        // Set Logo Images from Config
+        document.getElementById('nav-logo').src = siteImages.logo;
+        document.getElementById('footer-logo').src = siteImages.logo;
+
+        // Initialize App
+        router('home');
+
+        // ==========================================
+        //  MAP INTEGRATION LOGIC
+        // ==========================================
+
+        const routeManifest = [
+          // EUROPE
+          { "origin": "EHAM", "originCoords": [4.7639, 52.3091], "destination": "EGLL", "destinationCoords": [-0.4543, 51.4700], "fleet": ["E190", "E195", "B737-700", "B737-800", "A321neo"], "hub": true },
+          { "origin": "EHAM", "originCoords": [4.7639, 52.3091], "destination": "LFPG", "destinationCoords": [2.5479, 49.0097], "fleet": ["E190", "E195", "B737-700", "B737-800", "A321neo"], "hub": true },
+          { "origin": "EHAM", "originCoords": [4.7639, 52.3091], "destination": "EDDB", "destinationCoords": [13.5033, 52.3667], "fleet": ["E190", "E195", "B737-700", "B737-800", "A321neo"], "hub": true },
+          { "origin": "EHAM", "originCoords": [4.7639, 52.3091], "destination": "LIRF", "destinationCoords": [12.2508, 41.8003], "fleet": ["B737-800", "A321neo"], "hub": true },
+          { "origin": "EHAM", "originCoords": [4.7639, 52.3091], "destination": "LEMD", "destinationCoords": [-3.5668, 40.4893], "fleet": ["B737-800", "A321neo"], "hub": true },
+          { "origin": "EHAM", "originCoords": [4.7639, 52.3091], "destination": "LOWW", "destinationCoords": [16.5697, 48.1103], "fleet": ["E190", "E195", "B737-800"], "hub": true },
+          { "origin": "EHAM", "originCoords": [4.7639, 52.3091], "destination": "EBBR", "destinationCoords": [4.4844, 50.9014], "fleet": ["E190", "E195"], "hub": true },
+          { "origin": "EHAM", "originCoords": [4.7639, 52.3091], "destination": "LSZH", "destinationCoords": [8.5492, 47.4581], "fleet": ["E190", "E195", "B737-800"], "hub": true },
+          { "origin": "EHAM", "originCoords": [4.7639, 52.3091], "destination": "LSGG", "destinationCoords": [6.1090, 46.2381], "fleet": ["E190", "E195"], "hub": true },
+          { "origin": "EHAM", "originCoords": [4.7639, 52.3091], "destination": "ESSA", "destinationCoords": [17.9186, 59.6519], "fleet": ["E190", "E195", "B737-800"], "hub": true },
+          { "origin": "EHAM", "originCoords": [4.7639, 52.3091], "destination": "EKCH", "destinationCoords": [12.6560, 55.6180], "fleet": ["E190", "E195", "B737-800"], "hub": true },
+          { "origin": "EHAM", "originCoords": [4.7639, 52.3091], "destination": "ENGM", "destinationCoords": [11.1004, 60.1939], "fleet": ["E190", "E195"], "hub": true },
+          { "origin": "EHAM", "originCoords": [4.7639, 52.3091], "destination": "EFHK", "destinationCoords": [24.9633, 60.3172], "fleet": ["E190", "E195", "B737-800"], "hub": true },
+          { "origin": "EHAM", "originCoords": [4.7639, 52.3091], "destination": "LGAV", "destinationCoords": [23.9445, 37.9364], "fleet": ["B737-800", "A321neo"], "hub": true },
+          
+          // NORTH AMERICA
+          { "origin": "EHAM", "originCoords": [4.7639, 52.3091], "destination": "KJFK", "destinationCoords": [-73.7781, 40.6413], "fleet": ["B787-9", "B787-10", "B777-300ER", "A350-1000"], "hub": true },
+          { "origin": "EHAM", "originCoords": [4.7639, 52.3091], "destination": "KATL", "destinationCoords": [-84.4277, 33.6407], "fleet": ["B787-9", "B777-300ER"], "hub": true },
+          { "origin": "EHAM", "originCoords": [4.7639, 52.3091], "destination": "KLAX", "destinationCoords": [-118.4085, 33.9416], "fleet": ["B787-10", "B777-300ER"], "hub": true },
+          { "origin": "EHAM", "originCoords": [4.7639, 52.3091], "destination": "KSFO", "destinationCoords": [-122.3790, 37.6213], "fleet": ["B787-9", "B787-10"], "hub": true },
+          { "origin": "EHAM", "originCoords": [4.7639, 52.3091], "destination": "KORD", "destinationCoords": [-87.9073, 41.9742], "fleet": ["B787-9"], "hub": true },
+          { "origin": "EHAM", "originCoords": [4.7639, 52.3091], "destination": "KBOS", "destinationCoords": [-71.0052, 42.3656], "fleet": ["B787-9"], "hub": true },
+          { "origin": "EHAM", "originCoords": [4.7639, 52.3091], "destination": "KIAD", "destinationCoords": [-77.4565, 38.9531], "fleet": ["A330-200", "A330-300"], "hub": true },
+          { "origin": "EHAM", "originCoords": [4.7639, 52.3091], "destination": "CYYZ", "destinationCoords": [-79.6248, 43.6777], "fleet": ["B777-200ER", "B787-10"], "hub": true },
+          { "origin": "EHAM", "originCoords": [4.7639, 52.3091], "destination": "MMMX", "destinationCoords": [-99.0721, 19.4363], "fleet": ["B787-9"], "hub": true },
+
+          // SOUTH AMERICA & CARIBBEAN
+          { "origin": "EHAM", "originCoords": [4.7639, 52.3091], "destination": "SBGR", "destinationCoords": [-46.4731, -23.4356], "fleet": ["B777-300ER", "B787-9"], "hub": true },
+          { "origin": "EHAM", "originCoords": [4.7639, 52.3091], "destination": "SAEZ", "destinationCoords": [-58.5358, -34.8222], "fleet": ["B777-300ER"], "hub": true },
+          { "origin": "EHAM", "originCoords": [4.7639, 52.3091], "destination": "SBGL", "destinationCoords": [-43.2494, -22.8134], "fleet": ["B787-9"], "hub": true },
+          { "origin": "EHAM", "originCoords": [4.7639, 52.3091], "destination": "SKBO", "destinationCoords": [-74.1469, 4.7016], "fleet": ["B787-9"], "hub": true },
+          { "origin": "EHAM", "originCoords": [4.7639, 52.3091], "destination": "SPJC", "destinationCoords": [-77.1143, -12.0219], "fleet": ["B777-300ER"], "hub": true },
+          { "origin": "EHAM", "originCoords": [4.7639, 52.3091], "destination": "TNCA", "destinationCoords": [-70.0152, 12.5014], "fleet": ["B737-800", "A330-200"], "hub": true },
+          { "origin": "EHAM", "originCoords": [4.7639, 52.3091], "destination": "TNCM", "destinationCoords": [-63.1089, 18.0410], "fleet": ["A330-200"], "hub": true },
+          { "origin": "EHAM", "originCoords": [4.7639, 52.3091], "destination": "TNCC", "destinationCoords": [-68.9598, 12.1888], "fleet": ["B777-200ER", "B777-300ER"], "hub": true },
+
+          // AFRICA
+          { "origin": "EHAM", "originCoords": [4.7639, 52.3091], "destination": "FAOR", "destinationCoords": [28.2460, -26.1392], "fleet": ["B777-300ER", "B787-9"], "hub": true },
+          { "origin": "EHAM", "originCoords": [4.7639, 52.3091], "destination": "FACT", "destinationCoords": [18.6017, -33.9700], "fleet": ["B777-300ER"], "hub": true },
+          { "origin": "EHAM", "originCoords": [4.7639, 52.3091], "destination": "HKJK", "destinationCoords": [36.9278, -1.3192], "fleet": ["B787-9"], "hub": true },
+          { "origin": "EHAM", "originCoords": [4.7639, 52.3091], "destination": "DGAA", "destinationCoords": [-0.1667, 5.6051], "fleet": ["B777-300ER"], "hub": true },
+          { "origin": "EHAM", "originCoords": [4.7639, 52.3091], "destination": "DNMM", "destinationCoords": [3.3211, 6.5774], "fleet": ["A330-200"], "hub": true },
+
+          // ASIA & MIDDLE EAST
+          { "origin": "EHAM", "originCoords": [4.7639, 52.3091], "destination": "RJAA", "destinationCoords": [140.3929, 35.7719], "fleet": ["B787-9", "B777-300ER"], "hub": true },
+          { "origin": "EHAM", "originCoords": [4.7639, 52.3091], "destination": "VHHH", "destinationCoords": [113.9146, 22.3080], "fleet": ["B777-300ER"], "hub": true },
+          { "origin": "EHAM", "originCoords": [4.7639, 52.3091], "destination": "WSSS", "destinationCoords": [103.9940, 1.3644], "fleet": ["B787-10", "B777-300ER"], "hub": true },
+          { "origin": "EHAM", "originCoords": [4.7639, 52.3091], "destination": "RKSI", "destinationCoords": [126.4505, 37.4692], "fleet": ["B787-9"], "hub": true },
+          { "origin": "EHAM", "originCoords": [4.7639, 52.3091], "destination": "VTBS", "destinationCoords": [100.7501, 13.6900], "fleet": ["B777-300ER"], "hub": true },
+          { "origin": "EHAM", "originCoords": [4.7639, 52.3091], "destination": "ZSPD", "destinationCoords": [121.8052, 31.1433], "fleet": ["B777-300ER"], "hub": true },
+          { "origin": "EHAM", "originCoords": [4.7639, 52.3091], "destination": "VIDP", "destinationCoords": [77.1031, 28.5562], "fleet": ["B787-10"], "hub": true },
+          { "origin": "EHAM", "originCoords": [4.7639, 52.3091], "destination": "OMDB", "destinationCoords": [55.3644, 25.2532], "fleet": ["B787-9", "B777-300ER"], "hub": true },
+          { "origin": "EHAM", "originCoords": [4.7639, 52.3091], "destination": "LLBG", "destinationCoords": [34.8854, 32.0114], "fleet": ["B737-900"], "hub": true }
+        ];
+
+        let mapInstance = null;
+        let flightLinesLayer = null;
+
+        function initFleetMap() {
+            const container = document.getElementById('fleet-map');
+            if (!container) return;
+
+            // Cleanup existing
+            if (mapInstance) {
+                mapInstance.remove();
+                mapInstance = null;
+            }
+
+            // Init Map (Dark Theme)
+            mapInstance = L.map('fleet-map', {
+                center: [30, 0],
+                zoom: 2,
+                minZoom: 2,
+                maxBounds: [[-90, -180], [90, 180]],
+                zoomControl: false,
+                attributionControl: false
+            });
+
+            L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+                subdomains: 'abcd',
+                maxZoom: 19
+            }).addTo(mapInstance);
+            
+            L.control.zoom({ position: 'bottomright' }).addTo(mapInstance);
+
+            // Layer Group for lines
+            flightLinesLayer = L.layerGroup().addTo(mapInstance);
+
+            // Draw Routes (Default: ALL)
+            filterMapRoutes('ALL');
+        }
+
+        function filterMapRoutes(aircraftType) {
+            if (!flightLinesLayer) return;
+            flightLinesLayer.clearLayers();
+
+            // Hub Marker (EHAM)
+            const hubIcon = L.divIcon({
+                className: 'custom-div-icon',
+                html: "<div style='background-color:#00A1DE;width:12px;height:12px;border-radius:50%;box-shadow:0 0 10px #00A1DE;'></div>",
+                iconSize: [12, 12],
+                iconAnchor: [6, 6]
+            });
+            L.marker([52.3091, 4.7639], { icon: hubIcon, title: 'Hub: EHAM' }).addTo(flightLinesLayer);
+
+            routeManifest.forEach(route => {
+                // Filter Logic
+                if (aircraftType !== 'ALL' && !route.fleet.some(f => f.includes(aircraftType))) {
+                    return;
+                }
+
+                // Coordinates: JSON is [Lon, Lat] -> Leaflet needs [Lat, Lon]
+                const start = [route.originCoords[1], route.originCoords[0]];
+                const end = [route.destinationCoords[1], route.destinationCoords[0]];
+
+                // Great Circle Approximation (Forced Upward Arch)
+                const latlngs = getCurvePoints(start, end);
+
+                const polyline = L.polyline(latlngs, {
+                    color: '#00A1DE',
+                    weight: 1.5,
+                    opacity: 0.6,
+                    smoothFactor: 1
+                });
+
+                // Tooltip
+                const tooltipContent = `
+                    <div style="text-align:center">
+                        <span style="color:#00A1DE;font-weight:bold">${route.origin}</span> 
+                        <span style="color:#666">✈</span> 
+                        <span style="color:#00A1DE;font-weight:bold">${route.destination}</span><br>
+                        <span style="font-size:10px;color:#888">${route.fleet.join(', ')}</span>
+                    </div>
+                `;
+                
+                polyline.bindTooltip(tooltipContent, { 
+                    sticky: true, 
+                    direction: 'top',
+                    offset: [0, -5]
+                });
+
+                polyline.on('mouseover', function(e) {
+                    this.setStyle({ color: '#fff', weight: 3, opacity: 1 });
+                    this.bringToFront();
+                });
+                polyline.on('mouseout', function(e) {
+                    this.setStyle({ color: '#00A1DE', weight: 1.5, opacity: 0.6 });
+                });
+
+                polyline.addTo(flightLinesLayer);
+                
+                // Destination Dot
+                L.circleMarker(end, {
+                    radius: 3,
+                    fillColor: '#fff',
+                    color: '#00A1DE',
+                    weight: 1,
+                    opacity: 1,
+                    fillOpacity: 1
+                }).addTo(flightLinesLayer);
+            });
+        }
+
+        // Helper: Generate curved path points (Always Curves Up)
+        function getCurvePoints(start, end) {
+            const lat1 = start[0], lng1 = start[1];
+            const lat2 = end[0], lng2 = end[1];
+            
+            // Midpoint Calculation
+            const midLat = (lat1 + lat2) / 2;
+            const midLng = (lng1 + lng2) / 2;
+
+            // Distance factor to determine arc height
+            const dist = Math.sqrt(Math.pow(lat2 - lat1, 2) + Math.pow(lng2 - lng1, 2));
+            
+            // Force Control Point "UP" (North)
+            // Reduced factor from 0.5 to 0.25 for a smoother, flatter arc
+            const controlLat = midLat + (dist * 0.25); 
+            const controlLng = midLng; 
+
+            // Quadratic Bezier Interpolation
+            const points = [];
+            // Iterate t from 0 to 1
+            for(let t=0; t<=1; t+=0.02) {
+                const invT = 1 - t;
+                const lat = (invT * invT * lat1) + (2 * invT * t * controlLat) + (t * t * lat2);
+                const lng = (invT * invT * lng1) + (2 * invT * t * controlLng) + (t * t * lng2);
+                points.push([lat, lng]);
+            }
+            
+            // Explicitly ensure the final point connects to close gaps
+            points.push([lat2, lng2]); 
+            
+            return points;
+        }
+
+    </script>
+</body>
+</html>
