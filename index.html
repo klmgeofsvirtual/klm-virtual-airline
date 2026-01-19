@@ -123,6 +123,7 @@
                 <!-- Desktop Menu -->
                 <div class="hidden md:flex items-center space-x-8">
                     <button onclick="router('home')" class="nav-link text-slate-600 hover:text-klm transition-colors font-medium py-2">Home</button>
+                    <button onclick="router('news')" class="nav-link text-slate-600 hover:text-klm transition-colors font-medium py-2">News</button>
                     <button onclick="router('fleet')" class="nav-link text-slate-600 hover:text-klm transition-colors font-medium py-2">Fleet</button>
                     <button onclick="router('routes')" class="nav-link text-slate-600 hover:text-klm transition-colors font-medium py-2">Routes</button>
                     <button onclick="router('livemap')" class="nav-link text-slate-600 hover:text-klm transition-colors font-medium py-2">Live Map</button>
@@ -148,7 +149,8 @@
         <div id="mobile-menu" class="hidden md:hidden bg-white border-t border-slate-100 shadow-xl absolute w-full left-0 z-40">
             <div class="p-4 space-y-2">
                 <button onclick="router('home'); toggleMobileMenu()" class="block w-full text-left px-4 py-3 rounded-lg hover:bg-slate-50 text-slate-700 font-medium">Home</button>
-                <button onclick="router('fleet'); toggleMobileMenu()" class="block w-full text-left px-4 py-3 rounded-lg hover:bg-slate-50 text-slate-700 font-medium">Fleet</button>
+                <button onclick="router('news'); toggleMobileMenu()" class="block w-full text-left px-4 py-3 rounded-lg hover:bg-slate-700 text-slate-700 font-medium">News</button>
+                <button onclick="router('fleet'); toggleMobileMenu()" class="block w-full text-left px-4 py-3 rounded-lg hover:bg-slate-700 text-slate-700 font-medium">Fleet</button>
                 <button onclick="router('routes'); toggleMobileMenu()" class="block w-full text-left px-4 py-3 rounded-lg hover:bg-slate-700 text-slate-700 font-medium">Routes</button>
                 <button onclick="router('livemap'); toggleMobileMenu()" class="block w-full text-left px-4 py-3 rounded-lg hover:bg-slate-700 text-slate-700 font-medium">Live Map</button>
                 <button onclick="router('sop'); toggleMobileMenu()" class="block w-full text-left px-4 py-3 rounded-lg hover:bg-slate-700 text-slate-700 font-medium">SOP</button>
@@ -220,7 +222,8 @@
             routesHeader: "https://prod-img.telegraaf.nl/public/incoming/n38dez-air-france-vliegers-worden-ingezet-om-een-boeing-777-te-vliegen./alternates/SIXTEEN_NINE_128/Air%20France-vliegers%20worden%20ingezet%20om%20een%20Boeing%20777%20te%20vliegen.",
             sopHeader: "https://klmflightacademy.nl/wp-content/uploads/2021/10/737-cockpit.jpg",
             communityHeader: "https://s3.amazonaws.com/marquee-test-akiaisur2rgicbmpehea/L8ArtPS8Rgirr3CCcZOI_JPG%20-%20High-res-Billy%20Bishop%20Tower.jpg",
-            partnersHeader: "https://img-cdn.inc.com/image/upload/f_webp,q_auto,c_fit/images/panoramic/handshake-1940x900_36426.jpg"
+            partnersHeader: "https://img-cdn.inc.com/image/upload/f_webp,q_auto,c_fit/images/panoramic/handshake-1940x900_36426.jpg",
+            newsHeader: "https://images.unsplash.com/photo-1504711434969-e33886168f5c?auto=format&fit=crop&q=80&w=1200"
         };
 
         // ==========================================
@@ -247,6 +250,15 @@
                 img: "https://img.static-kl.com/transform/53cea398-7cff-4e3f-a7b1-496d4552fb10/" 
             },
             { 
+                type: "Boeing 737-700", 
+                role: "Short Haul", 
+                pax: 142, 
+                config: "20 Bus / 122 Eco", 
+                count: 6, 
+                // PASTE IMAGE LINK BELOW
+                img: "https://insideflyer.nl/wp-content/uploads/2018/07/B737-opstijgen.jpg" 
+            },
+            { 
                 type: "Boeing 737-800", 
                 role: "Short Haul", 
                 pax: 190, 
@@ -254,6 +266,15 @@
                 count: 30, 
                 // PASTE IMAGE LINK BELOW
                 img: "https://upload.wikimedia.org/wikipedia/commons/1/18/KLM_Boeing_737-800_PH-BCD_%2826038861623%29.jpg" 
+            },
+            { 
+                type: "Airbus A320neo", 
+                role: "On Order", 
+                pax: "TBD", 
+                config: "TBD", 
+                count: "9 (Pending)", 
+                // PASTE IMAGE LINK BELOW
+                img: "https://image.parool.nl/211007987/width/2480/impressie-van-een-airbus-a320-neo-in-de-kleuren-van-klm" 
             },
             { 
                 type: "Airbus A321neo", 
@@ -450,6 +471,118 @@
                             </div>
                         </div>
                     </div>
+                </div>
+            `,
+            news: `
+                <!-- News Header -->
+                <div class="relative bg-slate-900 h-64 md:h-80 overflow-hidden fade-in">
+                    <img src="${siteImages.newsHeader}" class="w-full h-full object-cover opacity-50">
+                    <div class="absolute inset-0 flex items-center justify-center">
+                        <div class="text-center">
+                            <h1 class="text-4xl md:text-5xl font-bold text-white mb-2">News & Updates</h1>
+                            <p class="text-slate-200 text-lg">Latest announcements from flight operations.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- News Grid -->
+                <div class="py-16 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 fade-in space-y-8">
+                    
+                    <!-- Article 1: Fleet Sale -->
+                    <article class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden flex flex-col md:flex-row">
+                        <div class="md:w-32 bg-slate-100 flex flex-col items-center justify-center border-r border-slate-200 p-4">
+                            <span class="text-slate-400 text-xs font-bold uppercase">Jan</span>
+                            <span class="text-3xl font-bold text-slate-800">19</span>
+                            <span class="text-slate-400 text-xs">2026</span>
+                        </div>
+                        <div class="p-6 md:p-8 flex-grow">
+                            <div class="flex items-center gap-2 mb-3">
+                                <span class="bg-sky-100 text-sky-800 text-xs font-bold px-2 py-1 rounded">Fleet Update</span>
+                            </div>
+                            <h2 class="text-2xl font-bold text-slate-900 mb-3">Strategic Fleet Adjustment: Sale of Boeing 777-300ER Units</h2>
+                            <p class="text-slate-600 leading-relaxed mb-4">
+                                As part of our fleet modernization strategy, KLM Virtual has finalized the sale of five (5) Boeing 777-300ER aircraft to Air India. This transfer aligns with our long-term sustainability goals and prepares our long-haul division for incoming next-generation airframes.
+                            </p>
+                        </div>
+                    </article>
+
+                    <!-- Article 2: Middle East Advisory -->
+                    <article class="bg-white rounded-xl shadow-md border-l-4 border-red-500 overflow-hidden flex flex-col md:flex-row ring-1 ring-red-100">
+                        <div class="md:w-32 bg-red-50 flex flex-col items-center justify-center border-r border-red-100 p-4">
+                            <span class="text-red-400 text-xs font-bold uppercase">Jan</span>
+                            <span class="text-3xl font-bold text-red-800">16</span>
+                            <span class="text-red-400 text-xs">2026</span>
+                        </div>
+                        <div class="p-6 md:p-8 flex-grow">
+                            <div class="flex items-center gap-2 mb-3">
+                                <span class="bg-red-100 text-red-800 text-xs font-bold px-2 py-1 rounded flex items-center"><i data-lucide="alert-triangle" class="w-3 h-3 mr-1"></i> Security Advisory</span>
+                            </div>
+                            <h2 class="text-2xl font-bold text-slate-900 mb-3">Middle East Airspace Advisory: High Alert</h2>
+                            <p class="text-slate-600 leading-relaxed mb-4">
+                                Due to escalating regional tensions and the risk of military activity, all Middle Eastern airspace is currently under strict restrictions.
+                            </p>
+                            <div class="bg-slate-50 p-4 rounded-lg border border-slate-200 text-sm space-y-2">
+                                <p><strong class="text-red-600">Prohibited Zones:</strong> Iraqi, Iranian, and Qatari airspace must be avoided completely.</p>
+                                <p><strong class="text-green-600">Permitted Routing:</strong> The Saudi corridor remains the only authorized exception.</p>
+                                <p><strong class="text-slate-700">Recommended Deviation:</strong> Southern routing via Saudi corridor → Egypt → Horn of Africa.</p>
+                            </div>
+                        </div>
+                    </article>
+
+                    <!-- Article 3: Plane Delivery -->
+                    <article class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden flex flex-col md:flex-row">
+                        <div class="md:w-32 bg-slate-100 flex flex-col items-center justify-center border-r border-slate-200 p-4">
+                            <span class="text-slate-400 text-xs font-bold uppercase">Jan</span>
+                            <span class="text-3xl font-bold text-slate-800">11</span>
+                            <span class="text-slate-400 text-xs">2026</span>
+                        </div>
+                        <div class="p-6 md:p-8 flex-grow">
+                            <div class="flex items-center gap-2 mb-3">
+                                <span class="bg-emerald-100 text-emerald-800 text-xs font-bold px-2 py-1 rounded">Operations</span>
+                            </div>
+                            <h2 class="text-2xl font-bold text-slate-900 mb-3">Airbus A320neo Delivery Flights</h2>
+                            <p class="text-slate-600 leading-relaxed mb-4">
+                                We are pleased to announce that nine (9) new Airbus A320neo aircraft are ready for delivery. Pilots are requested to assist in ferrying these airframes from Muscat (MCT) to Amsterdam (AMS) at their earliest convenience. These new additions will facilitate significant route expansion in our short-haul network.
+                            </p>
+                        </div>
+                    </article>
+
+                    <!-- Article 4: Caribbean Return -->
+                    <article class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden flex flex-col md:flex-row">
+                        <div class="md:w-32 bg-slate-100 flex flex-col items-center justify-center border-r border-slate-200 p-4">
+                            <span class="text-slate-400 text-xs font-bold uppercase">Jan</span>
+                            <span class="text-3xl font-bold text-slate-800">07</span>
+                            <span class="text-slate-400 text-xs">2026</span>
+                        </div>
+                        <div class="p-6 md:p-8 flex-grow">
+                            <div class="flex items-center gap-2 mb-3">
+                                <span class="bg-amber-100 text-amber-800 text-xs font-bold px-2 py-1 rounded">Route Network</span>
+                            </div>
+                            <h2 class="text-2xl font-bold text-slate-900 mb-3">Resumption of Caribbean Services</h2>
+                            <p class="text-slate-600 leading-relaxed mb-4">
+                                We are excited to announce the return of scheduled services to the Caribbean. Flights to St. Maarten (TNCM) will resume by the end of March. Services to Aruba and Curaçao are tentatively scheduled to resume by late April, contingent on the de-escalation of regional conflicts near Venezuela. We anticipate high demand for the upcoming Summer season.
+                            </p>
+                        </div>
+                    </article>
+
+                    <!-- Article 5: Schiphol Chaos -->
+                    <article class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden flex flex-col md:flex-row">
+                        <div class="md:w-32 bg-slate-100 flex flex-col items-center justify-center border-r border-slate-200 p-4">
+                            <span class="text-slate-400 text-xs font-bold uppercase">Jan</span>
+                            <span class="text-3xl font-bold text-slate-800">04</span>
+                            <span class="text-slate-400 text-xs">2026</span>
+                        </div>
+                        <div class="p-6 md:p-8 flex-grow">
+                            <div class="flex items-center gap-2 mb-3">
+                                <span class="bg-slate-200 text-slate-700 text-xs font-bold px-2 py-1 rounded">Operational Disruption</span>
+                            </div>
+                            <h2 class="text-2xl font-bold text-slate-900 mb-3">Operational Delays at Schiphol (AMS)</h2>
+                            <p class="text-slate-600 leading-relaxed mb-4">
+                                Severe weather conditions are currently impacting operations at Amsterdam Airport Schiphol (EHAM). Pilots should expect significant slot delays and holding patterns. Current data indicates cumulative delays impacting schedules by up to 72 hours. Please fuel accordingly and monitor NOTAMs.
+                            </p>
+                        </div>
+                    </article>
+
                 </div>
             `,
             fleet: `
