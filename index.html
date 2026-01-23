@@ -98,7 +98,7 @@
             font-weight: bold;
             padding: 10px;
             display: grid;
-            grid-template-columns: 1.5fr 1fr 1.5fr 1fr 1fr;
+            grid-template-columns: 1.5fr 0.8fr 0.8fr 1.5fr 1fr 1fr;
             text-transform: uppercase;
             font-size: 0.75rem;
             letter-spacing: 1px;
@@ -106,7 +106,7 @@
         .fids-row {
             padding: 12px 10px;
             display: grid;
-            grid-template-columns: 1.5fr 1fr 1.5fr 1fr 1fr;
+            grid-template-columns: 1.5fr 0.8fr 0.8fr 1.5fr 1fr 1fr;
             color: #e2e8f0;
             border-bottom: 1px solid #1e293b;
             font-size: 0.85rem;
@@ -262,7 +262,6 @@
         };
         
         // --- AUTHENTICATION STATE ---
-        // Storing basic Discord info in variable
         let discordUser = null; 
 
         // --- CHECK FOR DISCORD REDIRECT ---
@@ -272,10 +271,7 @@
             const tokenType = fragment.get('token_type');
 
             if (accessToken) {
-                // Clear the hash from the URL to look clean
                 window.history.replaceState({}, document.title, window.location.pathname);
-                
-                // Fetch User Data from Discord
                 fetch('https://discord.com/api/users/@me', {
                     headers: {
                         authorization: `${tokenType} ${accessToken}`,
@@ -283,22 +279,14 @@
                 })
                 .then(result => result.json())
                 .then(response => {
-                    console.log("Discord Login Success:", response);
-                    // Save to Local Storage so it persists on refresh
                     localStorage.setItem('klm_discord_user', JSON.stringify(response));
                     discordUser = response;
-                    
-                    // If we are on booking page, refresh it to show profile
                     if(document.getElementById('login-section')) {
                         initBookingPage(); 
                     }
-                    
-                    // Alert user (optional)
-                    // alert(`Welcome back, Captain ${response.username}!`);
                 })
                 .catch(console.error);
             } else {
-                // Check if already logged in previously
                 const stored = localStorage.getItem('klm_discord_user');
                 if (stored) {
                     discordUser = JSON.parse(stored);
@@ -306,7 +294,6 @@
             }
         }
         
-        // Run immediately on load
         checkDiscordAuth();
 
         const fleetData = [
@@ -380,7 +367,8 @@
                                     <div class="fids-header">
                                         <div>Pilot</div>
                                         <div>Flight</div>
-                                        <div>Route</div>
+                                        <div>Time</div>
+                                        <div class="hidden md:block">Route</div>
                                         <div>Aircraft</div>
                                         <div class="text-right">Status</div>
                                     </div>
@@ -525,7 +513,7 @@
                                         </div>
                                     </div>
 
-                                    <div class="mb-8">
+                                    <div class="mb-6 border-b border-slate-100 pb-6">
                                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                             <div>
                                                 <label class="block text-sm font-medium text-slate-700 mb-1">Aircraft</label>
@@ -536,6 +524,18 @@
                                                 <input type="time" id="dep-time" onchange="window.updatePreview()" required class="w-full bg-slate-50 border border-slate-300 rounded p-2 outline-none">
                                             </div>
                                         </div>
+                                    </div>
+
+                                    <!-- NEW: TEST FLIGHT CHECKBOX -->
+                                    <div class="mb-8">
+                                        <label class="flex items-center gap-3 cursor-pointer group">
+                                            <div class="relative">
+                                                <input type="checkbox" id="is-test-flight" class="sr-only peer">
+                                                <div class="w-10 h-6 bg-slate-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-klm/20 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-klm"></div>
+                                            </div>
+                                            <span class="text-sm font-bold text-slate-600 group-hover:text-klm transition">Mark as Test Flight</span>
+                                            <div class="bg-amber-100 text-amber-700 text-[10px] font-bold px-2 py-0.5 rounded border border-amber-200 uppercase tracking-wider">Board status: TEST</div>
+                                        </label>
                                     </div>
 
                                     <button type="submit" class="w-full bg-klm hover:bg-klm-dark text-white font-bold py-3 rounded shadow-lg transition transform active:scale-95 flex justify-center items-center">
@@ -804,29 +804,20 @@
         };
 
         // --- FIXED ROUTER LOGIC ---
-        let dispatchUnsubscribe = null; // Global unsubscribe variable
+        let dispatchUnsubscribe = null; 
 
         function router(pageName) {
-            // 1. Cleanup existing listener if moving AWAY from home
             if (dispatchUnsubscribe) {
                 dispatchUnsubscribe();
                 dispatchUnsubscribe = null;
-                console.log("Disconnected live board listener");
             }
-
-            // 2. Render Page
             const contentDiv = document.getElementById('app-content');
             contentDiv.innerHTML = pages[pageName] || pages['home'];
-            
-            // 3. Post-Render Logic
             if (pageName === 'routes') { setTimeout(() => { initFleetMap(); renderRouteGrid('Europe'); }, 100); }
             if (pageName === 'booking') { setTimeout(initBookingPage, 100); }
             if (pageName === 'home') { setTimeout(initDispatchBoard, 500); }
-
             lucide.createIcons();
             window.scrollTo(0, 0);
-            
-            // 4. Toggle Active State
             document.querySelectorAll('.nav-link').forEach(btn => {
                 if(btn.getAttribute('onclick').includes(pageName)) {
                     btn.classList.add('active', 'text-klm');
@@ -837,7 +828,7 @@
                 }
             });
         }
-        window.router = router; // Expose to global scope for HTML onclick
+        window.router = router;
 
         // --- BOOKING LOGIC ---
         let currentDirection = 'out';
@@ -847,12 +838,9 @@
             const regionSelect = document.getElementById('region-select');
             const acSelect = document.getElementById('aircraft-select');
             const loginSection = document.getElementById('login-section');
-            
             const regions = Object.keys(routeData);
             if(regionSelect) regionSelect.innerHTML = regions.map(r => `<option value="${r}">${r}</option>`).join('');
             if(acSelect) acSelect.innerHTML = fleetData.filter(f => f.status === 'Active' || f.status === 'Phasing Out').map(f => `<option value="${f.type}">${f.type}</option>`).join('');
-            
-            // Handle Login UI
             if(loginSection) {
                 if(discordUser) {
                     loginSection.innerHTML = `
@@ -871,9 +859,7 @@
                     `;
                     lucide.createIcons();
                 } else {
-                    // Update: Changed to token flow for static site compatibility
                     const discordAuthUrl = "https://discord.com/oauth2/authorize?client_id=1464272995542634566&response_type=token&redirect_uri=https%3A%2F%2Fklmgeofsvirtual.github.io%2Fklm-virtual-airline%2F&scope=identify+email+guilds.members.read";
-                    
                     loginSection.innerHTML = `
                         <div class="col-span-2">
                              <a href="${discordAuthUrl}" class="flex items-center justify-center w-full bg-[#5865F2] hover:bg-[#4752C4] text-white font-bold py-3 rounded transition shadow-lg transform active:scale-95">
@@ -887,7 +873,6 @@
                     `;
                 }
             }
-            
             updateDestinations();
         }
 
@@ -924,7 +909,6 @@
             const flightSelect = document.getElementById('flight-select');
             const route = bookingRouteList[index];
             if (!route) return;
-
             if (currentDirection === 'out') {
                 document.getElementById('disp-dep').textContent = "EHAM";
                 document.getElementById('disp-arr').textContent = route.code;
@@ -932,7 +916,6 @@
                 document.getElementById('disp-dep').textContent = route.code;
                 document.getElementById('disp-arr').textContent = "EHAM";
             }
-
             const rawString = currentDirection === 'out' ? route.out : route.in;
             const cleanString = rawString.replace(/[+*]/g, '');
             const numbers = cleanString.split(',').map(s => s.trim()).filter(s => s);
@@ -945,13 +928,9 @@
             const callsign = document.getElementById('flight-select').value || '---';
             const dep = document.getElementById('disp-dep').textContent;
             const arr = document.getElementById('disp-arr').textContent;
-            
-            // Use Discord user name if available, else blank
             const pilot = discordUser ? discordUser.username : '---';
-            
             const ac = document.getElementById('aircraft-select').value || '---';
             const time = document.getElementById('dep-time').value || '--:--';
-
             document.getElementById('preview-callsign').textContent = callsign;
             document.getElementById('preview-dep').textContent = dep;
             document.getElementById('preview-arr').textContent = arr;
@@ -966,12 +945,7 @@
             e.preventDefault();
             const btn = e.target.querySelector('button[type="submit"]');
             const originalText = btn.innerHTML;
-            
-            if (!discordUser) {
-                alert("You must log in with Discord first!");
-                return;
-            }
-
+            if (!discordUser) { alert("You must log in with Discord first!"); return; }
             btn.innerHTML = `<i data-lucide="loader" class="w-5 h-5 mr-2 animate-spin"></i> Processing...`;
             btn.disabled = true;
 
@@ -981,50 +955,35 @@
             const departure = document.getElementById('disp-dep').textContent;
             const aircraftType = document.getElementById('aircraft-select').value;
             const timeVal = document.getElementById('dep-time').value;
+            
+            // CHECK TEST CHECKBOX
+            const isTest = document.getElementById('is-test-flight').checked;
+            const finalStatus = isTest ? "TEST" : "BOOKED";
 
-            // Find selected aircraft object to get ICAO
             const selectedFleet = fleetData.find(f => f.type === aircraftType);
-
-            // Create ISO Date for Scheduled Departure (assuming today for date component)
             const today = new Date();
             const [hours, minutes] = timeVal.split(':');
             today.setHours(hours, minutes, 0, 0);
             const scheduledDepartureISO = today.toISOString();
 
-            if (!db) {
-                alert("Database not connected. Check config.");
-                btn.innerHTML = originalText;
-                btn.disabled = false;
-                return;
-            }
+            if (!db) { alert("Database not connected."); btn.innerHTML = originalText; btn.disabled = false; return; }
 
             try {
                 await addDoc(collection(db, "bookings"), {
                     flightNumber: flightNumber,
-                    aircraft: {
-                        name: selectedFleet.type,
-                        icao: selectedFleet.icao
-                    },
+                    aircraft: { name: selectedFleet.type, icao: selectedFleet.icao },
                     departure: departure,
                     destination: destination,
-                    pilot: {
-                        discordId: discordUser.id, // REAL DISCORD ID
-                        callsign: pilotName,
-                        username: discordUser.username
-                    },
-                    status: "BOOKED",
+                    pilot: { discordId: discordUser.id, callsign: pilotName, username: discordUser.username },
+                    status: finalStatus, // Use determined status
                     scheduledDeparture: scheduledDepartureISO,
                     createdAt: serverTimestamp()
                 });
-
-                alert("Booking Confirmed! Added to Dispatch Board.");
+                alert("Booking Confirmed!");
                 router('home');
             } catch (error) {
                 console.error("Error writing document: ", error);
-                // SHOW ERROR BANNER ON SUBMIT FAIL TOO
                 document.getElementById('db-error-banner').classList.remove('hidden');
-                
-                alert("DATABASE ERROR: Please create the database in the Google Console (see red banner).");
                 btn.innerHTML = originalText;
                 btn.disabled = false;
             }
@@ -1034,21 +993,13 @@
         // --- DISPATCH BOARD (HOME) ---
         function initDispatchBoard() {
             const board = document.getElementById('dispatch-rows');
-            
             if(!board || !db) return;
-
-            // Use Modular onSnapshot
             const q = query(collection(db, "bookings"), orderBy("createdAt", "desc"), limit(10));
-            
-            // Assign to Global Unsubscribe Variable
             dispatchUnsubscribe = onSnapshot(q, (querySnapshot) => {
-                // SAFETY CHECK: Ensure elements exist before updating
-                // This prevents crash if user navigates away mid-update
                 const statusLight = document.getElementById('db-status-light');
                 const statusText = document.getElementById('db-status-text');
                 const errorBanner = document.getElementById('db-error-banner');
                 const boardEl = document.getElementById('dispatch-rows');
-
                 if (statusLight) {
                     statusLight.classList.remove('bg-red-500', 'animate-pulse');
                     statusLight.classList.add('bg-emerald-500');
@@ -1057,54 +1008,51 @@
                     statusText.classList.add('text-emerald-400');
                     if (errorBanner) errorBanner.classList.add('hidden');
                 }
-
                 if (boardEl) {
                     boardEl.innerHTML = "";
                     if(querySnapshot.empty) {
-                        boardEl.innerHTML = '<div class="p-4 text-center text-slate-500">No active flights. Dispatch System Online.</div>';
+                        boardEl.innerHTML = '<div class="p-4 text-center text-slate-500">No active flights.</div>';
                         return;
                     }
                     querySnapshot.forEach((doc) => {
                         const data = doc.data();
-                        
-                        // Handle legacy data vs new nested format gracefully
-                        const pilotName = data.pilot?.callsign || data.pilot || 'Unknown';
-                        const flightNum = data.flightNumber || data.flightNum || '---';
-                        const aircraftName = data.aircraft?.name || data.aircraft || '---';
+                        const pilotName = data.pilot?.callsign || 'Unknown';
+                        const flightNum = data.flightNumber || '---';
+                        const aircraftName = data.aircraft?.name || '---';
                         const dest = data.destination || '---';
                         const status = data.status || 'BOOKED';
+                        
+                        // Handle Colors for Status
+                        const statusColor = status === 'TEST' ? 'text-amber-400' : 'text-emerald-400';
 
+                        let timeStr = '--:--z';
+                        if (data.scheduledDeparture) {
+                            try {
+                                const date = new Date(data.scheduledDeparture);
+                                timeStr = date.toLocaleTimeString('en-GB', {hour: '2-digit', minute:'2-digit', timeZone: 'UTC'}) + 'z';
+                            } catch (e) {}
+                        }
                         const row = document.createElement('div');
                         row.className = 'fids-row';
                         row.innerHTML = `
                             <div class="font-bold text-klm truncate">${pilotName}</div>
                             <div>${flightNum}</div>
+                            <div class="font-mono text-amber-500 font-bold">${timeStr}</div>
                             <div class="hidden md:block">EHAM ➝ ${dest}</div>
                             <div>${aircraftName}</div>
-                            <div class="text-right font-bold uppercase text-emerald-400 animate-pulse">${status}</div>
+                            <div class="text-right font-bold uppercase ${statusColor} animate-pulse">${status}</div>
                         `;
                         boardEl.appendChild(row);
                     });
                 }
             }, (error) => {
-                console.error("Dispatch Board Error:", error);
-                
                 const statusLight = document.getElementById('db-status-light');
                 const statusText = document.getElementById('db-status-text');
                 const errorBanner = document.getElementById('db-error-banner');
-                const boardEl = document.getElementById('dispatch-rows');
-                
                 if(errorBanner) errorBanner.classList.remove('hidden');
-
                 if (statusLight) {
-                    statusLight.classList.remove('bg-emerald-500');
                     statusLight.classList.add('bg-red-500', 'animate-pulse');
                     statusText.textContent = "CONNECTION LOST";
-                    statusText.classList.remove('text-emerald-400');
-                    statusText.classList.add('text-red-400');
-                }
-                if (boardEl) {
-                    boardEl.innerHTML = `<div class="p-4 text-center text-red-400 font-mono text-xs">Error: ${error.message}</div>`;
                 }
             });
         }
@@ -1112,9 +1060,7 @@
         // --- MAP LOGIC (UNCHANGED) ---
         let mapInstance = null;
         let flightLinesLayer = null;
-
         const routeManifest = [
-          // EUROPE
           { "origin": "EHAM", "originCoords": [4.7639, 52.3091], "destination": "EGLL", "destinationCoords": [-0.4543, 51.4700], "fleet": ["E190", "E195", "B737-700", "B737-800", "A321neo"], "hub": true },
           { "origin": "EHAM", "originCoords": [4.7639, 52.3091], "destination": "LFPG", "destinationCoords": [2.5479, 49.0097], "fleet": ["E190", "E195", "B737-700", "B737-800", "A321neo"], "hub": true },
           { "origin": "EHAM", "originCoords": [4.7639, 52.3091], "destination": "EDDB", "destinationCoords": [13.5033, 52.3667], "fleet": ["E190", "E195", "B737-700", "B737-800", "A321neo"], "hub": true },
@@ -1129,8 +1075,6 @@
           { "origin": "EHAM", "originCoords": [4.7639, 52.3091], "destination": "ENGM", "destinationCoords": [11.1004, 60.1939], "fleet": ["E190", "E195"], "hub": true },
           { "origin": "EHAM", "originCoords": [4.7639, 52.3091], "destination": "EFHK", "destinationCoords": [24.9633, 60.3172], "fleet": ["E190", "E195", "B737-800"], "hub": true },
           { "origin": "EHAM", "originCoords": [4.7639, 52.3091], "destination": "LGAV", "destinationCoords": [23.9445, 37.9364], "fleet": ["B737-800", "A321neo"], "hub": true },
-          
-          // NORTH AMERICA
           { "origin": "EHAM", "originCoords": [4.7639, 52.3091], "destination": "KJFK", "destinationCoords": [-73.7781, 40.6413], "fleet": ["B787-9", "B787-10", "B777-300ER"], "hub": true },
           { "origin": "EHAM", "originCoords": [4.7639, 52.3091], "destination": "KATL", "destinationCoords": [-84.4277, 33.6407], "fleet": ["B787-9", "B777-300ER"], "hub": true },
           { "origin": "EHAM", "originCoords": [4.7639, 52.3091], "destination": "KLAX", "destinationCoords": [-118.4085, 33.9416], "fleet": ["B787-10", "B777-300ER"], "hub": true },
@@ -1139,15 +1083,11 @@
           { "origin": "EHAM", "originCoords": [4.7639, 52.3091], "destination": "KBOS", "destinationCoords": [-71.0052, 42.3656], "fleet": ["B787-9"], "hub": true },
           { "origin": "EHAM", "originCoords": [4.7639, 52.3091], "destination": "KIAD", "destinationCoords": [-77.4565, 38.9531], "fleet": ["B787-9"], "hub": true },
           { "origin": "EHAM", "originCoords": [4.7639, 52.3091], "destination": "CYYZ", "destinationCoords": [-79.6248, 43.6777], "fleet": ["B777-300ER", "B787-10"], "hub": true },
-
-          // SOUTH AMERICA & CARIBBEAN
           { "origin": "EHAM", "originCoords": [4.7639, 52.3091], "destination": "SBGR", "destinationCoords": [-46.4731, -23.4356], "fleet": ["B777-300ER", "B787-9"], "hub": true },
           { "origin": "EHAM", "originCoords": [4.7639, 52.3091], "destination": "SAEZ", "destinationCoords": [-58.5358, -34.8222], "fleet": ["B777-300ER"], "hub": true },
           { "origin": "EHAM", "originCoords": [4.7639, 52.3091], "destination": "SKBO", "destinationCoords": [-74.1469, 4.7016], "fleet": ["B787-9"], "hub": true },
           { "origin": "EHAM", "originCoords": [4.7639, 52.3091], "destination": "TNCA", "destinationCoords": [-70.0152, 12.5014], "fleet": ["A330-200"], "hub": true },
           { "origin": "EHAM", "originCoords": [4.7639, 52.3091], "destination": "TNCM", "destinationCoords": [-63.1089, 18.0410], "fleet": ["A330-200"], "hub": true },
-
-          // ASIA & MIDDLE EAST
           { "origin": "EHAM", "originCoords": [4.7639, 52.3091], "destination": "RJAA", "destinationCoords": [140.3929, 35.7719], "fleet": ["B787-9", "B777-300ER"], "hub": true },
           { "origin": "EHAM", "originCoords": [4.7639, 52.3091], "destination": "VHHH", "destinationCoords": [113.9146, 22.3080], "fleet": ["B777-300ER"], "hub": true },
           { "origin": "EHAM", "originCoords": [4.7639, 52.3091], "destination": "WSSS", "destinationCoords": [103.9940, 1.3644], "fleet": ["B787-10", "B777-300ER"], "hub": true },
@@ -1159,21 +1099,8 @@
             const container = document.getElementById('fleet-map');
             if (!container) return;
             if (mapInstance) { mapInstance.remove(); mapInstance = null; }
-
-            mapInstance = L.map('fleet-map', {
-                center: [30, 0],
-                zoom: 2,
-                minZoom: 2,
-                maxBounds: [[-90, -180], [90, 180]],
-                zoomControl: false,
-                attributionControl: false
-            });
-
-            L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-                subdomains: 'abcd',
-                maxZoom: 19
-            }).addTo(mapInstance);
-            
+            mapInstance = L.map('fleet-map', { center: [30, 0], zoom: 2, minZoom: 2, maxBounds: [[-90, -180], [90, 180]], zoomControl: false, attributionControl: false });
+            L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', { subdomains: 'abcd', maxZoom: 19 }).addTo(mapInstance);
             flightLinesLayer = L.layerGroup().addTo(mapInstance);
             filterMapRoutes('ALL');
         }
@@ -1181,40 +1108,23 @@
         function filterMapRoutes(aircraftType) {
             if (!flightLinesLayer) return;
             flightLinesLayer.clearLayers();
-            
-            const hubIcon = L.divIcon({
-                className: 'custom-div-icon',
-                html: "<div style='background-color:#00A1DE;width:8px;height:8px;border-radius:50%;box-shadow:0 0 15px #00A1DE;'></div>",
-                iconSize: [8, 8],
-                iconAnchor: [4, 4]
-            });
+            const hubIcon = L.divIcon({ className: 'custom-div-icon', html: "<div style='background-color:#00A1DE;width:8px;height:8px;border-radius:50%;box-shadow:0 0 15px #00A1DE;'></div>", iconSize: [8, 8], iconAnchor: [4, 4] });
             L.marker([52.3091, 4.7639], { icon: hubIcon }).addTo(flightLinesLayer);
-
             routeManifest.forEach(route => {
                 const start = [route.originCoords[1], route.originCoords[0]];
                 const end = [route.destinationCoords[1], route.destinationCoords[0]];
                 const latlngs = getCurvePoints(start, end);
-
-                const polyline = L.polyline(latlngs, {
-                    color: '#00A1DE', weight: 1, opacity: 0.4, smoothFactor: 1
-                });
-                
+                const polyline = L.polyline(latlngs, { color: '#00A1DE', weight: 1, opacity: 0.4, smoothFactor: 1 });
                 polyline.addTo(flightLinesLayer);
-                
-                L.circleMarker(end, {
-                    radius: 2, fillColor: '#fff', color: '#00A1DE', weight: 0, opacity: 1, fillOpacity: 0.8
-                }).addTo(flightLinesLayer);
+                L.circleMarker(end, { radius: 2, fillColor: '#fff', color: '#00A1DE', weight: 0, opacity: 1, fillOpacity: 0.8 }).addTo(flightLinesLayer);
             });
         }
 
         function getCurvePoints(start, end) {
-            const lat1 = start[0], lng1 = start[1];
-            const lat2 = end[0], lng2 = end[1];
-            const midLat = (lat1 + lat2) / 2;
-            const midLng = (lng1 + lng2) / 2;
+            const lat1 = start[0], lng1 = start[1], lat2 = end[0], lng2 = end[1];
+            const midLat = (lat1 + lat2) / 2, midLng = (lng1 + lng2) / 2;
             const dist = Math.sqrt(Math.pow(lat2 - lat1, 2) + Math.pow(lng2 - lng1, 2));
-            const controlLat = midLat + (dist * 0.25); 
-            const controlLng = midLng; 
+            const controlLat = midLat + (dist * 0.25), controlLng = midLng; 
             const points = [];
             for(let t=0; t<=1; t+=0.02) {
                 const invT = 1 - t;
@@ -1230,13 +1140,8 @@
             const grid = document.getElementById('route-grid');
             const data = routeData[region] || [];
             document.querySelectorAll('.route-btn').forEach(btn => {
-                if(btn.id === `btn-${region}`) {
-                    btn.classList.add('bg-klm', 'text-white');
-                    btn.classList.remove('bg-white', 'text-slate-600', 'hover:bg-slate-50');
-                } else {
-                    btn.classList.remove('bg-klm', 'text-white');
-                    btn.classList.add('bg-white', 'text-slate-600', 'hover:bg-slate-50', 'border', 'border-slate-200');
-                }
+                if(btn.id === `btn-${region}`) { btn.classList.add('bg-klm', 'text-white'); btn.classList.remove('bg-white', 'text-slate-600'); }
+                else { btn.classList.remove('bg-klm', 'text-white'); btn.classList.add('bg-white', 'text-slate-600', 'border', 'border-slate-200'); }
             });
             grid.innerHTML = data.map(route => `
                 <div class="bg-white p-4 rounded border border-slate-200 hover:border-klm transition">
@@ -1253,15 +1158,11 @@
         }
         window.renderRouteGrid = renderRouteGrid;
 
-        function toggleMobileMenu() {
-            document.getElementById('mobile-menu').classList.toggle('hidden');
-        }
+        function toggleMobileMenu() { document.getElementById('mobile-menu').classList.toggle('hidden'); }
         window.toggleMobileMenu = toggleMobileMenu;
 
-        // Init
         document.getElementById('nav-logo').src = siteImages.logo;
         router('home');
-
     </script>
 </body>
 </html>
