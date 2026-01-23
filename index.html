@@ -6,20 +6,25 @@
     <title>KLM Virtual Airline | Operations Center</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <!-- Leaflet Map CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+
     <style>
         /* KLM Brand Colors */
         :root {
             --klm-blue: #00A1DE;
             --klm-dark: #0077A3;
             --klm-sky: #E5F6FF;
-            --status-active: #10b981;
-            --status-phaseout: #f59e0b;
-            --status-order: #6366f1;
+            --discord: #5865F2;
+            --discord-dark: #4752C4;
         }
         .text-klm { color: var(--klm-blue); }
         .bg-klm { background-color: var(--klm-blue); }
         .bg-klm-dark { background-color: var(--klm-dark); }
         .hover-bg-klm:hover { background-color: var(--klm-dark); }
+        .bg-discord { background-color: var(--discord); }
+        .hover-bg-discord:hover { background-color: var(--discord-dark); }
         
         body { font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; }
 
@@ -77,12 +82,56 @@
             background: #0f172a;
             z-index: 1;
         }
+
+        /* Dispatch Board Styles */
+        .fids-board {
+            font-family: 'Courier New', Courier, monospace;
+            background: #0f172a;
+            border: 4px solid #334155;
+            border-radius: 8px;
+            overflow: hidden;
+            position: relative;
+        }
+        .fids-header {
+            background: #1e293b;
+            color: #94a3b8;
+            font-weight: bold;
+            padding: 10px;
+            display: grid;
+            grid-template-columns: 1.5fr 1fr 1.5fr 1fr 1fr;
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            letter-spacing: 1px;
+        }
+        .fids-row {
+            padding: 12px 10px;
+            display: grid;
+            grid-template-columns: 1.5fr 1fr 1.5fr 1fr 1fr;
+            color: #e2e8f0;
+            border-bottom: 1px solid #1e293b;
+            font-size: 0.85rem;
+            align-items: center;
+            animation: flashText 0.5s ease;
+        }
+        .fids-row:last-child { border-bottom: none; }
+        
+        @keyframes flashText {
+            0% { opacity: 0; background-color: #334155; }
+            100% { opacity: 1; background-color: transparent; }
+        }
     </style>
-    <!-- Leaflet -->
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 </head>
 <body class="bg-slate-50 text-slate-800 flex flex-col min-h-screen">
+
+    <!-- ERROR BANNER (Hidden by default) -->
+    <div id="db-error-banner" class="hidden bg-red-600 text-white px-4 py-3 text-center shadow-lg z-[100]">
+        <div class="flex items-center justify-center gap-2">
+            <i data-lucide="alert-triangle" class="w-5 h-5"></i>
+            <span class="font-bold">DATABASE ERROR:</span>
+            <span class="text-sm">Connection lost or database not found.</span>
+            <a href="https://console.cloud.google.com/datastore/setup?project=klm-dispatch" target="_blank" class="underline font-bold hover:text-red-200 ml-2">Fix in Console</a>
+        </div>
+    </div>
 
     <!-- Navigation -->
     <nav class="sticky top-0 z-50 bg-white/95 backdrop-blur-md shadow-sm border-b border-slate-200">
@@ -100,6 +149,7 @@
                 <div class="hidden md:flex items-center space-x-6 lg:space-x-8">
                     <button onclick="router('home')" class="nav-link text-slate-600 hover:text-klm transition-colors font-medium py-2">Ops Center</button>
                     <button onclick="router('news')" class="nav-link text-slate-600 hover:text-klm transition-colors font-medium py-2">News</button>
+                    <button onclick="router('booking')" class="nav-link text-slate-600 hover:text-klm transition-colors font-medium py-2">Dispatch</button>
                     <button onclick="router('fleet')" class="nav-link text-slate-600 hover:text-klm transition-colors font-medium py-2">Fleet</button>
                     <button onclick="router('routes')" class="nav-link text-slate-600 hover:text-klm transition-colors font-medium py-2">Network</button>
                     <button onclick="router('livemap')" class="nav-link text-slate-600 hover:text-klm transition-colors font-medium py-2">Live Map</button>
@@ -124,6 +174,7 @@
             <div class="p-4 space-y-2">
                 <button onclick="router('home'); toggleMobileMenu()" class="block w-full text-left px-4 py-3 rounded hover:bg-slate-50 font-bold text-slate-800">Ops Center</button>
                 <button onclick="router('news'); toggleMobileMenu()" class="block w-full text-left px-4 py-3 rounded hover:bg-slate-50 font-medium text-slate-600">News</button>
+                <button onclick="router('booking'); toggleMobileMenu()" class="block w-full text-left px-4 py-3 rounded hover:bg-slate-50 font-medium text-slate-600">Dispatch</button>
                 <button onclick="router('fleet'); toggleMobileMenu()" class="block w-full text-left px-4 py-3 rounded hover:bg-slate-50 font-medium text-slate-600">Fleet</button>
                 <button onclick="router('routes'); toggleMobileMenu()" class="block w-full text-left px-4 py-3 rounded hover:bg-slate-50 font-medium text-slate-600">Network</button>
                 <button onclick="router('livemap'); toggleMobileMenu()" class="block w-full text-left px-4 py-3 rounded hover:bg-slate-50 font-medium text-slate-600">Live Map</button>
@@ -170,33 +221,109 @@
         </div>
     </footer>
 
-    <script>
-        const siteImages = {
-            logo: "https://upload.wikimedia.org/wikipedia/commons/c/c7/KLM_logo.svg",
-            homeHero: "https://content.r9cdn.net/rimg/dimg/aa/3f/bf32fc29-al-KL-168342f6d92.jpg?width=1366&height=768&xhint=1075&yhint=770&crop=true",
-            fleetHeader: "https://images.squarespace-cdn.com/content/v1/513bcb31e4b0df53688faccb/1465974398569-OX4HIEZ4213UPO7JLFPN/KLM+orange+aircraft",
-            routesHeader: "https://prod-img.telegraaf.nl/public/incoming/n38dez-air-france-vliegers-worden-ingezet-om-een-boeing-777-te-vliegen./alternates/SIXTEEN_NINE_128/Air%20France-vliegers%20worden%20ingezet%20om%20een%20Boeing%20777%20te%20vliegen.",
-            sopHeader: "https://klmflightacademy.nl/wp-content/uploads/2021/10/737-cockpit.jpg",
-            communityHeader: "https://s3.amazonaws.com/marquee-test-akiaisur2rgicbmpehea/L8ArtPS8Rgirr3CCcZOI_JPG%20-%20High-res-Billy%20Bishop%20Tower.jpg",
-            partnersHeader: "https://img-cdn.inc.com/image/upload/f_webp,q_auto,c_fit/images/panoramic/handshake-1940x900_36426.jpg",
-            newsHeader: "https://images.unsplash.com/photo-1504711434969-e33886168f5c?auto=format&fit=crop&q=80&w=1200"
+    <!-- Leaflet Script (Non-module) -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+    <!-- MAIN APP SCRIPT (MODULE) -->
+    <script type="module">
+        // Import Modern Firebase SDK
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getFirestore, collection, addDoc, onSnapshot, orderBy, query, limit, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-analytics.js";
+
+        // ==========================================
+        //  FIREBASE CONFIGURATION
+        // ==========================================
+        const firebaseConfig = {
+            apiKey: "AIzaSyBNM1Xc7a64GIlOiBiwJ5hE9Ci6EK1lxuo",
+            authDomain: "klm-dispatch.firebaseapp.com",
+            projectId: "klm-dispatch",
+            storageBucket: "klm-dispatch.firebasestorage.app",
+            messagingSenderId: "805612664938",
+            appId: "1:805612664938:web:7a794aaaa0c184dcf6f213",
+            measurementId: "G-6QQH3YVRKW"
         };
 
+        // Initialize Firebase
+        let db;
+        try {
+            const app = initializeApp(firebaseConfig);
+            db = getFirestore(app);
+            const analytics = getAnalytics(app);
+            console.log("Firebase initialized successfully (Modular SDK)");
+        } catch (e) {
+            console.error("Firebase Initialization Error:", e);
+        }
+
+        // --- GLOBAL CONSTANTS ---
+        const siteImages = {
+            logo: "https://upload.wikimedia.org/wikipedia/commons/c/c7/KLM_logo.svg",
+            homeHero: "https://content.r9cdn.net/rimg/dimg/aa/3f/bf32fc29-al-KL-168342f6d92.jpg?width=1366&height=768&xhint=1075&yhint=770&crop=true"
+        };
+        
+        // --- AUTHENTICATION STATE ---
+        // Storing basic Discord info in variable
+        let discordUser = null; 
+
+        // --- CHECK FOR DISCORD REDIRECT ---
+        function checkDiscordAuth() {
+            const fragment = new URLSearchParams(window.location.hash.slice(1));
+            const accessToken = fragment.get('access_token');
+            const tokenType = fragment.get('token_type');
+
+            if (accessToken) {
+                // Clear the hash from the URL to look clean
+                window.history.replaceState({}, document.title, window.location.pathname);
+                
+                // Fetch User Data from Discord
+                fetch('https://discord.com/api/users/@me', {
+                    headers: {
+                        authorization: `${tokenType} ${accessToken}`,
+                    },
+                })
+                .then(result => result.json())
+                .then(response => {
+                    console.log("Discord Login Success:", response);
+                    // Save to Local Storage so it persists on refresh
+                    localStorage.setItem('klm_discord_user', JSON.stringify(response));
+                    discordUser = response;
+                    
+                    // If we are on booking page, refresh it to show profile
+                    if(document.getElementById('login-section')) {
+                        initBookingPage(); 
+                    }
+                    
+                    // Alert user (optional)
+                    // alert(`Welcome back, Captain ${response.username}!`);
+                })
+                .catch(console.error);
+            } else {
+                // Check if already logged in previously
+                const stored = localStorage.getItem('klm_discord_user');
+                if (stored) {
+                    discordUser = JSON.parse(stored);
+                }
+            }
+        }
+        
+        // Run immediately on load
+        checkDiscordAuth();
+
         const fleetData = [
-            { type: "Embraer 190", role: "Cityhopper", desc: "Short-haul, high-frequency ops for training and local connectivity.", status: "Active", count: 21, img: "https://upload.wikimedia.org/wikipedia/commons/c/c6/Berlin_Brandenburg_Airport_KLM_Cityhopper_Embraer_E195-E2_PH-NXC_%28DSC02878%29.jpg" },
-            { type: "Embraer 195-E2", role: "Cityhopper", desc: "Modern regional efficiency. High frequency European connections.", status: "Active", count: 25, img: "https://img.static-kl.com/transform/53cea398-7cff-4e3f-a7b1-496d4552fb10/" },
-            { type: "Boeing 737-700", role: "Short Haul", desc: "Legacy workhorse. Being phased out for A320neo family.", status: "Phasing Out", count: 6, img: "https://insideflyer.nl/wp-content/uploads/2018/07/B737-opstijgen.jpg" },
-            { type: "Boeing 737-800", role: "Short Haul", desc: "Backbone of European operations. Gradual retirement scheduled.", status: "Phasing Out", count: 30, img: "https://upload.wikimedia.org/wikipedia/commons/1/18/KLM_Boeing_737-800_PH-BCD_%2826038861623%29.jpg" },
-            { type: "Airbus A320neo", role: "Short Haul", desc: "Next-gen European core. Maximum efficiency and realism.", status: "On Order", count: 9, img: "https://image.parool.nl/211007987/width/2480/impressie-van-een-airbus-a320-neo-in-de-kleuren-van-klm" },
-            { type: "Airbus A321neo", role: "Short Haul", desc: "High-capacity European routes. Primary replacement for B737.", status: "Active", count: 22, img: "https://img.static-kl.com/transform/8806738a-a661-4934-a177-95adef39307d/" },
-            { type: "Airbus A330-200", role: "Medium Haul", desc: "Intercontinental connector. Scheduled for retirement.", status: "Phasing Out", count: 6, img: "https://cdn.flightsim.to/images/27/inibuilds-a330-300-klm-fleet-pack-55321-1735741086-uIy_G.jpg?width=1400" },
-            { type: "Boeing 777-300ER", role: "Long Haul", desc: "High-capacity global reach. Fleet size reducing.", status: "Active", count: 11, img: "https://www.aerotime.aero/images/klm_boeing_777-300er_orange_pride_livery.jpg" },
-            { type: "Boeing 787-9", role: "Long Haul", desc: "The future of our long-haul operations. Elite flagship.", status: "Active", count: 13, img: "https://content.presspage.com/uploads/162/1920_25508202-10155250600310773-6357422191407278812-n.jpg" },
-            { type: "Boeing 787-10", role: "Long Haul", desc: "High-capacity Dreamliner for premium long-haul routes.", status: "Active", count: 14, img: "https://content.presspage.com/uploads/162/1920_paulridderhof30jun196473-465547.jpg?10000" },
+            { type: "Embraer 190", icao: "E190", role: "Cityhopper", desc: "Short-haul, high-frequency ops for training and local connectivity.", status: "Active", count: 21, img: "https://upload.wikimedia.org/wikipedia/commons/c/c6/Berlin_Brandenburg_Airport_KLM_Cityhopper_Embraer_E195-E2_PH-NXC_%28DSC02878%29.jpg" },
+            { type: "Embraer 195-E2", icao: "E295", role: "Cityhopper", desc: "Modern regional efficiency. High frequency European connections.", status: "Active", count: 25, img: "https://img.static-kl.com/transform/53cea398-7cff-4e3f-a7b1-496d4552fb10/" },
+            { type: "Boeing 737-700", icao: "B737", role: "Short Haul", desc: "Legacy workhorse. Being phased out for A320neo family.", status: "Phasing Out", count: 6, img: "https://upload.wikimedia.org/wikipedia/commons/thumb/3/34/KLM_Boeing_737-7K2_PH-BGT_MUC_2015_01.jpg/1280px-KLM_Boeing_737-7K2_PH-BGT_MUC_2015_01.jpg" },
+            { type: "Boeing 737-800", icao: "B738", role: "Short Haul", desc: "Backbone of European operations. Gradual retirement scheduled.", status: "Phasing Out", count: 30, img: "https://upload.wikimedia.org/wikipedia/commons/1/18/KLM_Boeing_737-800_PH-BCD_%2826038861623%29.jpg" },
+            { type: "Airbus A320neo", icao: "A20N", role: "Short Haul", desc: "Next-gen European core. Maximum efficiency and realism.", status: "On Order", count: 9, img: "https://image.parool.nl/211007987/width/2480/impressie-van-een-airbus-a320-neo-in-de-kleuren-van-klm" },
+            { type: "Airbus A321neo", icao: "A21N", role: "Short Haul", desc: "High-capacity European routes. Primary replacement for B737.", status: "Active", count: 22, img: "https://img.static-kl.com/transform/8806738a-a661-4934-a177-95adef39307d/" },
+            { type: "Airbus A330-200", icao: "A332", role: "Medium Haul", desc: "Intercontinental connector. Scheduled for retirement.", status: "Phasing Out", count: 6, img: "https://cdn.flightsim.to/images/27/inibuilds-a330-300-klm-fleet-pack-55321-1735741086-uIy_G.jpg?width=1400" },
+            { type: "Boeing 777-300ER", icao: "B77W", role: "Long Haul", desc: "High-capacity global reach. Fleet size reducing.", status: "Active", count: 11, img: "https://www.aerotime.aero/images/klm_boeing_777-300er_orange_pride_livery.jpg" },
+            { type: "Boeing 787-9", icao: "B789", role: "Long Haul", desc: "The future of our long-haul operations. Elite flagship.", status: "Active", count: 13, img: "https://content.presspage.com/uploads/162/1920_25508202-10155250600310773-6357422191407278812-n.jpg" },
+            { type: "Boeing 787-10", icao: "B78X", role: "Long Haul", desc: "High-capacity Dreamliner for premium long-haul routes.", status: "Active", count: 14, img: "https://content.presspage.com/uploads/162/1920_paulridderhof30jun196473-465547.jpg?10000" },
         ];
 
         const routeData = {
-            "Europe": [ /* ... existing route data ... */
+            "Europe": [
                 { city: "London Heathrow", code: "EGLL", out: "1001+", in: "1002+" }, { city: "Paris CDG", code: "LFPG", out: "1401+", in: "1402+" }, { city: "Berlin", code: "EDDB", out: "1775+", in: "1770+" }, { city: "Rome", code: "LIRF", out: "1601+", in: "1600+" }, { city: "Madrid", code: "LEMD", out: "1501+", in: "1500+" }, { city: "Vienna", code: "LOWW", out: "1901+", in: "1900+" }, { city: "Brussels", code: "EBBR", out: "1701+", in: "1700+" }, { city: "Zurich", code: "LSZH", out: "1917+", in: "1916+" }, { city: "Geneva", code: "LSGG", out: "1929+", in: "1928+" }, { city: "Stockholm", code: "ESSA", out: "1215+", in: "1216+" }, { city: "Copenhagen", code: "EKCH", out: "1267+", in: "1266+" }, { city: "Oslo", code: "ENGM", out: "1197+", in: "1196+" }, { city: "Helsinki", code: "EFHK", out: "1251+", in: "1248+" }, { city: "Porto", code: "LPPR", out: "1571+", in: "1570+" }, { city: "Lisbon", code: "LPPT", out: "1579+", in: "1580+" }, { city: "Kraków", code: "EPKK", out: "1323+", in: "1322+" }, { city: "Warsaw", code: "EPWA", out: "1313+", in: "1310+" }, { city: "Prague", code: "LKPR", out: "1351+", in: "1350+" }, { city: "Budapest", code: "LHBP", out: "1363+", in: "1362+" }, { city: "Bucharest", code: "LROP", out: "1373+", in: "1372+" }, { city: "Marseille", code: "LFML", out: "1465+", in: "1464+" }, { city: "Nice", code: "LFMN", out: "1475+", in: "1472+" }, { city: "Athens", code: "LGAV", out: "1955+", in: "1952+" }
             ],
             "North America": [
@@ -218,51 +345,51 @@
 
         const pages = {
             home: `
-                <div class="relative bg-slate-900 text-white fade-in min-h-[90vh] flex items-center">
-                    <div class="absolute inset-0">
-                        <img src="${siteImages.homeHero}" class="w-full h-full object-cover opacity-50" alt="KLM Ops">
-                        <div class="absolute inset-0 bg-gradient-to-r from-slate-900 via-slate-900/80 to-transparent"></div>
-                    </div>
-                    <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
-                        <div class="inline-flex items-center gap-2 bg-klm/20 border border-klm/50 text-klm-sky px-4 py-1.5 rounded-full mb-8 backdrop-blur-md">
-                            <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
-                            <span class="text-xs font-bold tracking-widest uppercase">Ops Normal</span>
+                <div class="relative bg-slate-900 text-white fade-in min-h-[90vh] flex flex-col">
+                    <div class="relative py-24 px-4 sm:px-6 lg:px-8 flex-grow">
+                         <div class="absolute inset-0 z-0">
+                            <img src="${siteImages.homeHero}" class="w-full h-full object-cover opacity-20" alt="KLM Ops">
+                            <div class="absolute inset-0 bg-gradient-to-b from-slate-900 via-transparent to-slate-900"></div>
                         </div>
-                        <h1 class="text-5xl md:text-7xl font-black tracking-tight mb-6 leading-tight max-w-3xl">
-                            Flying the World, <span class="text-klm">Virtually.</span><br>
-                            <span class="text-3xl md:text-4xl text-slate-400 font-bold block mt-4">For Pilots Who Fly Like They Mean It.</span>
-                        </h1>
-                        <p class="text-lg md:text-xl text-slate-300 mb-10 max-w-2xl font-light leading-relaxed border-l-4 border-klm pl-6">
-                            Join a small, active, operations-focused community with realistic procedures and elite standards. We prioritize skill over numbers.
-                        </p>
                         
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 max-w-3xl mb-12">
-                            <button onclick="router('routes')" class="group bg-white/5 hover:bg-white/10 border border-white/10 hover:border-klm p-6 rounded-lg text-left transition duration-300">
-                                <div class="flex justify-between items-start mb-4">
-                                    <i data-lucide="globe" class="w-6 h-6 text-klm"></i>
-                                    <i data-lucide="arrow-right" class="w-4 h-4 text-slate-500 group-hover:text-white transition"></i>
-                                </div>
-                                <h3 class="font-bold text-white mb-1">Global Network</h3>
-                                <p class="text-xs text-slate-400">View our strategic route deployment.</p>
-                            </button>
+                        <div class="relative z-10 max-w-7xl mx-auto">
+                             <div class="inline-flex items-center gap-2 bg-klm/20 border border-klm/50 text-klm-sky px-4 py-1.5 rounded-full mb-8 backdrop-blur-md">
+                                <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
+                                <span class="text-xs font-bold tracking-widest uppercase">Ops Normal</span>
+                            </div>
+                            <h1 class="text-5xl md:text-7xl font-black tracking-tight mb-6 leading-tight max-w-3xl">
+                                Flying the World, <span class="text-klm">Virtually.</span>
+                            </h1>
+                            <p class="text-xl text-slate-300 mb-10 max-w-2xl font-light">Join a small, active, operations-focused community with realistic procedures and elite standards.</p>
                             
-                            <button onclick="router('livemap')" class="group bg-white/5 hover:bg-white/10 border border-white/10 hover:border-klm p-6 rounded-lg text-left transition duration-300">
-                                <div class="flex justify-between items-start mb-4">
-                                    <i data-lucide="radar" class="w-6 h-6 text-klm"></i>
-                                    <i data-lucide="arrow-right" class="w-4 h-4 text-slate-500 group-hover:text-white transition"></i>
+                            <!-- LIVE DISPATCH BOARD -->
+                            <div class="mt-12">
+                                <div class="flex justify-between items-center mb-4 max-w-5xl">
+                                    <h3 class="text-xl font-bold flex items-center">
+                                        <i data-lucide="monitor" class="w-5 h-5 mr-2 text-amber-500"></i> 
+                                        Live Dispatch Board
+                                    </h3>
+                                    <!-- SYSTEM STATUS LIGHT -->
+                                    <div class="flex items-center gap-2 bg-slate-800 px-3 py-1 rounded border border-slate-700">
+                                        <div id="db-status-light" class="w-2 h-2 rounded-full bg-red-500 animate-pulse"></div>
+                                        <span id="db-status-text" class="text-[10px] font-mono font-bold text-red-400 uppercase tracking-wider">OFFLINE</span>
+                                    </div>
                                 </div>
-                                <h3 class="font-bold text-white mb-1">Active Operations</h3>
-                                <p class="text-xs text-slate-400">Live telemetry of active fleet.</p>
-                            </button>
-
-                            <button onclick="router('sop')" class="group bg-white/5 hover:bg-white/10 border border-white/10 hover:border-klm p-6 rounded-lg text-left transition duration-300">
-                                <div class="flex justify-between items-start mb-4">
-                                    <i data-lucide="book" class="w-6 h-6 text-klm"></i>
-                                    <i data-lucide="arrow-right" class="w-4 h-4 text-slate-500 group-hover:text-white transition"></i>
+                                
+                                <div class="fids-board max-w-5xl shadow-2xl">
+                                    <div class="fids-header">
+                                        <div>Pilot</div>
+                                        <div>Flight</div>
+                                        <div>Route</div>
+                                        <div>Aircraft</div>
+                                        <div class="text-right">Status</div>
+                                    </div>
+                                    <div id="dispatch-rows" class="min-h-[100px]">
+                                        <div class="p-4 text-center text-slate-500 italic">Connecting to Dispatch Server...</div>
+                                    </div>
                                 </div>
-                                <h3 class="font-bold text-white mb-1">SOP & Standards</h3>
-                                <p class="text-xs text-slate-400">Procedures for elite pilots.</p>
-                            </button>
+                                <p class="text-xs text-slate-500 mt-2">Use the <strong>Dispatch</strong> page or Discord bot to book flights.</p>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -277,8 +404,7 @@
                         </div>
                         
                         <div class="space-y-12">
-                             <!-- Article 0: Fleet Renewal -->
-                            <article class="bg-slate-800/50 rounded-lg p-8 border-l-4 border-indigo-500">
+                             <article class="bg-slate-800/50 rounded-lg p-8 border-l-4 border-indigo-500">
                                 <div class="flex items-center gap-3 mb-4 text-xs font-mono text-indigo-400 uppercase tracking-widest">
                                     <span>20 JAN 2026</span>
                                     <span>//</span>
@@ -293,38 +419,6 @@
                                         <li><strong class="text-white">Q1 2027:</strong> Full fleet modernization complete.</li>
                                     </ul>
                                 </div>
-                            </article>
-
-                            <!-- Article 2: Middle East -->
-                            <article class="bg-slate-800/50 rounded-lg p-8 border-l-4 border-red-500">
-                                <div class="flex items-center gap-3 mb-4 text-xs font-mono text-red-400 uppercase tracking-widest">
-                                    <span>16 JAN 2026</span>
-                                    <span>//</span>
-                                    <span>Security Advisory</span>
-                                </div>
-                                <h2 class="text-2xl font-bold text-white mb-4">Middle East Airspace: High Alert</h2>
-                                <p class="text-slate-300 mb-4">Mandatory re-routing in effect due to regional instability. Safety compliance is non-negotiable for all active pilots.</p>
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                                    <div class="bg-red-900/20 p-3 rounded border border-red-900/50 text-red-200">
-                                        <strong>RESTRICTED:</strong> Iraq, Iran, Qatar airspace.
-                                    </div>
-                                    <div class="bg-green-900/20 p-3 rounded border border-green-900/50 text-green-200">
-                                        <strong>CLEARED:</strong> Saudi Corridor → Egypt → Horn of Africa.
-                                    </div>
-                                </div>
-                            </article>
-
-                             <!-- Article 4: Caribbean Return -->
-                             <article class="bg-slate-800/50 rounded-lg p-8 border-l-4 border-amber-500">
-                                <div class="flex items-center gap-3 mb-4 text-xs font-mono text-amber-400 uppercase tracking-widest">
-                                    <span>07 JAN 2026</span>
-                                    <span>//</span>
-                                    <span>Network Ops</span>
-                                </div>
-                                <h2 class="text-2xl font-bold text-white mb-4">Resumption of Caribbean Services</h2>
-                                <p class="text-slate-300">
-                                    Scheduled services to St. Maarten (TNCM) resume in March. Aruba and Curaçao are tentatively scheduled for April, contingent on regional stability. This restores critical leisure capacity for the Summer season.
-                                </p>
                             </article>
                         </div>
                     </div>
@@ -347,7 +441,7 @@
                                 return `
                                 <div class="bg-slate-800 rounded-lg overflow-hidden border border-slate-700 hover:border-klm transition group">
                                     <div class="h-48 overflow-hidden relative">
-                                        <img src="${plane.img}" class="w-full h-full object-cover opacity-80 group-hover:opacity-100 group-hover:scale-105 transition duration-700">
+                                        <img src="${plane.img}" class="w-full h-full object-cover opacity-80 group-hover:opacity-100 group-hover:scale-105 transition duration-700" onerror="this.src='https://upload.wikimedia.org/wikipedia/commons/thumb/a/ac/No_image_available.svg/1024px-No_image_available.svg.png'">
                                         <div class="absolute top-3 right-3 ${statusColor} border px-2 py-1 rounded text-xs font-bold uppercase tracking-wider backdrop-blur-md">
                                             ${plane.status}
                                         </div>
@@ -358,11 +452,139 @@
                                             <span class="text-slate-500 text-sm font-mono">QTY: ${plane.count}</span>
                                         </div>
                                         <div class="text-klm text-xs font-bold uppercase tracking-wide mb-3">${plane.role}</div>
+                                        <div class="text-[10px] text-slate-500 font-mono mb-2">ICAO: ${plane.icao}</div>
                                         <p class="text-slate-400 text-sm leading-relaxed border-t border-slate-700 pt-3">${plane.desc}</p>
                                     </div>
                                 </div>
                                 `
                             }).join('')}
+                        </div>
+                    </div>
+                </div>
+            `,
+
+            booking: `
+                <div class="relative bg-slate-50 py-12 fade-in">
+                    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+                        <div class="mb-8">
+                            <h1 class="text-3xl font-black text-slate-900">Flight Dispatch</h1>
+                            <p class="text-slate-500">Create a flight plan and book your slot on the operations board.</p>
+                        </div>
+
+                        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                            <!-- Booking Form -->
+                            <div class="lg:col-span-2 bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+                                <form id="booking-form" onsubmit="window.handleBookingSubmit(event)">
+                                    
+                                    <div class="mb-6 border-b border-slate-100 pb-6">
+                                        <h3 class="text-sm font-bold text-slate-400 uppercase tracking-wider mb-4">Pilot Identification</h3>
+                                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4" id="login-section">
+                                            <!-- Dynamically filled by JS -->
+                                        </div>
+                                    </div>
+
+                                    <div class="mb-6 border-b border-slate-100 pb-6">
+                                        <h3 class="text-sm font-bold text-slate-400 uppercase tracking-wider mb-4">Flight Parameters</h3>
+                                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                                            <div>
+                                                <label class="block text-sm font-medium text-slate-700 mb-1">Direction</label>
+                                                <div class="flex gap-2">
+                                                    <button type="button" onclick="window.setDirection('out')" id="btn-out" class="flex-1 py-2 border rounded font-bold text-sm bg-klm text-white border-klm">Outbound</button>
+                                                    <button type="button" onclick="window.setDirection('in')" id="btn-in" class="flex-1 py-2 border rounded font-bold text-sm bg-white text-slate-600 border-slate-300">Inbound</button>
+                                                </div>
+                                            </div>
+                                            <div>
+                                                <label class="block text-sm font-medium text-slate-700 mb-1">Region</label>
+                                                <select id="region-select" onchange="window.updateDestinations()" class="w-full bg-slate-50 border border-slate-300 rounded p-2 outline-none"></select>
+                                            </div>
+                                        </div>
+
+                                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                                            <div>
+                                                <label class="block text-sm font-medium text-slate-700 mb-1">Destination / Origin</label>
+                                                <select id="dest-select" onchange="window.updateFlightDetails()" class="w-full bg-slate-50 border border-slate-300 rounded p-2 outline-none"></select>
+                                            </div>
+                                            <div>
+                                                <label class="block text-sm font-medium text-slate-700 mb-1">Flight Number</label>
+                                                <select id="flight-select" onchange="window.updatePreview()" class="w-full bg-slate-50 border border-slate-300 rounded p-2 outline-none"></select>
+                                            </div>
+                                        </div>
+
+                                        <div class="bg-slate-100 rounded p-3 flex justify-between items-center text-sm font-mono text-slate-600 border border-slate-200">
+                                            <div class="text-center">
+                                                <div class="text-[10px] uppercase text-slate-400">Departure</div>
+                                                <div id="disp-dep" class="font-bold text-lg text-slate-900">----</div>
+                                            </div>
+                                            <div class="text-slate-400">
+                                                <i data-lucide="plane" class="w-5 h-5 rotate-90"></i>
+                                            </div>
+                                            <div class="text-center">
+                                                <div class="text-[10px] uppercase text-slate-400">Arrival</div>
+                                                <div id="disp-arr" class="font-bold text-lg text-slate-900">----</div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="mb-8">
+                                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                            <div>
+                                                <label class="block text-sm font-medium text-slate-700 mb-1">Aircraft</label>
+                                                <select id="aircraft-select" onchange="window.updatePreview()" class="w-full bg-slate-50 border border-slate-300 rounded p-2 outline-none"></select>
+                                            </div>
+                                            <div>
+                                                <label class="block text-sm font-medium text-slate-700 mb-1">Departure Time (Zulu)</label>
+                                                <input type="time" id="dep-time" onchange="window.updatePreview()" required class="w-full bg-slate-50 border border-slate-300 rounded p-2 outline-none">
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <button type="submit" class="w-full bg-klm hover:bg-klm-dark text-white font-bold py-3 rounded shadow-lg transition transform active:scale-95 flex justify-center items-center">
+                                        <i data-lucide="check-circle" class="w-5 h-5 mr-2"></i> Confirm Booking
+                                    </button>
+
+                                </form>
+                            </div>
+
+                            <!-- Flight Strip -->
+                            <div class="lg:col-span-1">
+                                <h3 class="text-sm font-bold text-slate-400 uppercase tracking-wider mb-4">Flight Strip Preview</h3>
+                                <div class="bg-slate-800 text-white p-4 rounded-lg shadow-xl border-l-4 border-amber-500 font-mono text-sm relative overflow-hidden">
+                                    <div class="flex justify-between items-start mb-4 relative z-10">
+                                        <div>
+                                            <div class="text-xs text-slate-400">CALLSIGN</div>
+                                            <div class="text-xl font-bold text-amber-400" id="preview-callsign">KLM---</div>
+                                        </div>
+                                        <div class="text-right">
+                                            <div class="text-xs text-slate-400">AIRCRAFT</div>
+                                            <div class="font-bold" id="preview-ac">---</div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="grid grid-cols-2 gap-4 mb-4 relative z-10">
+                                        <div class="bg-slate-900/50 p-2 rounded">
+                                            <div class="text-[10px] text-slate-400">DEP</div>
+                                            <div class="font-bold text-lg" id="preview-dep">----</div>
+                                        </div>
+                                        <div class="bg-slate-900/50 p-2 rounded text-right">
+                                            <div class="text-[10px] text-slate-400">ARR</div>
+                                            <div class="font-bold text-lg" id="preview-arr">----</div>
+                                        </div>
+                                    </div>
+
+                                    <div class="border-t border-slate-700 pt-3 relative z-10">
+                                        <div class="flex justify-between items-center">
+                                            <div>
+                                                <div class="text-[10px] text-slate-400">PIC</div>
+                                                <div class="font-bold truncate max-w-[120px]" id="preview-pilot">---</div>
+                                            </div>
+                                            <div class="text-right">
+                                                <div class="text-[10px] text-slate-400">EOBT</div>
+                                                <div class="font-bold text-emerald-400" id="preview-time">--:--</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -375,24 +597,17 @@
                             <div class="md:w-1/3">
                                 <h1 class="text-4xl font-black text-slate-900 mb-6">Network Deployment</h1>
                                 <p class="text-slate-600 leading-relaxed mb-6">
-                                    Our route network is built around <strong>Amsterdam (EHAM)</strong> as a hub, with routes deployed strategically based on fleet capability and season.
+                                    Our route network is built around <strong>Amsterdam (EHAM)</strong> as a hub, with routes deployed strategically based on fleet capability.
                                 </p>
-                                <div class="bg-slate-50 p-4 rounded border border-slate-200 text-sm text-slate-700 italic">
-                                    "Active pilots execute real operations; seasonal and planned routes reflect realistic airline scheduling."
-                                </div>
                             </div>
                             <div class="md:w-2/3 relative h-[400px] bg-slate-900 rounded-xl overflow-hidden border border-slate-800 shadow-2xl">
                                 <div id="fleet-map"></div>
-                                <div class="absolute bottom-4 right-4 bg-slate-900/90 backdrop-blur text-white p-3 rounded border border-slate-700 text-xs z-[1000]">
-                                    <div class="flex items-center gap-2 mb-1"><span class="w-2 h-2 rounded-full bg-klm"></span> Active Routes</div>
-                                    <div class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-white"></span> Destinations</div>
-                                </div>
                             </div>
                         </div>
 
                         <div class="flex flex-wrap gap-2 mb-8 border-b border-slate-200 pb-4">
                             ${Object.keys(routeData).map(region => `
-                                <button onclick="renderRouteGrid('${region}')" 
+                                <button onclick="window.renderRouteGrid('${region}')" 
                                     class="route-btn px-4 py-2 rounded text-sm font-bold uppercase tracking-wide transition focus:outline-none"
                                     id="btn-${region}">
                                     ${region}
@@ -412,10 +627,6 @@
                                 <span class="w-2 h-2 rounded-full bg-red-500 animate-pulse"></span> 
                                 LIVE OPERATIONS
                             </h1>
-                            <p class="text-xs text-slate-400">Real-time telemetry of the active elite fleet.</p>
-                        </div>
-                        <div class="hidden md:block text-right">
-                             <p class="text-xs text-slate-500 italic">"Our pilots are the heartbeat of KLM VA."</p>
                         </div>
                     </div>
                     <div class="flex-grow bg-slate-800 relative">
@@ -429,49 +640,25 @@
                     <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
                         <div class="text-center mb-16">
                             <h1 class="text-4xl font-black text-slate-900 mb-4">Standard Operating Procedures</h1>
-                            <p class="text-slate-600 max-w-2xl mx-auto">Discipline is what separates us from the rest. Adherence to SOPs ensures operational efficiency and fleet readiness.</p>
+                            <p class="text-slate-600 max-w-2xl mx-auto">Discipline is what separates us from the rest.</p>
                         </div>
-
                         <div class="space-y-8">
                             <div class="bg-white p-8 rounded-xl shadow-sm border-l-4 border-klm">
-                                <h3 class="text-xl font-bold text-slate-900 mb-4 flex items-center"><i data-lucide="clipboard-check" class="w-5 h-5 mr-3 text-klm"></i> Phase 1: Preparation</h3>
-                                <p class="text-slate-600 mb-4">Ensures fleet readiness. Planning must begin 30 minutes prior to pushback.</p>
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm bg-slate-50 p-4 rounded border border-slate-200">
-                                    <div><strong>Flight Plan:</strong> Mandatory via SimBrief.</div>
-                                    <div><strong>Doors Closed:</strong> 5-15 mins pre-departure.</div>
-                                </div>
+                                <h3 class="text-xl font-bold text-slate-900 mb-4">Phase 1: Preparation</h3>
+                                <p class="text-slate-600">SimBrief Flight Plan Mandatory. Doors closed 5-15 min prior to departure.</p>
                             </div>
-
                             <div class="bg-white p-8 rounded-xl shadow-sm border-l-4 border-klm">
-                                <h3 class="text-xl font-bold text-slate-900 mb-4 flex items-center"><i data-lucide="plane-takeoff" class="w-5 h-5 mr-3 text-klm"></i> Phase 2: Execution</h3>
-                                <p class="text-slate-600 mb-4">Strict adherence to speed and altitude restrictions maintains airspace realism.</p>
+                                <h3 class="text-xl font-bold text-slate-900 mb-4">Phase 2: Execution</h3>
                                 <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
-                                    <div class="p-3 bg-slate-50 rounded border">
-                                        <div class="text-xs text-slate-500 uppercase">Taxi</div>
-                                        <div class="font-bold text-slate-900">Max 25 kts</div>
-                                    </div>
-                                    <div class="p-3 bg-slate-50 rounded border">
-                                        <div class="text-xs text-slate-500 uppercase">&lt; 10k ft</div>
-                                        <div class="font-bold text-slate-900">250 kts</div>
-                                    </div>
-                                    <div class="p-3 bg-slate-50 rounded border">
-                                        <div class="text-xs text-slate-500 uppercase">Cruise</div>
-                                        <div class="font-bold text-slate-900">Index Cost</div>
-                                    </div>
-                                    <div class="p-3 bg-slate-50 rounded border">
-                                        <div class="text-xs text-slate-500 uppercase">Separation</div>
-                                        <div class="font-bold text-slate-900">1000ft Vert</div>
-                                    </div>
+                                    <div class="p-3 bg-slate-50 border"><strong>Taxi</strong><br>Max 25 kts</div>
+                                    <div class="p-3 bg-slate-50 border"><strong>&lt;10k ft</strong><br>250 kts</div>
+                                    <div class="p-3 bg-slate-50 border"><strong>Cruise</strong><br>Cost Index</div>
+                                    <div class="p-3 bg-slate-50 border"><strong>Sep</strong><br>1000ft</div>
                                 </div>
                             </div>
-
                             <div class="bg-white p-8 rounded-xl shadow-sm border-l-4 border-klm">
-                                <h3 class="text-xl font-bold text-slate-900 mb-4 flex items-center"><i data-lucide="file-check" class="w-5 h-5 mr-3 text-klm"></i> Phase 3: Validation</h3>
-                                <p class="text-slate-600 mb-4">Accurate logging tracks pilot performance and contributes to our core metrics.</p>
-                                <div class="bg-slate-900 text-slate-300 p-4 rounded font-mono text-xs">
-                                    > Submit to #logs<br>
-                                    > Require: Dep/Arr, Time, Pilot Name, Screenshot (Aircraft + Nav Map)
-                                </div>
+                                <h3 class="text-xl font-bold text-slate-900 mb-4">Phase 3: Validation</h3>
+                                <p class="text-slate-600">Submit logs to Discord channel with Dep/Arr, Time, Name, and Screenshot.</p>
                             </div>
                         </div>
                     </div>
@@ -481,8 +668,6 @@
             partners: `
                 <div class="bg-white py-24 fade-in">
                     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                        
-                        <!-- DLH Parent -->
                         <div class="bg-slate-900 rounded-2xl p-8 md:p-12 mb-16 text-white relative overflow-hidden">
                              <div class="relative z-10 flex flex-col md:flex-row gap-12 items-center">
                                 <div class="md:w-1/2">
@@ -509,37 +694,15 @@
                              </div>
                         </div>
 
-                        <!-- Partners Grid -->
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-12">
-                            <div>
-                                <h3 class="text-2xl font-bold text-slate-900 mb-6">Strategic Oversight</h3>
-                                <div class="space-y-6">
-                                    <div class="bg-slate-50 p-6 rounded-lg border border-slate-200">
-                                        <h4 class="font-bold text-klm mb-2">GASA (Safety Authority)</h4>
-                                        <p class="text-sm text-slate-600 mb-3">Ensures safety, fairness, and realism. Operating as a neutral global oversight body.</p>
-                                        <ul class="text-xs text-slate-500 space-y-1">
-                                            <li>• Auditing & Certification</li>
-                                            <li>• Crash Investigation</li>
-                                            <li>• Regulatory Enforcement</li>
-                                        </ul>
-                                    </div>
-                                    <div class="bg-slate-50 p-6 rounded-lg border border-slate-200">
-                                        <h4 class="font-bold text-sky-600 mb-2">ICAO Community</h4>
-                                        <p class="text-sm text-slate-600 mb-3">Prevents chaos and fragmentation. Provides the shared framework for recognition.</p>
-                                        <div class="inline-block bg-green-100 text-green-800 text-xs font-bold px-2 py-1 rounded">Certified Organisation</div>
-                                    </div>
-                                </div>
+                             <div class="bg-slate-50 p-6 rounded-lg border border-slate-200">
+                                <h4 class="font-bold text-klm mb-2">GASA (Safety Authority)</h4>
+                                <p class="text-sm text-slate-600 mb-3">Ensures safety, fairness, and realism. Operating as a neutral global oversight body.</p>
                             </div>
-                            <div class="bg-slate-50 rounded-xl p-8 border border-slate-200 flex flex-col justify-center">
-                                <h3 class="font-bold text-slate-900 mb-4">Why Certification Matters</h3>
-                                <p class="text-slate-600 mb-6 leading-relaxed">
-                                    Being GASA and ICAO certified isn't just a badge. It signifies that KLM VA meets the highest standards of realism, professionalism, and safety within the GeoFS ecosystem.
-                                </p>
-                                <div class="flex items-center gap-4 text-sm font-bold text-slate-800">
-                                    <span class="flex items-center"><i data-lucide="check" class="w-4 h-4 text-klm mr-2"></i> Legitimacy</span>
-                                    <span class="flex items-center"><i data-lucide="check" class="w-4 h-4 text-klm mr-2"></i> Visibility</span>
-                                    <span class="flex items-center"><i data-lucide="check" class="w-4 h-4 text-klm mr-2"></i> Structure</span>
-                                </div>
+                            <div class="bg-slate-50 p-6 rounded-lg border border-slate-200">
+                                <h4 class="font-bold text-sky-600 mb-2">ICAO Community</h4>
+                                <p class="text-sm text-slate-600 mb-3">Prevents chaos and fragmentation. Provides the shared framework for recognition.</p>
+                                <div class="inline-block bg-green-100 text-green-800 text-xs font-bold px-2 py-1 rounded">Certified Organisation</div>
                             </div>
                         </div>
                     </div>
@@ -557,25 +720,52 @@
                         </div>
 
                         <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-24">
-                            <div class="bg-slate-800 p-6 rounded-lg border border-slate-700 flex flex-col items-center text-center">
-                                <div class="epaulette mb-4"><div class="stripe"></div></div>
-                                <h3 class="text-white font-bold">Trainee</h3>
-                                <p class="text-slate-500 text-xs mt-2">Entry Level<br>Evaluation Phase</p>
+                            <!-- Trainee -->
+                            <div class="bg-slate-800 p-6 rounded-lg border border-slate-700 text-center group hover:border-klm transition duration-300">
+                                <div class="epaulette mb-4 mx-auto group-hover:scale-110 transition duration-300">
+                                    <div class="stripe"></div>
+                                </div>
+                                <h3 class="text-white font-bold text-lg">Trainee</h3>
+                                <div class="text-slate-400 text-sm font-mono mt-2 mb-4">0 - 5 Hours</div>
+                                <div class="inline-block bg-slate-900/50 text-indigo-300 text-[10px] uppercase font-bold px-3 py-1 rounded border border-indigo-500/20">
+                                    Entry Exams
+                                </div>
                             </div>
-                            <div class="bg-slate-800 p-6 rounded-lg border border-slate-700 flex flex-col items-center text-center">
-                                <div class="epaulette mb-4"><div class="stripe"></div><div class="stripe"></div></div>
-                                <h3 class="text-white font-bold">Junior Officer</h3>
-                                <p class="text-slate-500 text-xs mt-2">20+ Hours<br>Short Haul Ops</p>
+
+                            <!-- Junior Officer -->
+                            <div class="bg-slate-800 p-6 rounded-lg border border-slate-700 text-center group hover:border-klm transition duration-300">
+                                <div class="epaulette mb-4 mx-auto group-hover:scale-110 transition duration-300">
+                                    <div class="stripe"></div><div class="stripe"></div>
+                                </div>
+                                <h3 class="text-white font-bold text-lg">Junior Officer</h3>
+                                <div class="text-slate-400 text-sm font-mono mt-2 mb-4">5 - 15 Hours</div>
+                                <div class="inline-block bg-slate-900/50 text-emerald-300 text-[10px] uppercase font-bold px-3 py-1 rounded border border-emerald-500/20">
+                                    Short Haul Ops
+                                </div>
                             </div>
-                            <div class="bg-slate-800 p-6 rounded-lg border border-slate-700 flex flex-col items-center text-center">
-                                <div class="epaulette mb-4"><div class="stripe"></div><div class="stripe"></div><div class="stripe"></div></div>
-                                <h3 class="text-white font-bold">First Officer</h3>
-                                <p class="text-slate-500 text-xs mt-2">50+ Hours<br>Complex Ops</p>
+
+                            <!-- First Officer -->
+                            <div class="bg-slate-800 p-6 rounded-lg border border-slate-700 text-center group hover:border-klm transition duration-300">
+                                <div class="epaulette mb-4 mx-auto group-hover:scale-110 transition duration-300">
+                                    <div class="stripe"></div><div class="stripe"></div><div class="stripe"></div>
+                                </div>
+                                <h3 class="text-white font-bold text-lg">First Officer</h3>
+                                <div class="text-slate-400 text-sm font-mono mt-2 mb-4">15 - 50 Hours</div>
+                                <div class="inline-block bg-slate-900/50 text-sky-300 text-[10px] uppercase font-bold px-3 py-1 rounded border border-sky-500/20">
+                                    Medium Haul Ops
+                                </div>
                             </div>
-                            <div class="bg-slate-800 p-6 rounded-lg border border-slate-700 flex flex-col items-center text-center">
-                                <div class="epaulette mb-4"><div class="stripe"></div><div class="stripe"></div><div class="stripe"></div><div class="stripe"></div></div>
-                                <h3 class="text-white font-bold">Captain</h3>
-                                <p class="text-slate-500 text-xs mt-2">150+ Hours<br>Long Haul Command</p>
+
+                            <!-- Captain -->
+                            <div class="bg-slate-800 p-6 rounded-lg border border-slate-700 text-center group hover:border-klm transition duration-300">
+                                <div class="epaulette mb-4 mx-auto group-hover:scale-110 transition duration-300">
+                                    <div class="stripe"></div><div class="stripe"></div><div class="stripe"></div><div class="stripe"></div>
+                                </div>
+                                <h3 class="text-white font-bold text-lg">Captain</h3>
+                                <div class="text-slate-400 text-sm font-mono mt-2 mb-4">50+ Hours</div>
+                                <div class="inline-block bg-slate-900/50 text-amber-300 text-[10px] uppercase font-bold px-3 py-1 rounded border border-amber-500/20">
+                                    Long Haul Command
+                                </div>
                             </div>
                         </div>
 
@@ -613,35 +803,313 @@
             `
         };
 
+        // --- FIXED ROUTER LOGIC ---
+        let dispatchUnsubscribe = null; // Global unsubscribe variable
+
         function router(pageName) {
+            // 1. Cleanup existing listener if moving AWAY from home
+            if (dispatchUnsubscribe) {
+                dispatchUnsubscribe();
+                dispatchUnsubscribe = null;
+                console.log("Disconnected live board listener");
+            }
+
+            // 2. Render Page
             const contentDiv = document.getElementById('app-content');
             contentDiv.innerHTML = pages[pageName] || pages['home'];
             
-            // Map Logic for Routes Page
-            if (pageName === 'routes') {
-                setTimeout(() => {
-                    initFleetMap();
-                    renderRouteGrid('Europe');
-                }, 100);
-            }
+            // 3. Post-Render Logic
+            if (pageName === 'routes') { setTimeout(() => { initFleetMap(); renderRouteGrid('Europe'); }, 100); }
+            if (pageName === 'booking') { setTimeout(initBookingPage, 100); }
+            if (pageName === 'home') { setTimeout(initDispatchBoard, 500); }
 
             lucide.createIcons();
             window.scrollTo(0, 0);
-
+            
+            // 4. Toggle Active State
             document.querySelectorAll('.nav-link').forEach(btn => {
                 if(btn.getAttribute('onclick').includes(pageName)) {
-                    btn.classList.add('active');
-                    btn.classList.add('text-klm');
+                    btn.classList.add('active', 'text-klm');
                     btn.classList.remove('text-slate-600');
                 } else {
-                    btn.classList.remove('active');
-                    btn.classList.remove('text-klm');
+                    btn.classList.remove('active', 'text-klm');
                     btn.classList.add('text-slate-600');
                 }
             });
         }
+        window.router = router; // Expose to global scope for HTML onclick
 
-        // --- MAP LOGIC ---
+        // --- BOOKING LOGIC ---
+        let currentDirection = 'out';
+        let bookingRouteList = [];
+
+        function initBookingPage() {
+            const regionSelect = document.getElementById('region-select');
+            const acSelect = document.getElementById('aircraft-select');
+            const loginSection = document.getElementById('login-section');
+            
+            const regions = Object.keys(routeData);
+            if(regionSelect) regionSelect.innerHTML = regions.map(r => `<option value="${r}">${r}</option>`).join('');
+            if(acSelect) acSelect.innerHTML = fleetData.filter(f => f.status === 'Active' || f.status === 'Phasing Out').map(f => `<option value="${f.type}">${f.type}</option>`).join('');
+            
+            // Handle Login UI
+            if(loginSection) {
+                if(discordUser) {
+                    loginSection.innerHTML = `
+                        <div class="col-span-2 flex items-center gap-4 bg-slate-50 p-4 rounded border border-emerald-200">
+                             <img src="https://cdn.discordapp.com/avatars/${discordUser.id}/${discordUser.avatar}.png" 
+                                  class="w-12 h-12 rounded-full border-2 border-white shadow" 
+                                  onerror="this.src='https://cdn.discordapp.com/embed/avatars/0.png'">
+                             <div>
+                                <div class="text-sm text-slate-500 font-bold uppercase tracking-wider">Authenticated Pilot</div>
+                                <div class="text-lg font-black text-slate-800">${discordUser.username}</div>
+                             </div>
+                             <div class="ml-auto bg-emerald-100 text-emerald-700 px-3 py-1 rounded text-xs font-bold uppercase tracking-wide">
+                                <i data-lucide="check-circle" class="w-3 h-3 inline mr-1"></i> Verified
+                             </div>
+                        </div>
+                    `;
+                    lucide.createIcons();
+                } else {
+                    // Update: Changed to token flow for static site compatibility
+                    const discordAuthUrl = "https://discord.com/oauth2/authorize?client_id=1464272995542634566&response_type=token&redirect_uri=https%3A%2F%2Fklmgeofsvirtual.github.io%2Fklm-virtual-airline%2F&scope=identify+email+guilds.members.read";
+                    
+                    loginSection.innerHTML = `
+                        <div class="col-span-2">
+                             <a href="${discordAuthUrl}" class="flex items-center justify-center w-full bg-[#5865F2] hover:bg-[#4752C4] text-white font-bold py-3 rounded transition shadow-lg transform active:scale-95">
+                                <svg class="w-6 h-6 mr-3" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037 20.818 20.818 0 0 0-3.361 6.91 20.8 20.8 0 0 0-3.356-6.91.071.071 0 0 0-.077-.037 19.782 19.782 0 0 0-4.886 1.515.072.072 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028 14.09 14.09 0 0 0 1.226-1.994.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.086 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.086 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/>
+                                </svg>
+                                Log in with Discord
+                            </a>
+                            <p class="text-xs text-center text-slate-500 mt-2">Required for pilot identification.</p>
+                        </div>
+                    `;
+                }
+            }
+            
+            updateDestinations();
+        }
+
+        function setDirection(dir) {
+            currentDirection = dir;
+            const btnOut = document.getElementById('btn-out');
+            const btnIn = document.getElementById('btn-in');
+            if(dir === 'out') {
+                btnOut.className = "flex-1 py-2 border rounded font-bold text-sm bg-klm text-white border-klm transition";
+                btnIn.className = "flex-1 py-2 border rounded font-bold text-sm bg-white text-slate-600 border-slate-300 transition";
+            } else {
+                btnOut.className = "flex-1 py-2 border rounded font-bold text-sm bg-white text-slate-600 border-slate-300 transition";
+                btnIn.className = "flex-1 py-2 border rounded font-bold text-sm bg-klm text-white border-klm transition";
+            }
+            updateFlightDetails();
+        }
+        window.setDirection = setDirection;
+
+        function updateDestinations() {
+            const region = document.getElementById('region-select').value;
+            const destSelect = document.getElementById('dest-select');
+            if(routeData[region]) {
+                bookingRouteList = routeData[region];
+                destSelect.innerHTML = bookingRouteList.map((route, index) => 
+                    `<option value="${index}">${route.city} (${route.code})</option>`
+                ).join('');
+                updateFlightDetails();
+            }
+        }
+        window.updateDestinations = updateDestinations;
+
+        function updateFlightDetails() {
+            const index = document.getElementById('dest-select').value;
+            const flightSelect = document.getElementById('flight-select');
+            const route = bookingRouteList[index];
+            if (!route) return;
+
+            if (currentDirection === 'out') {
+                document.getElementById('disp-dep').textContent = "EHAM";
+                document.getElementById('disp-arr').textContent = route.code;
+            } else {
+                document.getElementById('disp-dep').textContent = route.code;
+                document.getElementById('disp-arr').textContent = "EHAM";
+            }
+
+            const rawString = currentDirection === 'out' ? route.out : route.in;
+            const cleanString = rawString.replace(/[+*]/g, '');
+            const numbers = cleanString.split(',').map(s => s.trim()).filter(s => s);
+            flightSelect.innerHTML = numbers.map(num => `<option value="KL${num}">KL${num}</option>`).join('');
+            updatePreview();
+        }
+        window.updateFlightDetails = updateFlightDetails;
+
+        function updatePreview() {
+            const callsign = document.getElementById('flight-select').value || '---';
+            const dep = document.getElementById('disp-dep').textContent;
+            const arr = document.getElementById('disp-arr').textContent;
+            
+            // Use Discord user name if available, else blank
+            const pilot = discordUser ? discordUser.username : '---';
+            
+            const ac = document.getElementById('aircraft-select').value || '---';
+            const time = document.getElementById('dep-time').value || '--:--';
+
+            document.getElementById('preview-callsign').textContent = callsign;
+            document.getElementById('preview-dep').textContent = dep;
+            document.getElementById('preview-arr').textContent = arr;
+            document.getElementById('preview-pilot').textContent = pilot;
+            document.getElementById('preview-ac').textContent = ac;
+            document.getElementById('preview-time').textContent = time + 'z';
+        }
+        window.updatePreview = updatePreview;
+
+        // --- SUBMIT TO FIREBASE (ASYNC) ---
+        async function handleBookingSubmit(e) {
+            e.preventDefault();
+            const btn = e.target.querySelector('button[type="submit"]');
+            const originalText = btn.innerHTML;
+            
+            if (!discordUser) {
+                alert("You must log in with Discord first!");
+                return;
+            }
+
+            btn.innerHTML = `<i data-lucide="loader" class="w-5 h-5 mr-2 animate-spin"></i> Processing...`;
+            btn.disabled = true;
+
+            const pilotName = discordUser.username;
+            const flightNumber = document.getElementById('flight-select').value;
+            const destination = document.getElementById('disp-arr').textContent;
+            const departure = document.getElementById('disp-dep').textContent;
+            const aircraftType = document.getElementById('aircraft-select').value;
+            const timeVal = document.getElementById('dep-time').value;
+
+            // Find selected aircraft object to get ICAO
+            const selectedFleet = fleetData.find(f => f.type === aircraftType);
+
+            // Create ISO Date for Scheduled Departure (assuming today for date component)
+            const today = new Date();
+            const [hours, minutes] = timeVal.split(':');
+            today.setHours(hours, minutes, 0, 0);
+            const scheduledDepartureISO = today.toISOString();
+
+            if (!db) {
+                alert("Database not connected. Check config.");
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+                return;
+            }
+
+            try {
+                await addDoc(collection(db, "bookings"), {
+                    flightNumber: flightNumber,
+                    aircraft: {
+                        name: selectedFleet.type,
+                        icao: selectedFleet.icao
+                    },
+                    departure: departure,
+                    destination: destination,
+                    pilot: {
+                        discordId: discordUser.id, // REAL DISCORD ID
+                        callsign: pilotName,
+                        username: discordUser.username
+                    },
+                    status: "BOOKED",
+                    scheduledDeparture: scheduledDepartureISO,
+                    createdAt: serverTimestamp()
+                });
+
+                alert("Booking Confirmed! Added to Dispatch Board.");
+                router('home');
+            } catch (error) {
+                console.error("Error writing document: ", error);
+                // SHOW ERROR BANNER ON SUBMIT FAIL TOO
+                document.getElementById('db-error-banner').classList.remove('hidden');
+                
+                alert("DATABASE ERROR: Please create the database in the Google Console (see red banner).");
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }
+        }
+        window.handleBookingSubmit = handleBookingSubmit;
+
+        // --- DISPATCH BOARD (HOME) ---
+        function initDispatchBoard() {
+            const board = document.getElementById('dispatch-rows');
+            
+            if(!board || !db) return;
+
+            // Use Modular onSnapshot
+            const q = query(collection(db, "bookings"), orderBy("createdAt", "desc"), limit(10));
+            
+            // Assign to Global Unsubscribe Variable
+            dispatchUnsubscribe = onSnapshot(q, (querySnapshot) => {
+                // SAFETY CHECK: Ensure elements exist before updating
+                // This prevents crash if user navigates away mid-update
+                const statusLight = document.getElementById('db-status-light');
+                const statusText = document.getElementById('db-status-text');
+                const errorBanner = document.getElementById('db-error-banner');
+                const boardEl = document.getElementById('dispatch-rows');
+
+                if (statusLight) {
+                    statusLight.classList.remove('bg-red-500', 'animate-pulse');
+                    statusLight.classList.add('bg-emerald-500');
+                    statusText.textContent = "SYSTEM ONLINE";
+                    statusText.classList.remove('text-red-400');
+                    statusText.classList.add('text-emerald-400');
+                    if (errorBanner) errorBanner.classList.add('hidden');
+                }
+
+                if (boardEl) {
+                    boardEl.innerHTML = "";
+                    if(querySnapshot.empty) {
+                        boardEl.innerHTML = '<div class="p-4 text-center text-slate-500">No active flights. Dispatch System Online.</div>';
+                        return;
+                    }
+                    querySnapshot.forEach((doc) => {
+                        const data = doc.data();
+                        
+                        // Handle legacy data vs new nested format gracefully
+                        const pilotName = data.pilot?.callsign || data.pilot || 'Unknown';
+                        const flightNum = data.flightNumber || data.flightNum || '---';
+                        const aircraftName = data.aircraft?.name || data.aircraft || '---';
+                        const dest = data.destination || '---';
+                        const status = data.status || 'BOOKED';
+
+                        const row = document.createElement('div');
+                        row.className = 'fids-row';
+                        row.innerHTML = `
+                            <div class="font-bold text-klm truncate">${pilotName}</div>
+                            <div>${flightNum}</div>
+                            <div class="hidden md:block">EHAM ➝ ${dest}</div>
+                            <div>${aircraftName}</div>
+                            <div class="text-right font-bold uppercase text-emerald-400 animate-pulse">${status}</div>
+                        `;
+                        boardEl.appendChild(row);
+                    });
+                }
+            }, (error) => {
+                console.error("Dispatch Board Error:", error);
+                
+                const statusLight = document.getElementById('db-status-light');
+                const statusText = document.getElementById('db-status-text');
+                const errorBanner = document.getElementById('db-error-banner');
+                const boardEl = document.getElementById('dispatch-rows');
+                
+                if(errorBanner) errorBanner.classList.remove('hidden');
+
+                if (statusLight) {
+                    statusLight.classList.remove('bg-emerald-500');
+                    statusLight.classList.add('bg-red-500', 'animate-pulse');
+                    statusText.textContent = "CONNECTION LOST";
+                    statusText.classList.remove('text-emerald-400');
+                    statusText.classList.add('text-red-400');
+                }
+                if (boardEl) {
+                    boardEl.innerHTML = `<div class="p-4 text-center text-red-400 font-mono text-xs">Error: ${error.message}</div>`;
+                }
+            });
+        }
+
+        // --- MAP LOGIC (UNCHANGED) ---
         let mapInstance = null;
         let flightLinesLayer = null;
 
@@ -783,14 +1251,15 @@
                 </div>
             `).join('');
         }
+        window.renderRouteGrid = renderRouteGrid;
 
         function toggleMobileMenu() {
             document.getElementById('mobile-menu').classList.toggle('hidden');
         }
+        window.toggleMobileMenu = toggleMobileMenu;
 
         // Init
         document.getElementById('nav-logo').src = siteImages.logo;
-        document.getElementById('footer-logo').src = siteImages.logo;
         router('home');
 
     </script>
