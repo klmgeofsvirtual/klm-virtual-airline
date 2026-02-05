@@ -29,9 +29,9 @@
         body { font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; }
 
         /* Custom Scrollbar */
-        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-track { background: #0f172a; }
-        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 3px; }
         ::-webkit-scrollbar-thumb:hover { background: #475569; }
 
         /* Animations */
@@ -87,37 +87,49 @@
         .fids-board {
             font-family: 'Courier New', Courier, monospace;
             background: #0f172a;
-            border: 4px solid #334155;
+            border: 1px solid #334155;
             border-radius: 8px;
             overflow: hidden;
             position: relative;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
         }
         .fids-header {
             background: #1e293b;
             color: #94a3b8;
             font-weight: bold;
-            padding: 10px;
+            padding: 12px 16px;
             display: grid;
-            grid-template-columns: 1.5fr 0.8fr 0.8fr 1.5fr 1fr 1fr;
+            grid-template-columns: 1.5fr 1fr 1fr 1.5fr 1fr 1fr;
             text-transform: uppercase;
-            font-size: 0.75rem;
-            letter-spacing: 1px;
+            font-size: 0.7rem;
+            letter-spacing: 1.5px;
+            border-bottom: 2px solid #334155;
         }
         .fids-row {
-            padding: 12px 10px;
+            padding: 14px 16px;
             display: grid;
-            grid-template-columns: 1.5fr 0.8fr 0.8fr 1.5fr 1fr 1fr;
+            grid-template-columns: 1.5fr 1fr 1fr 1.5fr 1fr 1fr;
             color: #e2e8f0;
             border-bottom: 1px solid #1e293b;
             font-size: 0.85rem;
             align-items: center;
-            animation: flashText 0.5s ease;
+            transition: background-color 0.2s;
         }
+        .fids-row:hover { background-color: #1e293b; }
         .fids-row:last-child { border-bottom: none; }
         
         #dispatch-rows {
-            max-height: 240px; /* Approx 5 rows height */
+            max-height: 300px; /* Approximately 5-6 rows */
             overflow-y: auto;
+        }
+
+        /* News Card Styles */
+        .news-card {
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .news-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
         }
 
         @keyframes flashText {
@@ -329,12 +341,12 @@
         const fleetData = [
             { type: "Embraer 190", icao: "E190", role: "Cityhopper", desc: "Short-haul, high-frequency ops for training and local connectivity.", status: "Active", count: 21, img: "https://upload.wikimedia.org/wikipedia/commons/c/c6/Berlin_Brandenburg_Airport_KLM_Cityhopper_Embraer_E195-E2_PH-NXC_%28DSC02878%29.jpg" },
             { type: "Embraer 195-E2", icao: "E295", role: "Cityhopper", desc: "Modern regional efficiency. High frequency European connections.", status: "Active", count: 25, img: "https://img.static-kl.com/transform/53cea398-7cff-4e3f-a7b1-496d4552fb10/" },
-            { type: "Boeing 737-700", icao: "B737", role: "Short Haul", desc: "Legacy workhorse. Being phased out for A320neo family.", status: "Phasing Out", count: 6, img: "https://upload.wikimedia.org/wikipedia/commons/thumb/3/34/KLM_Boeing_737-7K2_PH-BGT_MUC_2015_01.jpg/1280px-KLM_Boeing_737-7K2_PH-BGT_MUC_2015_01.jpg" },
+            { type: "Boeing 737-700 LTRP", icao: "B737", role: "Short Haul", desc: "Legacy workhorse receiving extended-life refurbishment under LTRP program.", status: "LTRP", count: 6, img: "https://upload.wikimedia.org/wikipedia/commons/thumb/3/34/KLM_Boeing_737-7K2_PH-BGT_MUC_2015_01.jpg/1280px-KLM_Boeing_737-7K2_PH-BGT_MUC_2015_01.jpg" },
             { type: "Boeing 737-800", icao: "B738", role: "Short Haul", desc: "Backbone of European operations. Gradual retirement scheduled.", status: "Phasing Out", count: 30, img: "https://upload.wikimedia.org/wikipedia/commons/1/18/KLM_Boeing_737-800_PH-BCD_%2826038861623%29.jpg" },
             { type: "Airbus A320neo", icao: "A20N", role: "Short Haul", desc: "Next-gen European core. Maximum efficiency and realism.", status: "Active", count: 9, img: "https://image.parool.nl/211007987/width/2480/impressie-van-een-airbus-a320-neo-in-de-kleuren-van-klm" },
             { type: "Airbus A321neo", icao: "A21N", role: "Short Haul", desc: "High-capacity European routes. Primary replacement for B737.", status: "Active", count: 22, img: "https://img.static-kl.com/transform/8806738a-a661-4934-a177-95adef39307d/" },
             { type: "Airbus A330-200", icao: "A332", role: "Medium Haul", desc: "Intercontinental connector. Scheduled for retirement.", status: "Phasing Out", count: 6, img: "https://cdn.flightsim.to/images/27/inibuilds-a330-300-klm-fleet-pack-55321-1735741086-uIy_G.jpg?width=1400" },
-            { type: "Boeing 777-300ER", icao: "B77W", role: "Long Haul", desc: "High-capacity global reach. Fleet size reducing.", status: "Active", count: 3, img: "https://www.aerotime.aero/images/klm_boeing_777-300er_orange_pride_livery.jpg" },
+            { type: "Boeing 777-300ER LTRP", icao: "B77W", role: "Long Haul", desc: "Reinforced and refurbished for reliable service until next-gen replacement.", status: "LTRP", count: 3, img: "https://www.aerotime.aero/images/klm_boeing_777-300er_orange_pride_livery.jpg" },
             { type: "Boeing 787-9", icao: "B789", role: "Long Haul", desc: "The future of our long-haul operations. Elite flagship.", status: "Active", count: 13, img: "https://content.presspage.com/uploads/162/1920_25508202-10155250600310773-6357422191407278812-n.jpg" },
             { type: "Boeing 787-10", icao: "B78X", role: "Long Haul", desc: "High-capacity Dreamliner for premium long-haul routes.", status: "Active", count: 14, img: "https://content.presspage.com/uploads/162/1920_paulridderhof30jun196473-465547.jpg?10000" },
         ];
@@ -393,7 +405,7 @@
                                     </div>
                                 </div>
                                 
-                                <div class="fids-board max-w-5xl shadow-2xl">
+                                <div class="fids-board max-w-5xl">
                                     <div class="fids-header">
                                         <div>Pilot</div>
                                         <div>Flight</div>
@@ -402,7 +414,7 @@
                                         <div>Aircraft</div>
                                         <div class="text-right">Status</div>
                                     </div>
-                                    <div id="dispatch-rows" class="min-h-[100px]">
+                                    <div id="dispatch-rows">
                                         <div class="p-4 text-center text-slate-500 italic">Connecting to Dispatch Server...</div>
                                     </div>
                                 </div>
@@ -422,56 +434,76 @@
                         </div>
                         
                         <div class="space-y-12">
+                            <!-- Milano Olympics Update -->
+                             <article class="bg-slate-800 rounded-lg p-8 border-l-4 border-indigo-500 news-card shadow-lg">
+                                <div class="flex items-center gap-3 mb-4 text-xs font-mono text-indigo-400 uppercase tracking-widest">
+                                    <span>03 FEB 2026</span>
+                                    <span>//</span>
+                                    <span>Special Ops</span>
+                                </div>
+                                <h2 class="text-2xl font-bold text-white mb-4">Milano-Cortina Olympics Operations Update</h2>
+                                <div class="text-slate-300 space-y-4 leading-relaxed">
+                                    <p>During the Milano-Cortina Olympic Games, all KLM Virtual Airline flights operating to and from <strong>Milan (LIMC / LIN)</strong> will receive a <strong>1.5× flight boost</strong>.</p>
+                                    <ul class="list-disc pl-5 space-y-1 text-slate-400">
+                                        <li>1.5× XP</li>
+                                        <li>1.5× flight rewards</li>
+                                        <li>Applies to all Olympic-period Milan routes</li>
+                                    </ul>
+                                    <p class="text-sm italic text-slate-500 mt-4">This boost is active for the duration of the Olympic Games. Enjoy the extra rewards and fly the Olympic spirit with KLM VA!</p>
+                                </div>
+                            </article>
 
-                            <article class="bg-slate-800/50 rounded-lg p-8 border-l-4 border-amber-500">
+                            <!-- LTRP Update -->
+                             <article class="bg-slate-800 rounded-lg p-8 border-l-4 border-emerald-500 news-card shadow-lg">
+                                <div class="flex items-center gap-3 mb-4 text-xs font-mono text-emerald-400 uppercase tracking-widest">
+                                    <span>01 FEB 2026</span>
+                                    <span>//</span>
+                                    <span>Fleet Update</span>
+                                </div>
+                                <h2 class="text-2xl font-bold text-white mb-4">Fleet Update | Long Term Refurbishment Plan (LTRP)</h2>
+                                <div class="text-slate-300 space-y-4 leading-relaxed">
+                                    <p>We’re officially launching the Long Term Refurbishment Plan (LTRP) — a $65M investment to keep our most capable aircraft flying strong. The <strong>Boeing 737-7</strong> and <strong>Boeing 777-300ER</strong> will undergo extended-life refurbishment.</p>
+                                    <p><strong>Fleet Change Notice:</strong> With this shift, we will be phasing out the <strong>A330-200</strong> as part of our long-term strategy. It’s the end of an era, but a necessary step forward.</p>
+                                </div>
+                            </article>
+
+                             <!-- Widebody Delivery Update -->
+                             <article class="bg-slate-800 rounded-lg p-8 border-l-4 border-amber-500 news-card shadow-lg">
                                 <div class="flex items-center gap-3 mb-4 text-xs font-mono text-amber-400 uppercase tracking-widest">
+                                    <span>29 JAN 2026</span>
+                                    <span>//</span>
+                                    <span>Dispatch Directive</span>
+                                </div>
+                                <h2 class="text-2xl font-bold text-white mb-4">OFFICIAL DISPATCH – WIDEBODY DELIVERY FLIGHT</h2>
+                                <div class="text-slate-300 space-y-4 leading-relaxed">
+                                    <p>We are initiating the official delivery of our sold B777-300ERs. Pilots completing this flight (EHAM → VOBL) will receive <strong>1.5× credited flight hours</strong>.</p>
+                                    <div class="bg-slate-900 p-4 rounded border border-slate-700 font-mono text-sm">
+                                        <p>ROUTE: EHAM → VOBL</p>
+                                        <p>AIRCRAFT: Boeing 777-300ER</p>
+                                        <p>DEADLINE: 16 FEB 2026</p>
+                                    </div>
+                                    <p class="text-sm text-slate-400">Priority is given to Widebody Certified pilots. No reroutes. No substitutions.</p>
+                                </div>
+                            </article>
+
+                            <article class="bg-slate-800/50 rounded-lg p-8 border-l-4 border-slate-600 news-card">
+                                <div class="flex items-center gap-3 mb-4 text-xs font-mono text-slate-400 uppercase tracking-widest">
                                     <span>28 JAN 2026</span>
                                     <span>//</span>
-                                    <span>Fleet Strategy</span>
+                                    <span>Archive</span>
                                 </div>
-                                <h2 class="text-2xl font-bold text-white mb-4">Strategic Fleet Update: B777 Divestment & Modernization</h2>
-                                <div class="text-slate-300 space-y-4 leading-relaxed">
-                                    <p>In a major move towards operational efficiency, KLM Virtual has finalized the sale of eight Boeing 777-300ER airframes. Five units have been transferred to Air India, and a further three have been acquired by Hindustan Airways VA for $210M.</p>
-                                    <p>Pilots are requested to assist in ferrying the remaining sold units to Bangalore (VOBL). This divestment aligns with our upcoming transition to the A350-1000 flagship, arriving Q2 2026.</p>
-                                </div>
+                                <h2 class="text-xl font-bold text-slate-300 mb-2">Previous Directive: B777 Divestment</h2>
+                                <p class="text-slate-400 text-sm">Sale of eight Boeing 777-300ER airframes finalized. Units transferred to Air India and Hindustan Airways VA.</p>
                             </article>
 
-                            <article class="bg-slate-800/50 rounded-lg p-8 border-l-4 border-indigo-500">
-                                <div class="flex items-center gap-3 mb-4 text-xs font-mono text-indigo-400 uppercase tracking-widest">
-                                    <span>23 JAN 2026</span>
-                                    <span>//</span>
-                                    <span>Policy Update</span>
-                                </div>
-                                <h2 class="text-2xl font-bold text-white mb-4">Operational Standards: Revised Type Ratings</h2>
-                                <div class="text-slate-300 space-y-4 leading-relaxed">
-                                    <p>To ensure the highest standards of airmanship, a revised Pilot Ranking System is now in effect. Command of widebody aircraft (B777, B787, A330, A350) is now restricted to officers with a minimum of 10 logged flight hours.</p>
-                                    <p>This ensures that heavy-metal operations remain the domain of our most experienced crew, enhancing the realism of our virtual airspace.</p>
-                                </div>
-                            </article>
-
-                             <article class="bg-slate-800/50 rounded-lg p-8 border-l-4 border-red-500">
+                             <article class="bg-slate-800/50 rounded-lg p-8 border-l-4 border-red-900 news-card">
                                 <div class="flex items-center gap-3 mb-4 text-xs font-mono text-red-400 uppercase tracking-widest">
                                     <span>16 JAN 2026</span>
                                     <span>//</span>
                                     <span>Security Directive</span>
                                 </div>
-                                <h2 class="text-2xl font-bold text-white mb-4">SECURITY ALERT: Middle East Airspace Restrictions</h2>
-                                <div class="text-slate-300 space-y-4 leading-relaxed">
-                                    <p>Due to escalating geopolitical tensions, immediate flight restrictions are in effect for the Middle East region. <strong>Iraqi (ORBB), Iranian (OIIX/OIXX), and Qatari (OTBD)</strong> airspaces are strictly prohibited.</p>
-                                    <p>All traffic must utilize the Saudi Corridor (OEJD/OEJN) via Egypt and the Horn of Africa. Manual SimBrief modification is mandatory for all flight plans traversing this sector.</p>
-                                </div>
-                            </article>
-                            
-                            <article class="bg-slate-800/50 rounded-lg p-8 border-l-4 border-emerald-500">
-                                <div class="flex items-center gap-3 mb-4 text-xs font-mono text-emerald-400 uppercase tracking-widest">
-                                    <span>20 JAN 2026</span>
-                                    <span>//</span>
-                                    <span>Technology</span>
-                                </div>
-                                <h2 class="text-2xl font-bold text-white mb-4">Operations Center v3.0 Launched</h2>
-                                <div class="text-slate-300 space-y-4 leading-relaxed">
-                                    <p>We have officially deployed the v3.0 Operations Center. This major infrastructure upgrade introduces live fleet tracking, integrated dispatching, and a centralized pilot dashboard, reinforcing our commitment to an elite, realism-focused simulation environment.</p>
-                                </div>
+                                <h2 class="text-xl font-bold text-slate-300 mb-2">Middle East Airspace Restrictions</h2>
+                                <p class="text-slate-400 text-sm"><strong>Iraqi (ORBB), Iranian (OIIX/OIXX), and Qatari (OTBD)</strong> airspaces strictly prohibited. Use Saudi Corridor (OEJD/OEJN).</p>
                             </article>
 
                         </div>
@@ -491,22 +523,27 @@
                             ${fleetData.map(plane => {
                                 let statusColor = plane.status === 'Active' ? 'text-emerald-400 border-emerald-500/30 bg-emerald-500/10' : 
                                                   plane.status === 'Phasing Out' ? 'text-amber-400 border-amber-500/30 bg-amber-500/10' : 
+                                                  plane.status === 'LTRP' ? 'text-purple-400 border-purple-500/30 bg-purple-500/10' :
                                                   'text-indigo-400 border-indigo-500/30 bg-indigo-500/10';
                                 return `
-                                <div class="bg-slate-800 rounded-lg overflow-hidden border border-slate-700 hover:border-klm transition group">
-                                    <div class="h-48 overflow-hidden relative">
+                                <div class="bg-slate-800 rounded-lg overflow-hidden border border-slate-700 hover:border-klm transition duration-300 group shadow-lg hover:shadow-2xl relative">
+                                    <div class="absolute inset-0 bg-gradient-to-t from-slate-900 via-transparent to-transparent opacity-50 z-10 pointer-events-none"></div>
+                                    <div class="h-56 overflow-hidden relative">
                                         <img src="${plane.img}" class="w-full h-full object-cover opacity-80 group-hover:opacity-100 group-hover:scale-105 transition duration-700" onerror="this.src='https://upload.wikimedia.org/wikipedia/commons/thumb/a/ac/No_image_available.svg/1024px-No_image_available.svg.png'">
-                                        <div class="absolute top-3 right-3 ${statusColor} border px-2 py-1 rounded text-xs font-bold uppercase tracking-wider backdrop-blur-md">
+                                        <div class="absolute top-3 right-3 ${statusColor} border px-2 py-1 rounded text-xs font-bold uppercase tracking-wider backdrop-blur-md z-20 shadow-sm">
                                             ${plane.status}
                                         </div>
                                     </div>
-                                    <div class="p-6">
+                                    <div class="p-6 relative z-20 bg-slate-800">
                                         <div class="flex justify-between items-baseline mb-2">
-                                            <h3 class="text-xl font-bold text-white">${plane.type}</h3>
+                                            <h3 class="text-xl font-bold text-white tracking-tight">${plane.type}</h3>
                                             <span class="text-slate-500 text-sm font-mono">QTY: ${plane.count}</span>
                                         </div>
-                                        <div class="text-klm text-xs font-bold uppercase tracking-wide mb-3">${plane.role}</div>
-                                        <div class="text-[10px] text-slate-500 font-mono mb-2">ICAO: ${plane.icao}</div>
+                                        <div class="text-klm text-xs font-bold uppercase tracking-wide mb-3 flex items-center gap-2">
+                                            <div class="w-1.5 h-1.5 rounded-full bg-klm"></div>
+                                            ${plane.role}
+                                        </div>
+                                        <div class="text-[10px] text-slate-500 font-mono mb-3 bg-slate-900/50 inline-block px-2 py-1 rounded">ICAO: ${plane.icao}</div>
                                         <p class="text-slate-400 text-sm leading-relaxed border-t border-slate-700 pt-3">${plane.desc}</p>
                                     </div>
                                 </div>
@@ -1183,7 +1220,7 @@
             // Status Color Map
             const statusColors = {
                 'TEST': 'text-amber-400',
-                'LOGGED': 'text-slate-400',
+                'LOGGED': 'text-slate-500', // Gray for completed logs
                 'BOOKED': 'text-emerald-400',
                 'DEPARTED': 'text-sky-400',
                 'ENROUTE': 'text-indigo-400',
@@ -1191,7 +1228,7 @@
                 'CANCELED': 'text-red-500'
             };
 
-            const q = query(collection(db, "bookings"), orderBy("createdAt", "desc"), limit(10));
+            const q = query(collection(db, "bookings"), orderBy("createdAt", "desc"), limit(20)); // Increased limit for scrolling
             dispatchUnsubscribe = onSnapshot(q, (querySnapshot) => {
                 const statusLight = document.getElementById('db-status-light');
                 const statusText = document.getElementById('db-status-text');
@@ -1226,7 +1263,7 @@
                         if (data.scheduledDeparture) {
                             try {
                                 const date = new Date(data.scheduledDeparture);
-                                // Format: 31 JAN
+                                // Format: 03 FEB
                                 dateStr = date.toLocaleDateString('en-GB', {day: '2-digit', month: 'short'}).toUpperCase();
                             } catch (e) {}
                         }
@@ -1238,7 +1275,7 @@
                             <div class="font-mono text-amber-500 font-bold">${dateStr}</div>
                             <div class="hidden md:block">EHAM ➝ ${dest}</div>
                             <div>${aircraftName}</div>
-                            <div class="text-right font-bold uppercase ${statusColor} animate-pulse">${status}</div>
+                            <div class="text-right font-bold uppercase ${statusColor} animate-pulse text-xs tracking-wider">${status}</div>
                         `;
                         boardEl.appendChild(row);
                     });
