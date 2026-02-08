@@ -276,7 +276,7 @@
     <script type="module">
         // Import Modern Firebase SDK
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getFirestore, collection, addDoc, onSnapshot, orderBy, query, limit, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, onSnapshot, orderBy, query, limit, serverTimestamp, doc, updateDoc, increment, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
         import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-analytics.js";
 
         // ==========================================
@@ -498,6 +498,19 @@
                                 <p class="font-serif italic text-slate-400">Signed,</p>
                                 <p class="font-bold text-white mt-2">Nihid</p>
                                 <p class="text-xs text-slate-500 uppercase tracking-wide">Co-Chairman, KLM VA</p>
+                             </div>
+
+                             <!-- CONDOLENCES BUTTON & COUNTER -->
+                             <div class="mt-16 pt-8 border-t border-slate-800 text-center">
+                                <button id="condolence-btn" onclick="window.submitCondolence()" class="group relative inline-flex items-center justify-center px-8 py-3 text-base font-medium text-white bg-slate-800 border border-slate-700 rounded-full hover:bg-slate-700 transition-all duration-300 shadow-lg hover:shadow-indigo-500/20 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed">
+                                    <span class="absolute w-full h-full bg-gradient-to-r from-indigo-500/20 to-purple-500/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-full pointer-events-none"></span>
+                                    <i data-lucide="heart" class="w-5 h-5 mr-3 text-red-500 fill-current animate-pulse"></i>
+                                    <span id="condolence-btn-text">Pay Respects</span>
+                                </button>
+                                <div class="mt-4 flex items-center justify-center gap-2 text-sm text-slate-500 font-mono uppercase tracking-widest">
+                                    <span id="condolence-count" class="text-white font-bold text-lg tabular-nums">---</span>
+                                    <span>Tributes Paid</span>
+                                </div>
                              </div>
                         </div>
 
@@ -994,19 +1007,98 @@
             `
         };
 
+        // --- CONDOLENCE LOGIC ---
+        let condolenceUnsubscribe = null;
+
+        window.submitCondolence = async () => {
+            const btn = document.getElementById('condolence-btn');
+            const btnText = document.getElementById('condolence-btn-text');
+            
+            // Check local state to prevent spam
+            if (localStorage.getItem('klm_condolence_submitted')) {
+                alert("Thank you. You have already paid your respects.");
+                return;
+            }
+
+            if (!db) return;
+
+            // Optimistic UI update
+            btn.disabled = true;
+            btnText.textContent = "Submitting...";
+
+            try {
+                const ref = doc(db, "site_stats", "condolences");
+                
+                // Try to update, if doc doesn't exist, create it
+                try {
+                    await updateDoc(ref, { count: increment(1) });
+                } catch (e) {
+                    // Document likely doesn't exist, create it
+                    await setDoc(ref, { count: 1 });
+                }
+
+                // Mark as submitted locally
+                localStorage.setItem('klm_condolence_submitted', 'true');
+                btnText.textContent = "Respects Paid";
+                
+            } catch (e) {
+                console.error("Error submitting condolence:", e);
+                btn.disabled = false;
+                btnText.textContent = "Try Again";
+            }
+        };
+
+        function initCondolences() {
+            if (!db) return;
+            const ref = doc(db, "site_stats", "condolences");
+            
+            // Check if user already submitted
+            if (localStorage.getItem('klm_condolence_submitted')) {
+                const btn = document.getElementById('condolence-btn');
+                const btnText = document.getElementById('condolence-btn-text');
+                if(btn && btnText) {
+                    btn.disabled = true;
+                    btnText.textContent = "Respects Paid";
+                }
+            }
+
+            condolenceUnsubscribe = onSnapshot(ref, (docSnap) => {
+                const countEl = document.getElementById('condolence-count');
+                if (countEl) {
+                    if (docSnap.exists()) {
+                        countEl.textContent = docSnap.data().count.toLocaleString();
+                    } else {
+                        countEl.textContent = "0";
+                    }
+                }
+            });
+        }
+
+
         // --- FIXED ROUTER LOGIC ---
         let dispatchUnsubscribe = null; 
 
         function router(pageName) {
+            // Cleanup Dispatch Listener
             if (dispatchUnsubscribe) {
                 dispatchUnsubscribe();
                 dispatchUnsubscribe = null;
             }
+            // Cleanup Condolence Listener
+            if (condolenceUnsubscribe) {
+                condolenceUnsubscribe();
+                condolenceUnsubscribe = null;
+            }
+
             const contentDiv = document.getElementById('app-content');
             contentDiv.innerHTML = pages[pageName] || pages['home'];
+            
+            // Page Init Logic
             if (pageName === 'routes') { setTimeout(() => { initFleetMap(); renderRouteGrid('Europe'); }, 100); }
             if (pageName === 'booking') { setTimeout(initBookingPage, 100); }
             if (pageName === 'home') { setTimeout(initDispatchBoard, 500); }
+            if (pageName === 'condolences') { setTimeout(initCondolences, 100); }
+
             lucide.createIcons();
             window.scrollTo(0, 0);
             document.querySelectorAll('.nav-link').forEach(btn => {
