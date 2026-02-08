@@ -11,14 +11,24 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 
     <style>
-        /* KLM Brand Colors */
+        /* KLM Brand Colors - MUTED FOR MOURNING */
         :root {
-            --klm-blue: #00A1DE;
+            --klm-blue: #00A1DE; 
             --klm-dark: #0077A3;
             --klm-sky: #E5F6FF;
             --discord: #5865F2;
             --discord-dark: #4752C4;
+            --mourning-black: #1a1a1a;
+            --mourning-gray: #4b5563;
         }
+        
+        /* MOURNING OVERRIDES */
+        .mourning-mode .text-klm { color: var(--mourning-gray); }
+        .mourning-mode .bg-klm { background-color: var(--mourning-gray); }
+        .mourning-mode .border-klm { border-color: var(--mourning-gray); }
+        .mourning-mode #nav-logo, .mourning-mode #footer-logo { filter: grayscale(100%); }
+        .mourning-mode .hero-bg { filter: grayscale(100%) contrast(1.2); }
+
         .text-klm { color: var(--klm-blue); }
         .bg-klm { background-color: var(--klm-blue); }
         .bg-klm-dark { background-color: var(--klm-dark); }
@@ -46,6 +56,8 @@
             color: var(--klm-blue);
             font-weight: 700;
         }
+        .mourning-mode .nav-link.active { color: #1f2937; } /* Dark Gray for mourning */
+        
         .nav-link.active::after {
             content: '';
             display: block;
@@ -54,6 +66,7 @@
             background: var(--klm-blue);
             margin-top: 2px;
         }
+        .mourning-mode .nav-link.active::after { background: #1f2937; }
 
         /* Epaulettes */
         .epaulette {
@@ -131,6 +144,21 @@
             transform: translateY(-2px);
             box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
         }
+        
+        /* Mourning Ribbon */
+        .ribbon {
+            background: #000;
+            color: #fff;
+            text-align: center;
+            font-size: 0.75rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            padding: 8px 0;
+            position: sticky;
+            top: 0;
+            z-index: 60;
+        }
 
         @keyframes flashText {
             0% { opacity: 0; background-color: #334155; }
@@ -138,7 +166,12 @@
         }
     </style>
 </head>
-<body class="bg-slate-50 text-slate-800 flex flex-col min-h-screen">
+<body class="bg-slate-50 text-slate-800 flex flex-col min-h-screen mourning-mode">
+
+    <!-- MOURNING RIBBON -->
+    <div class="ribbon">
+        <span class="opacity-75 mr-2">●</span> In Memoriam: Flight KLM1016 <span class="opacity-75 ml-2">●</span>
+    </div>
 
     <!-- ERROR BANNER (Hidden by default) -->
     <div id="db-error-banner" class="hidden bg-red-600 text-white px-4 py-3 text-center shadow-lg z-[100]">
@@ -151,7 +184,7 @@
     </div>
 
     <!-- Navigation -->
-    <nav class="sticky top-0 z-50 bg-white/95 backdrop-blur-md shadow-sm border-b border-slate-200">
+    <nav class="sticky top-[34px] z-50 bg-white/95 backdrop-blur-md shadow-sm border-b border-slate-200">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between h-20">
                 <div class="flex items-center cursor-pointer" onclick="router('home')">
@@ -165,13 +198,12 @@
                 <!-- Desktop Menu -->
                 <div class="hidden md:flex items-center space-x-6 lg:space-x-8">
                     <button onclick="router('home')" class="nav-link text-slate-600 hover:text-klm transition-colors font-medium py-2">Ops Center</button>
+                    <button onclick="router('condolences')" class="nav-link text-slate-600 hover:text-klm transition-colors font-medium py-2">Condolences</button>
                     <button onclick="router('news')" class="nav-link text-slate-600 hover:text-klm transition-colors font-medium py-2">News</button>
                     <button onclick="router('booking')" class="nav-link text-slate-600 hover:text-klm transition-colors font-medium py-2">Dispatch</button>
                     <button onclick="router('fleet')" class="nav-link text-slate-600 hover:text-klm transition-colors font-medium py-2">Fleet</button>
                     <button onclick="router('routes')" class="nav-link text-slate-600 hover:text-klm transition-colors font-medium py-2">Network</button>
                     <button onclick="router('livemap')" class="nav-link text-slate-600 hover:text-klm transition-colors font-medium py-2">Live Map</button>
-                    <button onclick="router('sop')" class="nav-link text-slate-600 hover:text-klm transition-colors font-medium py-2">SOP</button>
-                    <button onclick="router('partners')" class="nav-link text-slate-600 hover:text-klm transition-colors font-medium py-2">Partners</button>
                     <button onclick="router('community')" class="nav-link text-slate-600 hover:text-klm transition-colors font-medium py-2">Crew</button>
                     
                     <a href="https://discord.gg/Zj9BrrxU" target="_blank" class="bg-slate-900 text-white px-5 py-2 rounded font-bold hover:bg-slate-800 transition shadow flex items-center text-sm uppercase tracking-wide">
@@ -190,13 +222,12 @@
         <div id="mobile-menu" class="hidden md:hidden bg-white border-t border-slate-100 shadow-xl absolute w-full left-0 z-40">
             <div class="p-4 space-y-2">
                 <button onclick="router('home'); toggleMobileMenu()" class="block w-full text-left px-4 py-3 rounded hover:bg-slate-50 font-bold text-slate-800">Ops Center</button>
+                <button onclick="router('condolences'); toggleMobileMenu()" class="block w-full text-left px-4 py-3 rounded hover:bg-slate-50 font-bold text-slate-800">Condolences</button>
                 <button onclick="router('news'); toggleMobileMenu()" class="block w-full text-left px-4 py-3 rounded hover:bg-slate-50 font-medium text-slate-600">News</button>
                 <button onclick="router('booking'); toggleMobileMenu()" class="block w-full text-left px-4 py-3 rounded hover:bg-slate-50 font-medium text-slate-600">Dispatch</button>
                 <button onclick="router('fleet'); toggleMobileMenu()" class="block w-full text-left px-4 py-3 rounded hover:bg-slate-50 font-medium text-slate-600">Fleet</button>
                 <button onclick="router('routes'); toggleMobileMenu()" class="block w-full text-left px-4 py-3 rounded hover:bg-slate-50 font-medium text-slate-600">Network</button>
                 <button onclick="router('livemap'); toggleMobileMenu()" class="block w-full text-left px-4 py-3 rounded hover:bg-slate-50 font-medium text-slate-600">Live Map</button>
-                <button onclick="router('sop'); toggleMobileMenu()" class="block w-full text-left px-4 py-3 rounded hover:bg-slate-50 font-medium text-slate-600">SOP</button>
-                <button onclick="router('partners'); toggleMobileMenu()" class="block w-full text-left px-4 py-3 rounded hover:bg-slate-50 font-medium text-slate-600">Partners</button>
                 <button onclick="router('community'); toggleMobileMenu()" class="block w-full text-left px-4 py-3 rounded hover:bg-slate-50 font-medium text-slate-600">Crew</button>
             </div>
         </div>
@@ -208,7 +239,7 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8 border-b border-slate-800 pb-8">
                 <div class="col-span-1 md:col-span-2">
-                    <img id="footer-logo" src="" alt="KLM Logo" class="h-8 mb-4 brightness-0 invert opacity-80">
+                    <img id="footer-logo" src="" alt="KLM Logo" class="h-8 mb-4 brightness-0 invert opacity-50">
                     <p class="text-sm leading-relaxed max-w-sm text-slate-500">
                         A non-profit virtual aviation community. We are not affiliated with KLM Royal Dutch Airlines.
                         <br><br>
@@ -377,14 +408,14 @@
                 <div class="relative bg-slate-900 text-white fade-in min-h-[90vh] flex flex-col">
                     <div class="relative py-24 px-4 sm:px-6 lg:px-8 flex-grow">
                          <div class="absolute inset-0 z-0">
-                            <img src="${siteImages.homeHero}" class="w-full h-full object-cover opacity-20" alt="KLM Ops">
+                            <img src="${siteImages.homeHero}" class="w-full h-full object-cover hero-bg" alt="KLM Ops">
                             <div class="absolute inset-0 bg-gradient-to-b from-slate-900 via-transparent to-slate-900"></div>
                         </div>
                         
                         <div class="relative z-10 max-w-7xl mx-auto">
-                             <div class="inline-flex items-center gap-2 bg-klm/20 border border-klm/50 text-klm-sky px-4 py-1.5 rounded-full mb-8 backdrop-blur-md">
-                                <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
-                                <span class="text-xs font-bold tracking-widest uppercase">Ops Normal</span>
+                             <div class="inline-flex items-center gap-2 bg-black/50 border border-slate-700 text-slate-300 px-4 py-1.5 rounded-full mb-8 backdrop-blur-md">
+                                <span class="w-2 h-2 rounded-full bg-red-600 animate-pulse"></span>
+                                <span class="text-xs font-bold tracking-widest uppercase">Emergency Response</span>
                             </div>
                             <h1 class="text-5xl md:text-7xl font-black tracking-tight mb-6 leading-tight max-w-3xl">
                                 Flying the World, <span class="text-klm">Virtually.</span>
@@ -425,6 +456,58 @@
                 </div>
             `,
             
+            condolences: `
+                <div class="relative bg-black min-h-screen text-white fade-in py-24">
+                    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+                        <div class="text-center mb-16">
+                            <img src="${siteImages.logo}" class="h-16 mx-auto mb-8 filter grayscale opacity-75">
+                            <h1 class="text-4xl md:text-5xl font-serif font-bold text-slate-200 mb-4">In Memoriam</h1>
+                            <p class="text-slate-500 uppercase tracking-widest text-sm">Flight KLM1016 • 23 JAN 2026</p>
+                        </div>
+
+                        <div class="bg-slate-900 border border-slate-800 p-8 md:p-12 rounded-lg shadow-2xl mb-12 relative overflow-hidden">
+                             <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-slate-600 to-transparent opacity-50"></div>
+                             
+                             <h2 class="text-2xl font-bold text-slate-100 mb-6 text-center">OFFICIAL STATEMENT</h2>
+                             
+                             <div class="prose prose-invert prose-lg mx-auto text-slate-300 leading-relaxed font-light">
+                                <p><strong>KLM confirms that Flight KLM1016</strong>, operated by an Embraer 190 from Amsterdam Schiphol (EHAM) to London Heathrow (EGLL), was involved in a fatal accident in the North Sea shortly after departure on 23 January at 17:25 UTC.</p>
+                                
+                                <p>All 94 passengers and crew on board have been confirmed deceased. This is a tragic loss of life, and our deepest condolences go to the families, friends, and colleagues of those affected.</p>
+                                
+                                <p>KLM is fully cooperating with the Global Aviation Safety Authority (GASA) in an independent investigation. Flight data, maintenance records, and crew training documentation are being preserved and provided to investigators.</p>
+                                
+                                <hr class="border-slate-800 my-8">
+                                
+                                <h3 class="text-lg font-bold text-white mb-2">Compensation and Family Support</h3>
+                                <p>KLM will provide an immediate ex gratia payment of USD 100,000 per victim to next of kin as an initial humanitarian measure. Additional compensation will be determined following the conclusion of the investigation.</p>
+                                
+                                <h3 class="text-lg font-bold text-white mb-2 mt-6">Operational Response</h3>
+                                <ul class="list-disc pl-5 space-y-2">
+                                    <li>All Embraer 190 operations are undergoing immediate internal safety review.</li>
+                                    <li>Pilot onboarding and training procedures are being audited and revised.</li>
+                                    <li>Additional safety directives will be issued across the fleet as findings develop.</li>
+                                </ul>
+
+                                <div class="bg-black/30 p-4 rounded mt-8 text-sm text-slate-400 italic border-l-2 border-slate-600">
+                                    This statement refers to the independent virtual airline operation using the KLM branding and is not affiliated with KLM Royal Dutch Airlines or the Air France–KLM Group.
+                                </div>
+                             </div>
+
+                             <div class="mt-12 text-center">
+                                <p class="font-serif italic text-slate-400">Signed,</p>
+                                <p class="font-bold text-white mt-2">Nihid</p>
+                                <p class="text-xs text-slate-500 uppercase tracking-wide">Co-Chairman, KLM VA</p>
+                             </div>
+                        </div>
+
+                        <div class="text-center">
+                            <button onclick="router('home')" class="text-slate-500 hover:text-white transition text-sm uppercase tracking-widest">Return to Operations</button>
+                        </div>
+                    </div>
+                </div>
+            `,
+
             news: `
                 <div class="relative bg-slate-900 py-24 fade-in">
                     <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -434,8 +517,27 @@
                         </div>
                         
                         <div class="space-y-12">
+                             <!-- FLIGHT 1016 ACCIDENT - PINNED -->
+                             <article class="bg-black rounded-lg p-8 border border-slate-700 news-card shadow-2xl relative overflow-hidden">
+                                <div class="absolute top-0 left-0 w-1 h-full bg-white/20"></div>
+                                <div class="flex items-center gap-3 mb-4 text-xs font-mono text-white uppercase tracking-widest">
+                                    <span class="bg-white text-black px-2 py-0.5 rounded font-bold">URGENT</span>
+                                    <span>23 JAN 2026</span>
+                                    <span>//</span>
+                                    <span>Official Statement</span>
+                                </div>
+                                <h2 class="text-2xl font-bold text-white mb-4">OFFICIAL STATEMENT — FLIGHT KLM1016 ACCIDENT</h2>
+                                <div class="text-slate-300 space-y-4 leading-relaxed">
+                                    <p>KLM confirms that Flight KLM1016 (E190, EHAM-EGLL) was involved in a fatal accident in the North Sea. All 94 souls on board are confirmed deceased.</p>
+                                    <p>We are cooperating fully with GASA investigators. Immediate ex gratia payments are being issued to families. All E190 operations are under safety review.</p>
+                                    <div class="mt-6">
+                                        <button onclick="router('condolences')" class="text-white underline hover:text-slate-300 font-bold text-sm">Read Full Statement & Condolences &rarr;</button>
+                                    </div>
+                                </div>
+                            </article>
+
                             <!-- Milano Olympics Update -->
-                             <article class="bg-slate-800 rounded-lg p-8 border-l-4 border-indigo-500 news-card shadow-lg">
+                             <article class="bg-slate-800 rounded-lg p-8 border-l-4 border-indigo-500 news-card shadow-lg opacity-75 hover:opacity-100 transition">
                                 <div class="flex items-center gap-3 mb-4 text-xs font-mono text-indigo-400 uppercase tracking-widest">
                                     <span>03 FEB 2026</span>
                                     <span>//</span>
@@ -449,12 +551,11 @@
                                         <li>1.5× flight rewards</li>
                                         <li>Applies to all Olympic-period Milan routes</li>
                                     </ul>
-                                    <p class="text-sm italic text-slate-500 mt-4">This boost is active for the duration of the Olympic Games. Enjoy the extra rewards and fly the Olympic spirit with KLM VA!</p>
                                 </div>
                             </article>
 
                             <!-- LTRP Update -->
-                             <article class="bg-slate-800 rounded-lg p-8 border-l-4 border-emerald-500 news-card shadow-lg">
+                             <article class="bg-slate-800 rounded-lg p-8 border-l-4 border-emerald-500 news-card shadow-lg opacity-75 hover:opacity-100 transition">
                                 <div class="flex items-center gap-3 mb-4 text-xs font-mono text-emerald-400 uppercase tracking-widest">
                                     <span>01 FEB 2026</span>
                                     <span>//</span>
@@ -462,50 +563,9 @@
                                 </div>
                                 <h2 class="text-2xl font-bold text-white mb-4">Fleet Update | Long Term Refurbishment Plan (LTRP)</h2>
                                 <div class="text-slate-300 space-y-4 leading-relaxed">
-                                    <p>We’re officially launching the Long Term Refurbishment Plan (LTRP) — a $65M investment to keep our most capable aircraft flying strong. The <strong>Boeing 737-7</strong> and <strong>Boeing 777-300ER</strong> will undergo extended-life refurbishment.</p>
-                                    <p><strong>Fleet Change Notice:</strong> With this shift, we will be phasing out the <strong>A330-200</strong> as part of our long-term strategy. It’s the end of an era, but a necessary step forward.</p>
+                                    <p>We’re officially launching the Long Term Refurbishment Plan (LTRP) — a $65M investment to keep our most capable aircraft flying strong.</p>
                                 </div>
                             </article>
-
-                             <!-- Widebody Delivery Update -->
-                             <article class="bg-slate-800 rounded-lg p-8 border-l-4 border-amber-500 news-card shadow-lg">
-                                <div class="flex items-center gap-3 mb-4 text-xs font-mono text-amber-400 uppercase tracking-widest">
-                                    <span>29 JAN 2026</span>
-                                    <span>//</span>
-                                    <span>Dispatch Directive</span>
-                                </div>
-                                <h2 class="text-2xl font-bold text-white mb-4">OFFICIAL DISPATCH – WIDEBODY DELIVERY FLIGHT</h2>
-                                <div class="text-slate-300 space-y-4 leading-relaxed">
-                                    <p>We are initiating the official delivery of our sold B777-300ERs. Pilots completing this flight (EHAM → VOBL) will receive <strong>1.5× credited flight hours</strong>.</p>
-                                    <div class="bg-slate-900 p-4 rounded border border-slate-700 font-mono text-sm">
-                                        <p>ROUTE: EHAM → VOBL</p>
-                                        <p>AIRCRAFT: Boeing 777-300ER</p>
-                                        <p>DEADLINE: 16 FEB 2026</p>
-                                    </div>
-                                    <p class="text-sm text-slate-400">Priority is given to Widebody Certified pilots. No reroutes. No substitutions.</p>
-                                </div>
-                            </article>
-
-                            <article class="bg-slate-800/50 rounded-lg p-8 border-l-4 border-slate-600 news-card">
-                                <div class="flex items-center gap-3 mb-4 text-xs font-mono text-slate-400 uppercase tracking-widest">
-                                    <span>28 JAN 2026</span>
-                                    <span>//</span>
-                                    <span>Archive</span>
-                                </div>
-                                <h2 class="text-xl font-bold text-slate-300 mb-2">Previous Directive: B777 Divestment</h2>
-                                <p class="text-slate-400 text-sm">Sale of eight Boeing 777-300ER airframes finalized. Units transferred to Air India and Hindustan Airways VA.</p>
-                            </article>
-
-                             <article class="bg-slate-800/50 rounded-lg p-8 border-l-4 border-red-900 news-card">
-                                <div class="flex items-center gap-3 mb-4 text-xs font-mono text-red-400 uppercase tracking-widest">
-                                    <span>16 JAN 2026</span>
-                                    <span>//</span>
-                                    <span>Security Directive</span>
-                                </div>
-                                <h2 class="text-xl font-bold text-slate-300 mb-2">Middle East Airspace Restrictions</h2>
-                                <p class="text-slate-400 text-sm"><strong>Iraqi (ORBB), Iranian (OIIX/OIXX), and Qatari (OTBD)</strong> airspaces strictly prohibited. Use Saudi Corridor (OEJD/OEJN).</p>
-                            </article>
-
                         </div>
                     </div>
                 </div>
@@ -529,7 +589,7 @@
                                 <div class="bg-slate-800 rounded-lg overflow-hidden border border-slate-700 hover:border-klm transition duration-300 group shadow-lg hover:shadow-2xl relative">
                                     <div class="absolute inset-0 bg-gradient-to-t from-slate-900 via-transparent to-transparent opacity-50 z-10 pointer-events-none"></div>
                                     <div class="h-56 overflow-hidden relative">
-                                        <img src="${plane.img}" class="w-full h-full object-cover opacity-80 group-hover:opacity-100 group-hover:scale-105 transition duration-700" onerror="this.src='https://upload.wikimedia.org/wikipedia/commons/thumb/a/ac/No_image_available.svg/1024px-No_image_available.svg.png'">
+                                        <img src="${plane.img}" class="w-full h-full object-cover opacity-80 group-hover:opacity-100 group-hover:scale-105 transition duration-700 grayscale" onerror="this.src='https://upload.wikimedia.org/wikipedia/commons/thumb/a/ac/No_image_available.svg/1024px-No_image_available.svg.png'">
                                         <div class="absolute top-3 right-3 ${statusColor} border px-2 py-1 rounded text-xs font-bold uppercase tracking-wider backdrop-blur-md z-20 shadow-sm">
                                             ${plane.status}
                                         </div>
