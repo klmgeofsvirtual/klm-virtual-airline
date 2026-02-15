@@ -11,24 +11,15 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 
     <style>
-        /* KLM Brand Colors - MUTED FOR MOURNING */
+        /* KLM Brand Colors */
         :root {
             --klm-blue: #00A1DE; 
             --klm-dark: #0077A3;
             --klm-sky: #E5F6FF;
             --discord: #5865F2;
             --discord-dark: #4752C4;
-            --mourning-black: #1a1a1a;
-            --mourning-gray: #4b5563;
         }
         
-        /* MOURNING OVERRIDES */
-        .mourning-mode .text-klm { color: var(--mourning-gray); }
-        .mourning-mode .bg-klm { background-color: var(--mourning-gray); }
-        .mourning-mode .border-klm { border-color: var(--mourning-gray); }
-        .mourning-mode #nav-logo, .mourning-mode #footer-logo { filter: grayscale(100%); }
-        .mourning-mode .hero-bg { filter: grayscale(100%) contrast(1.2); }
-
         .text-klm { color: var(--klm-blue); }
         .bg-klm { background-color: var(--klm-blue); }
         .bg-klm-dark { background-color: var(--klm-dark); }
@@ -56,8 +47,6 @@
             color: var(--klm-blue);
             font-weight: 700;
         }
-        .mourning-mode .nav-link.active { color: #1f2937; } /* Dark Gray for mourning */
-        
         .nav-link.active::after {
             content: '';
             display: block;
@@ -66,7 +55,6 @@
             background: var(--klm-blue);
             margin-top: 2px;
         }
-        .mourning-mode .nav-link.active::after { background: #1f2937; }
 
         /* Epaulettes */
         .epaulette {
@@ -159,14 +147,9 @@
             top: 0;
             z-index: 60;
         }
-
-        @keyframes flashText {
-            0% { opacity: 0; background-color: #334155; }
-            100% { opacity: 1; background-color: transparent; }
-        }
     </style>
 </head>
-<body class="bg-slate-50 text-slate-800 flex flex-col min-h-screen mourning-mode">
+<body class="bg-slate-50 text-slate-800 flex flex-col min-h-screen">
 
     <!-- MOURNING RIBBON -->
     <div class="ribbon">
@@ -206,7 +189,7 @@
                     <button onclick="router('livemap')" class="nav-link text-slate-600 hover:text-klm transition-colors font-medium py-2">Live Map</button>
                     <button onclick="router('community')" class="nav-link text-slate-600 hover:text-klm transition-colors font-medium py-2">Crew</button>
                     
-                    <a href="https://discord.gg/zva7WenVdv" target="_blank" class="bg-slate-900 text-white px-5 py-2 rounded font-bold hover:bg-slate-800 transition shadow flex items-center text-sm uppercase tracking-wide">
+                    <a href="https://discord.gg/Zj9BrrxU" target="_blank" class="bg-slate-900 text-white px-5 py-2 rounded font-bold hover:bg-slate-800 transition shadow flex items-center text-sm uppercase tracking-wide">
                         <i data-lucide="radio" class="w-4 h-4 mr-2"></i> Report In
                     </a>
                 </div>
@@ -239,7 +222,7 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8 border-b border-slate-800 pb-8">
                 <div class="col-span-1 md:col-span-2">
-                    <img id="footer-logo" src="" alt="KLM Logo" class="h-8 mb-4 brightness-0 invert opacity-50">
+                    <img id="footer-logo" src="" alt="KLM Logo" class="h-8 mb-4 brightness-0 invert opacity-80">
                     <p class="text-sm leading-relaxed max-w-sm text-slate-500">
                         A non-profit virtual aviation community. We are not affiliated with KLM Royal Dutch Airlines.
                         <br><br>
@@ -384,31 +367,140 @@
 
         const routeData = {
             "Europe": [
-                { city: "London Heathrow", code: "EGLL", out: "1001+", in: "1002+" }, { city: "Paris CDG", code: "LFPG", out: "1401+", in: "1402+" }, { city: "Berlin", code: "EDDB", out: "1775+", in: "1770+" }, { city: "Rome", code: "LIRF", out: "1601+", in: "1600+" }, { city: "Madrid", code: "LEMD", out: "1501+", in: "1500+" }, { city: "Vienna", code: "LOWW", out: "1901+", in: "1900+" }, { city: "Brussels", code: "EBBR", out: "1701+", in: "1700+" }, { city: "Zurich", code: "LSZH", out: "1917+", in: "1916+" }, { city: "Geneva", code: "LSGG", out: "1929+", in: "1928+" }, { city: "Stockholm", code: "ESSA", out: "1215+", in: "1216+" }, { city: "Copenhagen", code: "EKCH", out: "1267+", in: "1266+" }, { city: "Oslo", code: "ENGM", out: "1197+", in: "1196+" }, { city: "Helsinki", code: "EFHK", out: "1251+", in: "1248+" }, { city: "Porto", code: "LPPR", out: "1571+", in: "1570+" }, { city: "Lisbon", code: "LPPT", out: "1579+", in: "1580+" }, { city: "Kraków", code: "EPKK", out: "1323+", in: "1322+" }, { city: "Warsaw", code: "EPWA", out: "1313+", in: "1310+" }, { city: "Prague", code: "LKPR", out: "1351+", in: "1350+" }, { city: "Budapest", code: "LHBP", out: "1363+", in: "1362+" }, { city: "Bucharest", code: "LROP", out: "1373+", in: "1372+" }, { city: "Marseille", code: "LFML", out: "1465+", in: "1464+" }, { city: "Nice", code: "LFMN", out: "1475+", in: "1472+" }, { city: "Athens", code: "LGAV", out: "1955+", in: "1952+" }
+                { city: "London Heathrow", code: "EGLL", out: "KL1006, KL1007, KL1008, KL1009, KL1010", in: "KL1001, KL1002, KL1003, KL1004, KL1005" },
+                { city: "Paris CDG", code: "LFPG", out: "KL1016, KL1017, KL1018, KL1019, KL1020", in: "KL1011, KL1012, KL1013, KL1014, KL1015" },
+                { city: "Berlin", code: "EDDB", out: "KL1026, KL1027, KL1028, KL1029, KL1030", in: "KL1021, KL1022, KL1023, KL1024, KL1025" },
+                { city: "Rome", code: "LIRF", out: "KL1036, KL1037, KL1038, KL1039, KL1040", in: "KL1031, KL1032, KL1033, KL1034, KL1035" },
+                { city: "Madrid", code: "LEMD", out: "KL1046, KL1047, KL1048, KL1049, KL1050", in: "KL1041, KL1042, KL1043, KL1044, KL1045" },
+                { city: "Vienna", code: "LOWW", out: "KL1056, KL1057, KL1058, KL1059, KL1060", in: "KL1051, KL1052, KL1053, KL1054, KL1055" },
+                { city: "Brussels", code: "EBBR", out: "KL1066, KL1067, KL1068, KL1069, KL1070", in: "KL1061, KL1062, KL1063, KL1064, KL1065" },
+                { city: "Zurich", code: "LSZH", out: "KL1076, KL1077, KL1078, KL1079, KL1080", in: "KL1071, KL1072, KL1073, KL1074, KL1075" },
+                { city: "Geneva", code: "LSGG", out: "KL1086, KL1087, KL1088, KL1089, KL1090", in: "KL1081, KL1082, KL1083, KL1084, KL1085" },
+                { city: "Stockholm", code: "ESSA", out: "KL1096, KL1097, KL1098, KL1099, KL1100", in: "KL1091, KL1092, KL1093, KL1094, KL1095" },
+                { city: "Copenhagen", code: "EKCH", out: "KL1106, KL1107, KL1108, KL1109, KL1110", in: "KL1101, KL1102, KL1103, KL1104, KL1105" },
+                { city: "Oslo", code: "ENGM", out: "KL1116, KL1117, KL1118, KL1119, KL1120", in: "KL1111, KL1112, KL1113, KL1114, KL1115" },
+                { city: "Helsinki", code: "EFHK", out: "KL1126, KL1127, KL1128, KL1129, KL1130", in: "KL1121, KL1122, KL1123, KL1124, KL1125" },
+                { city: "Riga", code: "EVRA", out: "KL1136, KL1137, KL1138, KL1139, KL1140", in: "KL1131, KL1132, KL1133, KL1134, KL1135" },
+                { city: "Tallinn", code: "EETN", out: "KL1146, KL1147, KL1148, KL1149, KL1150", in: "KL1141, KL1142, KL1143, KL1144, KL1145" },
+                { city: "Vilnius", code: "EYVI", out: "KL1156, KL1157, KL1158, KL1159, KL1160", in: "KL1151, KL1152, KL1153, KL1154, KL1155" },
+                { city: "Porto", code: "LPPR", out: "KL1166, KL1167, KL1168, KL1169, KL1170", in: "KL1161, KL1162, KL1163, KL1164, KL1165" },
+                { city: "Lisbon", code: "LPPT", out: "KL1176, KL1177, KL1178, KL1179, KL1180", in: "KL1171, KL1172, KL1173, KL1174, KL1175" },
+                { city: "Kraków", code: "EPKK", out: "KL1186, KL1187, KL1188, KL1189, KL1190", in: "KL1181, KL1182, KL1183, KL1184, KL1185" },
+                { city: "Warsaw", code: "EPWA", out: "KL1196, KL1197, KL1198, KL1199, KL1200", in: "KL1191, KL1192, KL1193, KL1194, KL1195" },
+                { city: "Prague", code: "LKPR", out: "KL1206, KL1207, KL1208, KL1209, KL1210", in: "KL1201, KL1202, KL1203, KL1204, KL1205" },
+                { city: "Budapest", code: "LHBP", out: "KL1216, KL1217, KL1218, KL1219, KL1220", in: "KL1211, KL1212, KL1213, KL1214, KL1215" },
+                { city: "Bucharest", code: "LROP", out: "KL1226, KL1227, KL1228, KL1229, KL1230", in: "KL1221, KL1222, KL1223, KL1224, KL1225" },
+                { city: "Marseille", code: "LFML", out: "KL1236, KL1237, KL1238, KL1239, KL1240", in: "KL1231, KL1232, KL1233, KL1234, KL1235" },
+                { city: "Nice", code: "LFMN", out: "KL1246, KL1247, KL1248, KL1249, KL1250", in: "KL1241, KL1242, KL1243, KL1244, KL1245" },
+                { city: "Athens", code: "LGAV", out: "KL1256, KL1257, KL1258, KL1259, KL1260", in: "KL1251, KL1252, KL1253, KL1254, KL1255" }
             ],
             "North America": [
-                 { city: "New York JFK", code: "KJFK", out: "641+", in: "642+" }, { city: "Atlanta", code: "KATL", out: "621+", in: "622+" }, { city: "Los Angeles", code: "KLAX", out: "601+", in: "602+" }, { city: "San Francisco", code: "KSFO", out: "605+", in: "606+" }, { city: "Chicago", code: "KORD", out: "611+", in: "612+" }, { city: "Washington", code: "KIAD", out: "651+", in: "652+" }, { city: "Boston", code: "KBOS", out: "617+", in: "618+" }, { city: "Houston", code: "KIAH", out: "661+", in: "662+" }, { city: "Toronto", code: "CYYZ", out: "691+", in: "692+" }, { city: "Montreal", code: "CYUL", out: "671+", in: "672+" }, { city: "Calgary", code: "CYYC", out: "677+", in: "678+" }, { city: "Vancouver", code: "CYVR", out: "681+", in: "682+" }, { city: "Mexico City", code: "MMMX", out: "685+", in: "686+" }
+                 { city: "New York JFK", code: "KJFK", out: "KL2006, KL2007, KL2008, KL2009, KL2010", in: "KL2001, KL2002, KL2003, KL2004, KL2005" },
+                 { city: "Atlanta", code: "KATL", out: "KL2016, KL2017, KL2018, KL2019, KL2020", in: "KL2011, KL2012, KL2013, KL2014, KL2015" },
+                 { city: "Los Angeles", code: "KLAX", out: "KL2026, KL2027, KL2028, KL2029, KL2030", in: "KL2021, KL2022, KL2023, KL2024, KL2025" },
+                 { city: "San Francisco", code: "KSFO", out: "KL2036, KL2037, KL2038, KL2039, KL2040", in: "KL2031, KL2032, KL2033, KL2034, KL2035" },
+                 { city: "Chicago", code: "KORD", out: "KL2046, KL2047, KL2048, KL2049, KL2050", in: "KL2041, KL2042, KL2043, KL2044, KL2045" },
+                 { city: "Washington", code: "KIAD", out: "KL2056, KL2057, KL2058, KL2059, KL2060", in: "KL2051, KL2052, KL2053, KL2054, KL2055" },
+                 { city: "Boston", code: "KBOS", out: "KL2066, KL2067, KL2068, KL2069, KL2070", in: "KL2061, KL2062, KL2063, KL2064, KL2065" },
+                 { city: "Houston", code: "KIAH", out: "KL2076, KL2077, KL2078, KL2079, KL2080", in: "KL2071, KL2072, KL2073, KL2074, KL2075" },
+                 { city: "Toronto", code: "CYYZ", out: "KL2086, KL2087, KL2088, KL2089, KL2090", in: "KL2081, KL2082, KL2083, KL2084, KL2085" },
+                 { city: "Montreal", code: "CYUL", out: "KL2096, KL2097, KL2098, KL2099, KL2100", in: "KL2091, KL2092, KL2093, KL2094, KL2095" },
+                 { city: "Calgary", code: "CYYC", out: "KL2106, KL2107, KL2108, KL2109, KL2110", in: "KL2101, KL2102, KL2103, KL2104, KL2105" },
+                 { city: "Vancouver", code: "CYVR", out: "KL2116, KL2117, KL2118, KL2119, KL2120", in: "KL2111, KL2112, KL2113, KL2114, KL2115" },
+                 { city: "Mexico City", code: "MMMX", out: "KL2126, KL2127, KL2128, KL2129, KL2130", in: "KL2121, KL2122, KL2123, KL2124, KL2125" }
             ],
              "South America": [
-                 { city: "São Paulo", code: "SBGR", out: "791", in: "792" }, { city: "Rio de Janeiro", code: "SBGL", out: "705", in: "706" }, { city: "Buenos Aires", code: "SAEZ", out: "701", in: "702" }, { city: "Lima", code: "SPJC", out: "743", in: "744" }, { city: "Bogotá", code: "SKBO", out: "741", in: "742" }, { city: "Quito", code: "SEQM", out: "751", in: "752" }, { city: "Guayaquil", code: "SEGU", out: "755", in: "756" }, { city: "Paramaribo", code: "SMJP", out: "713", in: "714" }, { city: "Aruba", code: "TNCA", out: "765", in: "766" }, { city: "Curaçao", code: "TNCC", out: "735", in: "736" }, { city: "St. Maarten", code: "TNCM", out: "777", in: "778" }
+                 { city: "São Paulo", code: "SBGR", out: "KL3006, KL3007, KL3008, KL3009, KL3010", in: "KL3001, KL3002, KL3003, KL3004, KL3005" },
+                 { city: "Rio de Janeiro", code: "SBGL", out: "KL3016, KL3017, KL3018, KL3019, KL3020", in: "KL3011, KL3012, KL3013, KL3014, KL3015" },
+                 { city: "Buenos Aires", code: "SAEZ", out: "KL3026, KL3027, KL3028, KL3029, KL3030", in: "KL3021, KL3022, KL3023, KL3024, KL3025" },
+                 { city: "Lima", code: "SPJC", out: "KL3036, KL3037, KL3038, KL3039, KL3040", in: "KL3031, KL3032, KL3033, KL3034, KL3035" },
+                 { city: "Bogotá", code: "SKBO", out: "KL3046, KL3047, KL3048, KL3049, KL3050", in: "KL3041, KL3042, KL3043, KL3044, KL3045" },
+                 { city: "Quito", code: "SEQM", out: "KL3056, KL3057, KL3058, KL3059, KL3060", in: "KL3051, KL3052, KL3053, KL3054, KL3055" },
+                 { city: "Guayaquil", code: "SEGU", out: "KL3066, KL3067, KL3068, KL3069, KL3070", in: "KL3061, KL3062, KL3063, KL3064, KL3065" },
+                 { city: "Paramaribo", code: "SMJP", out: "KL3076, KL3077, KL3078, KL3079, KL3080", in: "KL3071, KL3072, KL3073, KL3074, KL3075" },
+                 { city: "Aruba", code: "TNCA", out: "KL3086, KL3087, KL3088, KL3089, KL3090", in: "KL3081, KL3082, KL3083, KL3084, KL3085" },
+                 { city: "Curaçao", code: "TNCC", out: "KL3096, KL3097, KL3098, KL3099, KL3100", in: "KL3091, KL3092, KL3093, KL3094, KL3095" },
+                 { city: "Bonaire", code: "TNCB", out: "KL3106, KL3107, KL3108, KL3109, KL3110", in: "KL3101, KL3102, KL3103, KL3104, KL3105" },
+                 { city: "St. Maarten", code: "TNCM", out: "KL3116, KL3117, KL3118, KL3119, KL3120", in: "KL3111, KL3112, KL3113, KL3114, KL3115" }
              ],
             "Africa": [
-                 { city: "Nairobi", code: "HKJK", out: "565", in: "566" }, { city: "Dar es Salaam", code: "HTDA", out: "515", in: "516" }, { city: "Johannesburg", code: "FAOR", out: "591", in: "592" }, { city: "Cape Town", code: "FACT", out: "595+", in: "596+" }, { city: "Accra", code: "DGAA", out: "589", in: "590" }, { city: "Lagos", code: "DNMM", out: "587", in: "588" }, { city: "Kigali", code: "HRYR", out: "535", in: "536*" }, { city: "Entebbe", code: "HUEN", out: "535", in: "536" }
+                 { city: "Nairobi", code: "HKJK", out: "KL4006, KL4007, KL4008, KL4009, KL4010", in: "KL4001, KL4002, KL4003, KL4004, KL4005" },
+                 { city: "Dar es Salaam", code: "HTDA", out: "KL4016, KL4017, KL4018, KL4019, KL4020", in: "KL4011, KL4012, KL4013, KL4014, KL4015" },
+                 { city: "Johannesburg", code: "FAOR", out: "KL4026, KL4027, KL4028, KL4029, KL4030", in: "KL4021, KL4022, KL4023, KL4024, KL4025" },
+                 { city: "Cape Town", code: "FACT", out: "KL4036, KL4037, KL4038, KL4039, KL4040", in: "KL4031, KL4032, KL4033, KL4034, KL4035" },
+                 { city: "Accra", code: "DGAA", out: "KL4046, KL4047, KL4048, KL4049, KL4050", in: "KL4041, KL4042, KL4043, KL4044, KL4045" },
+                 { city: "Lagos", code: "DNMM", out: "KL4056, KL4057, KL4058, KL4059, KL4060", in: "KL4051, KL4052, KL4053, KL4054, KL4055" },
+                 { city: "Kigali", code: "HRYR", out: "KL4066, KL4067, KL4068, KL4069, KL4070", in: "KL4061, KL4062, KL4063, KL4064, KL4065" },
+                 { city: "Entebbe", code: "HUEN", out: "KL4076, KL4077, KL4078, KL4079, KL4080", in: "KL4071, KL4072, KL4073, KL4074, KL4075" }
             ],
             "Asia": [
-                 { city: "Tokyo", code: "RJAA", out: "861", in: "862" }, { city: "Seoul", code: "RKSI", out: "855", in: "856" }, { city: "Singapore", code: "WSSS", out: "835", in: "836" }, { city: "Hong Kong", code: "VHHH", out: "887", in: "888" }, { city: "Delhi", code: "VIDP", out: "871", in: "872" }, { city: "Mumbai", code: "VABB", out: "877", in: "878" }, { city: "Bangalore", code: "VOBL", out: "879", in: "880" }, { city: "Beijing", code: "ZBAA", out: "897", in: "898" }, { city: "Shanghai", code: "ZSPD", out: "895", in: "896" }, { city: "Bangkok", code: "VTBS", out: "843", in: "844" }, { city: "Kuala Lumpur", code: "WMKK", out: "809", in: "810" }, { city: "Jakarta", code: "WIII", out: "809", in: "810" }, { city: "Manila", code: "RPLL", out: "807", in: "808" }, { city: "Taipei", code: "RCTP", out: "807", in: "808" }, { city: "Denpasar", code: "WADD", out: "835", in: "836" }
+                 { city: "Delhi", code: "VIDP", out: "KL5006, KL5007, KL5008, KL5009, KL5010", in: "KL5001, KL5002, KL5003, KL5004, KL5005" },
+                 { city: "Mumbai", code: "VABB", out: "KL5016, KL5017, KL5018, KL5019, KL5020", in: "KL5011, KL5012, KL5013, KL5014, KL5015" },
+                 { city: "Bangalore", code: "VOBL", out: "KL5026, KL5027, KL5028, KL5029, KL5030", in: "KL5021, KL5022, KL5023, KL5024, KL5025" },
+                 { city: "Beijing", code: "ZBAA", out: "KL5036, KL5037, KL5038, KL5039, KL5040", in: "KL5031, KL5032, KL5033, KL5034, KL5035" },
+                 { city: "Shanghai", code: "ZSPD", out: "KL5046, KL5047, KL5048, KL5049, KL5050", in: "KL5041, KL5042, KL5043, KL5044, KL5045" },
+                 { city: "Hong Kong", code: "VHHH", out: "KL5056, KL5057, KL5058, KL5059, KL5060", in: "KL5051, KL5052, KL5053, KL5054, KL5055" },
+                 { city: "Tokyo Narita", code: "RJAA", out: "KL5066, KL5067, KL5068, KL5069, KL5070", in: "KL5061, KL5062, KL5063, KL5064, KL5065" },
+                 { city: "Osaka Kansai", code: "RJBB", out: "KL5076, KL5077, KL5078, KL5079, KL5080", in: "KL5071, KL5072, KL5073, KL5074, KL5075" },
+                 { city: "Seoul Incheon", code: "RKSI", out: "KL5086, KL5087, KL5088, KL5089, KL5090", in: "KL5081, KL5082, KL5083, KL5084, KL5085" },
+                 { city: "Bangkok", code: "VTBS", out: "KL5096, KL5097, KL5098, KL5099, KL5100", in: "KL5091, KL5092, KL5093, KL5094, KL5095" },
+                 { city: "Singapore", code: "WSSS", out: "KL5106, KL5107, KL5108, KL5109, KL5110", in: "KL5101, KL5102, KL5103, KL5104, KL5105" },
+                 { city: "Kuala Lumpur", code: "WMKK", out: "KL5116, KL5117, KL5118, KL5119, KL5120", in: "KL5111, KL5112, KL5113, KL5114, KL5115" },
+                 { city: "Jakarta", code: "WIII", out: "KL5126, KL5127, KL5128, KL5129, KL5130", in: "KL5121, KL5122, KL5123, KL5124, KL5125" },
+                 { city: "Manila", code: "RPLL", out: "KL5136, KL5137, KL5138, KL5139, KL5140", in: "KL5131, KL5132, KL5133, KL5134, KL5135" },
+                 { city: "Taipei", code: "RCTP", out: "KL5146, KL5147, KL5148, KL5149, KL5150", in: "KL5141, KL5142, KL5143, KL5144, KL5145" },
+                 { city: "Denpasar Bali", code: "WADD", out: "KL5156, KL5157, KL5158, KL5159, KL5160", in: "KL5151, KL5152, KL5153, KL5154, KL5155" }
             ],
             "Middle East": [
-                { city: "Dubai", code: "OMDB", out: "427", in: "428" }, { city: "Tel Aviv", code: "LLBG", out: "461", in: "462" }
+                { city: "Dubai", code: "OMDB", out: "KL6006, KL6007, KL6008, KL6009, KL6010", in: "KL6001, KL6002, KL6003, KL6004, KL6005" },
+                { city: "Abu Dhabi", code: "OMAA", out: "KL6016, KL6017, KL6018, KL6019, KL6020", in: "KL6011, KL6012, KL6013, KL6014, KL6015" },
+                { city: "Kuwait City", code: "OKBK", out: "KL6026, KL6027, KL6028, KL6029, KL6030", in: "KL6021, KL6022, KL6023, KL6024, KL6025" },
+                { city: "Doha", code: "OTHH", out: "KL6036, KL6037, KL6038, KL6039, KL6040", in: "KL6031, KL6032, KL6033, KL6034, KL6035" },
+                { city: "Tel Aviv", code: "LLBG", out: "KL6046, KL6047, KL6048, KL6049, KL6050", in: "KL6041, KL6042, KL6043, KL6044, KL6045" },
+                { city: "Riyadh", code: "OERK", out: "KL6056, KL6057, KL6058, KL6059, KL6060", in: "KL6051, KL6052, KL6053, KL6054, KL6055" },
+                { city: "Cairo", code: "HECA", out: "KL6066, KL6067, KL6068, KL6069, KL6070", in: "KL6061, KL6062, KL6063, KL6064, KL6065" }
             ]
         };
+
+        const newsData = [
+            { date: "13 FEB 2026", title: "Operations Update", tag: "TECH", content: `New flight numbers implemented across the network. Website and Dispatch Bot have been updated to reflect these changes.` },
+            { date: "13 FEB 2026", title: "Staff Announcement", tag: "STAFF", content: `Co-Chairman Nihid has been appointed CEO of Qatar Airways Virtual. He remains committed to KLM VA but will be balancing both leadership roles.` },
+            { date: "10 FEB 2026", title: "Community Achievement", tag: "COMMUNITY", content: `CEO mileflight selected for international academic competition, flying Emirates A380!` },
+            { date: "08 FEB 2026", title: "OFFICIAL STATEMENT — FLIGHT KLM1016 ACCIDENT", tag: "URGENT", content: `KLM confirms that Flight KLM1016 (E190, EHAM-EGLL) was involved in a fatal accident in the North Sea. All 94 souls on board are deceased. <a href="#" onclick="router('condolences')" class="text-klm underline">Pay Condolences Here</a>.` },
+            { date: "03 FEB 2026", title: "Milano-Cortina Olympics Operations Update", tag: "EVENT", content: `During the Milano-Cortina Olympic Games, all KLM Virtual Airline flights operating to and from Milan (LIMC / LIN) will receive a <strong>1.5× flight boost</strong>.` },
+            { date: "01 FEB 2026", title: "Fleet Update | Long Term Refurbishment Plan (LTRP)", tag: "FLEET", content: `Launching LTRP ($65M investment). B737-7 and B777-300ER entering refurbishment. A330-200 phase-out confirmed.` },
+            { date: "29 JAN 2026", title: "OFFICIAL DISPATCH – WIDEBODY DELIVERY FLIGHT", tag: "DISPATCH", content: `Delivery of sold B777-300ERs to VOBL. <strong>1.5× credited flight hours</strong> for participating pilots. Deadline: 16 FEB 2026.` },
+            { date: "20 JAN 2026", title: "KLM Virtual Airlines Website v3.0", tag: "TECH", content: `Website v3.0 is live. Features new Live Map, Fleet Strategy, and SOPs. Operations-first design.` },
+            { date: "16 JAN 2026", title: "Middle East Airspace Advisory", tag: "ALERT", content: `High conflict risk. Avoid Iraqi, Iranian, and Qatari airspace. Saudi corridor is the only exception. Update SimBrief FIR avoidances.` },
+            { date: "12 JAN 2026", title: "JAL Partnership & Trip", tag: "COMMUNITY", content: `CEO mileflight heading to Narita on 787-9. Partnership with JAL strengthens Asia network.` },
+            { date: "11 JAN 2026", title: "A320neo Delivery", tag: "FLEET", content: `9x A320neo aircraft delivered to AMS from MCT. Ready for route expansion.` },
+            { date: "07 JAN 2026", title: "Chaos at Schiphol", tag: "OPS", content: `Severe weather causing major delays at EHAM. Average delay time: 72 hours.` },
+            { date: "07 JAN 2026", title: "Return to Caribbean", tag: "OPS", content: `Flights to St. Maarten resume end of March. Aruba and Curaçao pending conflict resolution.` },
+            { date: "03 JAN 2026", title: "Flight Suspension to Caribbean", tag: "OPS", content: `All flights to Caribbean suspended due to ongoing conflict.` },
+            { date: "31 DEC 2025", title: "A BRAND NEW YEAR", tag: "COMMUNITY", content: `Happy New Year 2026! We fly together with pride and courage. Thanks to our partners and pilots.` },
+            { date: "26 DEC 2025", title: "KLM Asia Subsidiary", tag: "FLEET", content: `Announcing KLM Asia! This subsidiary allows KLM to fly to Taiwan continuously without restrictions. Three 787-9s will fly with KLM Asia branding.` },
+            { date: "26 DEC 2025", title: "Aircraft Refurbishment: Premium Economy", tag: "FLEET", content: `KLM is refurbishing its fleet with the introduction of Premium Economy. More legroom than Economy, affordable Business feel.` },
+            { date: "24 DEC 2025", title: "Merry Christmas", tag: "COMMUNITY", content: `Merry Christmas from KLM VA! May everyone be safe, happy, and enjoy this holiday.` },
+            { date: "19 DEC 2025", title: "DLH Inaugural Christmas Ops", tag: "EVENT", content: `Christmas delivery flight from Svalbard to Frankfurt (DLH) or Amsterdam (KLM). 700 euro bonus for first flight!` },
+            { date: "17 DEC 2025", title: "Safety Certification (GASA)", tag: "SAFETY", content: `KLM is now officially certified by the GeoFS Aviation Safety Authority (GASA).` },
+            { date: "16 DEC 2025", title: "Lufthansa Group Merger", tag: "PARTNERSHIP", content: `KLM has officially joined the Lufthansa Group! This makes us the most dominant airline in Europe. All flights are now codeshares.` },
+            { date: "14 DEC 2025", title: "Cathay Pacific Codeshare", tag: "PARTNERSHIP", content: `KLM and Cathay Pacific have officially started a codeshare connecting Amsterdam to Hong Kong.` },
+            { date: "12 DEC 2025", title: "STARLUX Codeshare", tag: "PARTNERSHIP", content: `KLM and STARLUX Airlines have launched a mutual codeshare connecting Amsterdam (EHAM) and Taipei (RCTP).` },
+            { date: "12 DEC 2025", title: "Qatar Airways Codeshare", tag: "PARTNERSHIP", content: `KLM and Qatar Airways announce a new codeshare partnership on the Amsterdam (EHAM) ⇆ Doha (OTHH) route.` },
+            { date: "11 DEC 2025", title: "Fleet Number Update", tag: "FLEET", content: `Changing fleet numbers to current KLM numbers. Registration system and Finance update incoming.` },
+            { date: "10 DEC 2025", title: "A330 Phasing Out Begins", tag: "FLEET", content: `KLM has successfully sold 3x A330-200 to the Emirates group.` },
+            { date: "06 DEC 2025", title: "Route Changes", tag: "NETWORK", content: `Removed: Inverness, Kittilä, Bergen, Bilbao, Bologna, Dallas, Miami, Orlando, San Diego, Edmonton, Georgetown, Havana, Hyderabad, Chengdu, Muscat.` },
+            { date: "04 DEC 2025", title: "First Promotions & Growth", tag: "COMMUNITY", content: `Welcome JustFrost as Chief Fleet Manager and K777-fly as CFO! We have reached 10 human members.` },
+            { date: "25 NOV 2025", title: "First Ever Flight", tag: "MILESTONE", content: `The first flight has been completed: EHAM-EBBR!` },
+            { date: "28 OCT 2025", title: "Server Operational", tag: "LAUNCH", content: `The server is completed and operational. Invite others!` }
+        ];
 
         const pages = {
             home: `
                 <div class="relative bg-slate-900 text-white fade-in min-h-[90vh] flex flex-col">
                     <div class="relative py-24 px-4 sm:px-6 lg:px-8 flex-grow">
                          <div class="absolute inset-0 z-0">
-                            <img src="${siteImages.homeHero}" class="w-full h-full object-cover hero-bg" alt="KLM Ops">
+                            <img src="${siteImages.homeHero}" class="w-full h-full object-cover" alt="KLM Ops">
                             <div class="absolute inset-0 bg-gradient-to-b from-slate-900 via-transparent to-slate-900"></div>
                         </div>
                         
@@ -525,60 +617,23 @@
                 <div class="relative bg-slate-900 py-24 fade-in">
                     <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
                         <div class="border-b border-slate-700 pb-8 mb-12">
-                            <h1 class="text-4xl font-black text-white mb-4">Operational Directives</h1>
-                            <p class="text-slate-400 text-lg">Fleet strategy, route adjustments, and airspace advisories.</p>
+                            <h1 class="text-4xl font-black text-white mb-4">Official Archives</h1>
+                            <p class="text-slate-400 text-lg">Complete record of all KLM VA operational directives and community announcements.</p>
                         </div>
                         
-                        <div class="space-y-12">
-                             <!-- FLIGHT 1016 ACCIDENT - PINNED -->
-                             <article class="bg-black rounded-lg p-8 border border-slate-700 news-card shadow-2xl relative overflow-hidden">
-                                <div class="absolute top-0 left-0 w-1 h-full bg-white/20"></div>
-                                <div class="flex items-center gap-3 mb-4 text-xs font-mono text-white uppercase tracking-widest">
-                                    <span class="bg-white text-black px-2 py-0.5 rounded font-bold">URGENT</span>
-                                    <span>23 JAN 2026</span>
-                                    <span>//</span>
-                                    <span>Official Statement</span>
-                                </div>
-                                <h2 class="text-2xl font-bold text-white mb-4">OFFICIAL STATEMENT — FLIGHT KLM1016 ACCIDENT</h2>
-                                <div class="text-slate-300 space-y-4 leading-relaxed">
-                                    <p>KLM confirms that Flight KLM1016 (E190, EHAM-EGLL) was involved in a fatal accident in the North Sea. All 94 souls on board are confirmed deceased.</p>
-                                    <p>We are cooperating fully with GASA investigators. Immediate ex gratia payments are being issued to families. All E190 operations are under safety review.</p>
-                                    <div class="mt-6">
-                                        <button onclick="router('condolences')" class="text-white underline hover:text-slate-300 font-bold text-sm">Read Full Statement & Condolences &rarr;</button>
+                        <div class="space-y-8">
+                            ${newsData.map(news => `
+                                <article class="bg-slate-800 rounded-lg p-6 border-l-4 ${news.tag === 'URGENT' ? 'border-red-500' : news.tag === 'DISPATCH' ? 'border-amber-500' : 'border-klm'} news-card shadow-lg">
+                                    <div class="flex items-center gap-3 mb-3 text-xs font-mono text-slate-400 uppercase tracking-widest">
+                                        <span class="font-bold text-white bg-slate-700 px-2 py-0.5 rounded">${news.tag}</span>
+                                        <span>${news.date}</span>
                                     </div>
-                                </div>
-                            </article>
-
-                            <!-- Milano Olympics Update -->
-                             <article class="bg-slate-800 rounded-lg p-8 border-l-4 border-indigo-500 news-card shadow-lg opacity-75 hover:opacity-100 transition">
-                                <div class="flex items-center gap-3 mb-4 text-xs font-mono text-indigo-400 uppercase tracking-widest">
-                                    <span>03 FEB 2026</span>
-                                    <span>//</span>
-                                    <span>Special Ops</span>
-                                </div>
-                                <h2 class="text-2xl font-bold text-white mb-4">Milano-Cortina Olympics Operations Update</h2>
-                                <div class="text-slate-300 space-y-4 leading-relaxed">
-                                    <p>During the Milano-Cortina Olympic Games, all KLM Virtual Airline flights operating to and from <strong>Milan (LIMC / LIN)</strong> will receive a <strong>1.5× flight boost</strong>.</p>
-                                    <ul class="list-disc pl-5 space-y-1 text-slate-400">
-                                        <li>1.5× XP</li>
-                                        <li>1.5× flight rewards</li>
-                                        <li>Applies to all Olympic-period Milan routes</li>
-                                    </ul>
-                                </div>
-                            </article>
-
-                            <!-- LTRP Update -->
-                             <article class="bg-slate-800 rounded-lg p-8 border-l-4 border-emerald-500 news-card shadow-lg opacity-75 hover:opacity-100 transition">
-                                <div class="flex items-center gap-3 mb-4 text-xs font-mono text-emerald-400 uppercase tracking-widest">
-                                    <span>01 FEB 2026</span>
-                                    <span>//</span>
-                                    <span>Fleet Update</span>
-                                </div>
-                                <h2 class="text-2xl font-bold text-white mb-4">Fleet Update | Long Term Refurbishment Plan (LTRP)</h2>
-                                <div class="text-slate-300 space-y-4 leading-relaxed">
-                                    <p>We’re officially launching the Long Term Refurbishment Plan (LTRP) — a $65M investment to keep our most capable aircraft flying strong.</p>
-                                </div>
-                            </article>
+                                    <h2 class="text-xl font-bold text-white mb-3">${news.title}</h2>
+                                    <div class="text-slate-300 leading-relaxed text-sm">
+                                        ${news.content}
+                                    </div>
+                                </article>
+                            `).join('')}
                         </div>
                     </div>
                 </div>
@@ -602,7 +657,7 @@
                                 <div class="bg-slate-800 rounded-lg overflow-hidden border border-slate-700 hover:border-klm transition duration-300 group shadow-lg hover:shadow-2xl relative">
                                     <div class="absolute inset-0 bg-gradient-to-t from-slate-900 via-transparent to-transparent opacity-50 z-10 pointer-events-none"></div>
                                     <div class="h-56 overflow-hidden relative">
-                                        <img src="${plane.img}" class="w-full h-full object-cover opacity-80 group-hover:opacity-100 group-hover:scale-105 transition duration-700 grayscale" onerror="this.src='https://upload.wikimedia.org/wikipedia/commons/thumb/a/ac/No_image_available.svg/1024px-No_image_available.svg.png'">
+                                        <img src="${plane.img}" class="w-full h-full object-cover opacity-80 group-hover:opacity-100 group-hover:scale-105 transition duration-700" onerror="this.src='https://upload.wikimedia.org/wikipedia/commons/thumb/a/ac/No_image_available.svg/1024px-No_image_available.svg.png'">
                                         <div class="absolute top-3 right-3 ${statusColor} border px-2 py-1 rounded text-xs font-bold uppercase tracking-wider backdrop-blur-md z-20 shadow-sm">
                                             ${plane.status}
                                         </div>
@@ -834,7 +889,7 @@
                         </div>
                     </div>
                     <div class="flex-grow bg-slate-800 relative">
-                        <iframe src="https://radarthing.com/radar?callsign=KLM%2CKL" class="absolute inset-0 w-full h-full border-0" allowfullscreen></iframe>
+                        <iframe src="https://radarthing.com/radar?callsign=KLM,KL" class="absolute inset-0 w-full h-full border-0" allowfullscreen></iframe>
                     </div>
                 </div>
             `,
@@ -882,7 +937,7 @@
                                     </p>
                                     <div class="flex gap-4">
                                         <a href="https://midmm2tehdumb.github.io/Lufthansa-Group/index.html" target="_blank" class="border border-white/20 hover:bg-white/10 px-6 py-2 rounded font-bold transition">Visit DLH</a>
-                                        <a href="https://discord.gg/fCSBdHDm4q" target="_blank" class="bg-amber-500 hover:bg-amber-600 text-slate-900 px-6 py-2 rounded font-bold transition">Discord</a>
+                                        <a href="https://discord.gg/TJRUPZj3t9" target="_blank" class="bg-amber-500 hover:bg-amber-600 text-slate-900 px-6 py-2 rounded font-bold transition">Discord</a>
                                     </div>
                                 </div>
                                 <div class="md:w-1/2 grid grid-cols-2 gap-4">
@@ -1125,7 +1180,7 @@
 
             const regions = Object.keys(routeData);
             if(regionSelect) regionSelect.innerHTML = regions.map(r => `<option value="${r}">${r}</option>`).join('');
-            if(acSelect) acSelect.innerHTML = fleetData.filter(f => f.status === 'Active' || f.status === 'Phasing Out').map(f => `<option value="${f.type}">${f.type}</option>`).join('');
+            if(acSelect) acSelect.innerHTML = fleetData.filter(f => f.status === 'Active' || f.status === 'Phasing Out' || f.status === 'LTRP').map(f => `<option value="${f.type}">${f.type}</option>`).join('');
             
             // Handle Login UI & Membership Check
             if(loginSection) {
@@ -1257,7 +1312,7 @@
             const rawString = currentDirection === 'out' ? route.out : route.in;
             const cleanString = rawString.replace(/[+*]/g, '');
             const numbers = cleanString.split(',').map(s => s.trim()).filter(s => s);
-            flightSelect.innerHTML = numbers.map(num => `<option value="KL${num}">KL${num}</option>`).join('');
+            flightSelect.innerHTML = numbers.map(num => `<option value="${num}">${num}</option>`).join('');
             updatePreview();
         }
         window.updateFlightDetails = updateFlightDetails;
@@ -1448,6 +1503,7 @@
         let mapInstance = null;
         let flightLinesLayer = null;
         const routeManifest = [
+          // EUROPE
           { "origin": "EHAM", "originCoords": [4.7639, 52.3091], "destination": "EGLL", "destinationCoords": [-0.4543, 51.4700], "fleet": ["E190", "E195", "B737-700", "B737-800", "A321neo"], "hub": true },
           { "origin": "EHAM", "originCoords": [4.7639, 52.3091], "destination": "LFPG", "destinationCoords": [2.5479, 49.0097], "fleet": ["E190", "E195", "B737-700", "B737-800", "A321neo"], "hub": true },
           { "origin": "EHAM", "originCoords": [4.7639, 52.3091], "destination": "EDDB", "destinationCoords": [13.5033, 52.3667], "fleet": ["E190", "E195", "B737-700", "B737-800", "A321neo"], "hub": true },
@@ -1462,6 +1518,20 @@
           { "origin": "EHAM", "originCoords": [4.7639, 52.3091], "destination": "ENGM", "destinationCoords": [11.1004, 60.1939], "fleet": ["E190", "E195"], "hub": true },
           { "origin": "EHAM", "originCoords": [4.7639, 52.3091], "destination": "EFHK", "destinationCoords": [24.9633, 60.3172], "fleet": ["E190", "E195", "B737-800"], "hub": true },
           { "origin": "EHAM", "originCoords": [4.7639, 52.3091], "destination": "LGAV", "destinationCoords": [23.9445, 37.9364], "fleet": ["B737-800", "A321neo"], "hub": true },
+          { "origin": "EHAM", "originCoords": [4.7639, 52.3091], "destination": "EVRA", "destinationCoords": [23.9711, 56.9236], "fleet": ["E195-E2"], "hub": true },
+          { "origin": "EHAM", "originCoords": [4.7639, 52.3091], "destination": "EETN", "destinationCoords": [24.8328, 59.4133], "fleet": ["E195-E2"], "hub": true },
+          { "origin": "EHAM", "originCoords": [4.7639, 52.3091], "destination": "EYVI", "destinationCoords": [25.2858, 54.6341], "fleet": ["E195-E2"], "hub": true },
+          { "origin": "EHAM", "originCoords": [4.7639, 52.3091], "destination": "LPPR", "destinationCoords": [-8.6706, 41.2421], "fleet": ["B737-800"], "hub": true },
+          { "origin": "EHAM", "originCoords": [4.7639, 52.3091], "destination": "LPPT", "destinationCoords": [-9.1359, 38.7742], "fleet": ["B737-800"], "hub": true },
+          { "origin": "EHAM", "originCoords": [4.7639, 52.3091], "destination": "EPKK", "destinationCoords": [19.7848, 50.0777], "fleet": ["E195-E2"], "hub": true },
+          { "origin": "EHAM", "originCoords": [4.7639, 52.3091], "destination": "EPWA", "destinationCoords": [20.9671, 52.1657], "fleet": ["E195-E2"], "hub": true },
+          { "origin": "EHAM", "originCoords": [4.7639, 52.3091], "destination": "LKPR", "destinationCoords": [14.2632, 50.1008], "fleet": ["E195-E2"], "hub": true },
+          { "origin": "EHAM", "originCoords": [4.7639, 52.3091], "destination": "LHBP", "destinationCoords": [19.2556, 47.4369], "fleet": ["B737-800"], "hub": true },
+          { "origin": "EHAM", "originCoords": [4.7639, 52.3091], "destination": "LROP", "destinationCoords": [26.0850, 44.5711], "fleet": ["B737-800"], "hub": true },
+          { "origin": "EHAM", "originCoords": [4.7639, 52.3091], "destination": "LFML", "destinationCoords": [5.2150, 43.4367], "fleet": ["B737-700"], "hub": true },
+          { "origin": "EHAM", "originCoords": [4.7639, 52.3091], "destination": "LFMN", "destinationCoords": [7.2150, 43.6653], "fleet": ["B737-800"], "hub": true },
+
+          // NORTH AMERICA
           { "origin": "EHAM", "originCoords": [4.7639, 52.3091], "destination": "KJFK", "destinationCoords": [-73.7781, 40.6413], "fleet": ["B787-9", "B787-10", "B777-300ER"], "hub": true },
           { "origin": "EHAM", "originCoords": [4.7639, 52.3091], "destination": "KATL", "destinationCoords": [-84.4277, 33.6407], "fleet": ["B787-9", "B777-300ER"], "hub": true },
           { "origin": "EHAM", "originCoords": [4.7639, 52.3091], "destination": "KLAX", "destinationCoords": [-118.4085, 33.9416], "fleet": ["B787-10", "B777-300ER"], "hub": true },
@@ -1469,17 +1539,63 @@
           { "origin": "EHAM", "originCoords": [4.7639, 52.3091], "destination": "KORD", "destinationCoords": [-87.9073, 41.9742], "fleet": ["B787-9"], "hub": true },
           { "origin": "EHAM", "originCoords": [4.7639, 52.3091], "destination": "KBOS", "destinationCoords": [-71.0052, 42.3656], "fleet": ["B787-9"], "hub": true },
           { "origin": "EHAM", "originCoords": [4.7639, 52.3091], "destination": "KIAD", "destinationCoords": [-77.4565, 38.9531], "fleet": ["B787-9"], "hub": true },
+          { "origin": "EHAM", "originCoords": [4.7639, 52.3091], "destination": "KIAH", "destinationCoords": [-95.3414, 29.9844], "fleet": ["B787-9"], "hub": true },
           { "origin": "EHAM", "originCoords": [4.7639, 52.3091], "destination": "CYYZ", "destinationCoords": [-79.6248, 43.6777], "fleet": ["B777-300ER", "B787-10"], "hub": true },
+          { "origin": "EHAM", "originCoords": [4.7639, 52.3091], "destination": "CYUL", "destinationCoords": [-73.7408, 45.4706], "fleet": ["A330-200"], "hub": true },
+          { "origin": "EHAM", "originCoords": [4.7639, 52.3091], "destination": "CYYC", "destinationCoords": [-114.0203, 51.1139], "fleet": ["B787-9"], "hub": true },
+          { "origin": "EHAM", "originCoords": [4.7639, 52.3091], "destination": "CYVR", "destinationCoords": [-123.1840, 49.1947], "fleet": ["B777-300ER"], "hub": true },
+          { "origin": "EHAM", "originCoords": [4.7639, 52.3091], "destination": "MMMX", "destinationCoords": [-99.0721, 19.4363], "fleet": ["B787-9"], "hub": true },
+
+          // SOUTH AMERICA
           { "origin": "EHAM", "originCoords": [4.7639, 52.3091], "destination": "SBGR", "destinationCoords": [-46.4731, -23.4356], "fleet": ["B777-300ER", "B787-9"], "hub": true },
           { "origin": "EHAM", "originCoords": [4.7639, 52.3091], "destination": "SAEZ", "destinationCoords": [-58.5358, -34.8222], "fleet": ["B777-300ER"], "hub": true },
+          { "origin": "EHAM", "originCoords": [4.7639, 52.3091], "destination": "SBGL", "destinationCoords": [-43.2506, -22.8089], "fleet": ["B787-9"], "hub": true },
           { "origin": "EHAM", "originCoords": [4.7639, 52.3091], "destination": "SKBO", "destinationCoords": [-74.1469, 4.7016], "fleet": ["B787-9"], "hub": true },
+          { "origin": "EHAM", "originCoords": [4.7639, 52.3091], "destination": "SPJC", "destinationCoords": [-77.1143, -12.0219], "fleet": ["B777-300ER"], "hub": true },
+          { "origin": "EHAM", "originCoords": [4.7639, 52.3091], "destination": "SEQM", "destinationCoords": [-78.3586, -0.1292], "fleet": ["B777-200ER"], "hub": true },
+          { "origin": "EHAM", "originCoords": [4.7639, 52.3091], "destination": "SEGU", "destinationCoords": [-79.8836, -2.1575], "fleet": ["B777-200ER"], "hub": true },
+          { "origin": "EHAM", "originCoords": [4.7639, 52.3091], "destination": "SMJP", "destinationCoords": [-55.1878, 5.4528], "fleet": ["B777-300ER"], "hub": true },
           { "origin": "EHAM", "originCoords": [4.7639, 52.3091], "destination": "TNCA", "destinationCoords": [-70.0152, 12.5014], "fleet": ["A330-200"], "hub": true },
           { "origin": "EHAM", "originCoords": [4.7639, 52.3091], "destination": "TNCM", "destinationCoords": [-63.1089, 18.0410], "fleet": ["A330-200"], "hub": true },
+          { "origin": "EHAM", "originCoords": [4.7639, 52.3091], "destination": "TNCC", "destinationCoords": [-68.9597, 12.1889], "fleet": ["B777-300ER"], "hub": true },
+          { "origin": "EHAM", "originCoords": [4.7639, 52.3091], "destination": "TNCB", "destinationCoords": [-68.2685, 12.1310], "fleet": ["A330-200"], "hub": true },
+
+          // ASIA
           { "origin": "EHAM", "originCoords": [4.7639, 52.3091], "destination": "RJAA", "destinationCoords": [140.3929, 35.7719], "fleet": ["B787-9", "B777-300ER"], "hub": true },
+          { "origin": "EHAM", "originCoords": [4.7639, 52.3091], "destination": "RJBB", "destinationCoords": [135.2304, 34.4320], "fleet": ["B787-9"], "hub": true },
           { "origin": "EHAM", "originCoords": [4.7639, 52.3091], "destination": "VHHH", "destinationCoords": [113.9146, 22.3080], "fleet": ["B777-300ER"], "hub": true },
           { "origin": "EHAM", "originCoords": [4.7639, 52.3091], "destination": "WSSS", "destinationCoords": [103.9940, 1.3644], "fleet": ["B787-10", "B777-300ER"], "hub": true },
+          { "origin": "EHAM", "originCoords": [4.7639, 52.3091], "destination": "RKSI", "destinationCoords": [126.4407, 37.4602], "fleet": ["B787-9"], "hub": true },
+          { "origin": "EHAM", "originCoords": [4.7639, 52.3091], "destination": "VIDP", "destinationCoords": [77.1000, 28.5562], "fleet": ["B787-10"], "hub": true },
+          { "origin": "EHAM", "originCoords": [4.7639, 52.3091], "destination": "VABB", "destinationCoords": [72.8656, 19.0896], "fleet": ["B787-10"], "hub": true },
+          { "origin": "EHAM", "originCoords": [4.7639, 52.3091], "destination": "VOBL", "destinationCoords": [77.7066, 13.1986], "fleet": ["B777-200ER"], "hub": true },
+          { "origin": "EHAM", "originCoords": [4.7639, 52.3091], "destination": "ZBAA", "destinationCoords": [116.5871, 40.0801], "fleet": ["B777-300ER"], "hub": true },
+          { "origin": "EHAM", "originCoords": [4.7639, 52.3091], "destination": "ZSPD", "destinationCoords": [121.8052, 31.1443], "fleet": ["B777-300ER"], "hub": true },
+          { "origin": "EHAM", "originCoords": [4.7639, 52.3091], "destination": "VTBS", "destinationCoords": [100.7501, 13.6900], "fleet": ["B777-300ER"], "hub": true },
+          { "origin": "EHAM", "originCoords": [4.7639, 52.3091], "destination": "WMKK", "destinationCoords": [101.7099, 2.7456], "fleet": ["B787-9"], "hub": true },
+          { "origin": "EHAM", "originCoords": [4.7639, 52.3091], "destination": "WIII", "destinationCoords": [106.6559, -6.1256], "fleet": ["B777-300ER"], "hub": true },
+          { "origin": "EHAM", "originCoords": [4.7639, 52.3091], "destination": "RPLL", "destinationCoords": [121.0194, 14.5086], "fleet": ["B777-300ER"], "hub": true },
+          { "origin": "EHAM", "originCoords": [4.7639, 52.3091], "destination": "RCTP", "destinationCoords": [121.2313, 25.0777], "fleet": ["B777-300ER"], "hub": true },
+          { "origin": "EHAM", "originCoords": [4.7639, 52.3091], "destination": "WADD", "destinationCoords": [115.1668, -8.7482], "fleet": ["B777-300ER"], "hub": true },
+
+          // MIDDLE EAST
           { "origin": "EHAM", "originCoords": [4.7639, 52.3091], "destination": "OMDB", "destinationCoords": [55.3644, 25.2532], "fleet": ["B787-9", "B777-300ER"], "hub": true },
-          { "origin": "EHAM", "originCoords": [4.7639, 52.3091], "destination": "LLBG", "destinationCoords": [34.8854, 32.0114], "fleet": ["B737-900"], "hub": true }
+          { "origin": "EHAM", "originCoords": [4.7639, 52.3091], "destination": "LLBG", "destinationCoords": [34.8854, 32.0114], "fleet": ["B737-900"], "hub": true },
+          { "origin": "EHAM", "originCoords": [4.7639, 52.3091], "destination": "OMAA", "destinationCoords": [54.6511, 24.4330], "fleet": ["B787-9"], "hub": true },
+          { "origin": "EHAM", "originCoords": [4.7639, 52.3091], "destination": "OKBK", "destinationCoords": [47.9689, 29.2266], "fleet": ["A330-200"], "hub": true },
+          { "origin": "EHAM", "originCoords": [4.7639, 52.3091], "destination": "OTHH", "destinationCoords": [51.6083, 25.2731], "fleet": ["B777-300ER"], "hub": true },
+          { "origin": "EHAM", "originCoords": [4.7639, 52.3091], "destination": "OERK", "destinationCoords": [46.6989, 24.9576], "fleet": ["A330-200"], "hub": true },
+          { "origin": "EHAM", "originCoords": [4.7639, 52.3091], "destination": "HECA", "destinationCoords": [31.4056, 30.1219], "fleet": ["B777-200ER"], "hub": true },
+
+          // AFRICA
+          { "origin": "EHAM", "originCoords": [4.7639, 52.3091], "destination": "HKJK", "destinationCoords": [36.9275, -1.3192], "fleet": ["B787-10"], "hub": true },
+          { "origin": "EHAM", "originCoords": [4.7639, 52.3091], "destination": "HTDA", "destinationCoords": [39.2026, -6.8781], "fleet": ["B787-10"], "hub": true },
+          { "origin": "EHAM", "originCoords": [4.7639, 52.3091], "destination": "FAOR", "destinationCoords": [28.2411, -26.1367], "fleet": ["B777-300ER"], "hub": true },
+          { "origin": "EHAM", "originCoords": [4.7639, 52.3091], "destination": "FACT", "destinationCoords": [18.6017, -33.9715], "fleet": ["B777-300ER"], "hub": true },
+          { "origin": "EHAM", "originCoords": [4.7639, 52.3091], "destination": "DGAA", "destinationCoords": [-0.1667, 5.6052], "fleet": ["B777-300ER"], "hub": true },
+          { "origin": "EHAM", "originCoords": [4.7639, 52.3091], "destination": "DNMM", "destinationCoords": [3.3212, 6.5774], "fleet": ["A330-200"], "hub": true },
+          { "origin": "EHAM", "originCoords": [4.7639, 52.3091], "destination": "HRYR", "destinationCoords": [30.1331, -1.9686], "fleet": ["A330-200"], "hub": true },
+          { "origin": "EHAM", "originCoords": [4.7639, 52.3091], "destination": "HUEN", "destinationCoords": [32.4431, 0.0450], "fleet": ["A330-200"], "hub": true }
         ];
 
         function initFleetMap() {
@@ -1536,9 +1652,9 @@
                         <span class="font-bold text-slate-800 text-sm truncate">${route.city}</span>
                         <span class="font-mono text-xs text-slate-400">${route.code}</span>
                     </div>
-                    <div class="flex gap-2 text-[10px] font-mono text-slate-500">
-                         <span class="bg-slate-100 px-1 rounded">OUT: ${route.out}</span>
-                         <span class="bg-slate-100 px-1 rounded">IN: ${route.in}</span>
+                    <div class="flex flex-col gap-1 text-[10px] font-mono text-slate-500">
+                         <div class="bg-slate-100 px-1 rounded truncate" title="${route.out}">OUT: ${route.out}</div>
+                         <div class="bg-slate-100 px-1 rounded truncate" title="${route.in}">IN: ${route.in}</div>
                     </div>
                 </div>
             `).join('');
