@@ -186,6 +186,7 @@
                     <button onclick="router('booking')" class="nav-link text-slate-600 hover:text-klm transition-colors font-medium py-2">Dispatch</button>
                     <button onclick="router('fleet')" class="nav-link text-slate-600 hover:text-klm transition-colors font-medium py-2">Fleet</button>
                     <button onclick="router('routes')" class="nav-link text-slate-600 hover:text-klm transition-colors font-medium py-2">Network</button>
+                    <button onclick="router('partners')" class="nav-link text-slate-600 hover:text-klm transition-colors font-medium py-2">Partners</button>
                     <button onclick="router('livemap')" class="nav-link text-slate-600 hover:text-klm transition-colors font-medium py-2">Live Map</button>
                     <button onclick="router('community')" class="nav-link text-slate-600 hover:text-klm transition-colors font-medium py-2">Crew</button>
                     
@@ -210,6 +211,7 @@
                 <button onclick="router('booking'); toggleMobileMenu()" class="block w-full text-left px-4 py-3 rounded hover:bg-slate-50 font-medium text-slate-600">Dispatch</button>
                 <button onclick="router('fleet'); toggleMobileMenu()" class="block w-full text-left px-4 py-3 rounded hover:bg-slate-50 font-medium text-slate-600">Fleet</button>
                 <button onclick="router('routes'); toggleMobileMenu()" class="block w-full text-left px-4 py-3 rounded hover:bg-slate-50 font-medium text-slate-600">Network</button>
+                <button onclick="router('partners'); toggleMobileMenu()" class="block w-full text-left px-4 py-3 rounded hover:bg-slate-50 font-medium text-slate-600">Partners</button>
                 <button onclick="router('livemap'); toggleMobileMenu()" class="block w-full text-left px-4 py-3 rounded hover:bg-slate-50 font-medium text-slate-600">Live Map</button>
                 <button onclick="router('community'); toggleMobileMenu()" class="block w-full text-left px-4 py-3 rounded hover:bg-slate-50 font-medium text-slate-600">Crew</button>
             </div>
@@ -953,7 +955,9 @@
             partners: `
                 <div class="bg-white py-24 fade-in">
                     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                        <div class="bg-slate-900 rounded-2xl p-8 md:p-12 mb-16 text-white relative overflow-hidden">
+                        
+                        <!-- LUFTHANSA GROUP CARD -->
+                        <div class="bg-slate-900 rounded-2xl p-8 md:p-12 mb-12 text-white relative overflow-hidden shadow-2xl">
                              <div class="relative z-10 flex flex-col md:flex-row gap-12 items-center">
                                 <div class="md:w-1/2">
                                     <div class="text-amber-400 text-xs font-bold uppercase tracking-widest mb-2">Parent Airline Group</div>
@@ -974,6 +978,39 @@
                                     <div class="bg-white/5 p-4 rounded border border-white/10">
                                         <div class="text-2xl font-bold text-amber-400">A+</div>
                                         <div class="text-xs text-slate-400 uppercase">ICAO Rating</div>
+                                    </div>
+                                </div>
+                             </div>
+                        </div>
+
+                        <!-- SKYLINK GLOBAL CARD -->
+                        <div class="bg-gradient-to-br from-slate-900 to-slate-800 rounded-2xl p-8 md:p-12 mb-16 text-white relative overflow-hidden shadow-2xl border border-slate-700">
+                             <div class="absolute top-0 right-0 w-96 h-96 bg-sky-600 rounded-full blur-[100px] opacity-10 pointer-events-none"></div>
+                             
+                             <div class="relative z-10 flex flex-col md:flex-row gap-12 items-center">
+                                <div class="md:w-1/2">
+                                    <div class="text-sky-400 text-xs font-bold uppercase tracking-widest mb-2">Global Strategic Alliance</div>
+                                    <h2 class="text-4xl font-bold mb-4">SkyLink Global</h2>
+                                    <p class="text-slate-300 text-lg leading-relaxed mb-6">
+                                        A premier GeoFS airline alliance dedicated to connectivity, professionalism, and operational realism. SkyLink Global unites independent virtual airlines under one coordinated global network.
+                                    </p>
+                                    <div class="bg-slate-800/50 p-4 rounded-l border-l-4 border-sky-500 mb-8">
+                                        <p class="text-sky-100 italic font-serif">"To connect the skies with purpose."</p>
+                                    </div>
+                                    <div class="flex gap-4">
+                                        <a href="https://discord.gg/3kfpuabd8G" target="_blank" class="bg-sky-600 hover:bg-sky-500 text-white px-8 py-3 rounded font-bold transition shadow-lg shadow-sky-900/30 flex items-center">
+                                            <i data-lucide="globe" class="w-4 h-4 mr-2"></i> Join The Alliance
+                                        </a>
+                                    </div>
+                                </div>
+                                <div class="md:w-1/2 space-y-4">
+                                    <div class="bg-white/5 p-6 rounded-lg border border-white/10 hover:border-sky-500/30 transition">
+                                        <h3 class="font-bold text-sky-400 mb-2 text-sm uppercase tracking-wide">Our Mission</h3>
+                                        <p class="text-sm text-slate-300 leading-relaxed">To create a structured and realistic alliance environment where member airlines can expand their reach, strengthen their operations, and grow together through trust and ambition.</p>
+                                    </div>
+                                    <div class="bg-white/5 p-6 rounded-lg border border-white/10 hover:border-sky-500/30 transition">
+                                        <h3 class="font-bold text-sky-400 mb-2 text-sm uppercase tracking-wide">Operational Excellence</h3>
+                                        <p class="text-sm text-slate-300 leading-relaxed">Through coordinated events, shared route planning, and structured performance leagues, we foster an environment where airlines do not simply coexist, but thrive together.</p>
                                     </div>
                                 </div>
                              </div>
@@ -1543,7 +1580,6 @@
           { "origin": "EHAM", "originCoords": [4.7639, 52.3091], "destination": "EKCH", "destinationCoords": [12.6560, 55.6180], "fleet": ["E190", "E195", "B737-800"], "hub": true },
           { "origin": "EHAM", "originCoords": [4.7639, 52.3091], "destination": "ENGM", "destinationCoords": [11.1004, 60.1939], "fleet": ["E190", "E195"], "hub": true },
           { "origin": "EHAM", "originCoords": [4.7639, 52.3091], "destination": "EFHK", "destinationCoords": [24.9633, 60.3172], "fleet": ["E190", "E195", "B737-800"], "hub": true },
-          { "origin": "EHAM", "originCoords": [4.7639, 52.3091], "destination": "LGAV", "destinationCoords": [23.9445, 37.9364], "fleet": ["B737-800", "A321neo"], "hub": true },
           { "origin": "EHAM", "originCoords": [4.7639, 52.3091], "destination": "EVRA", "destinationCoords": [23.9711, 56.9236], "fleet": ["E195-E2"], "hub": true },
           { "origin": "EHAM", "originCoords": [4.7639, 52.3091], "destination": "EETN", "destinationCoords": [24.8328, 59.4133], "fleet": ["E195-E2"], "hub": true },
           { "origin": "EHAM", "originCoords": [4.7639, 52.3091], "destination": "EYVI", "destinationCoords": [25.2858, 54.6341], "fleet": ["E195-E2"], "hub": true },
