@@ -189,7 +189,7 @@
                     <button onclick="router('livemap')" class="nav-link text-slate-600 hover:text-klm transition-colors font-medium py-2">Live Map</button>
                     <button onclick="router('community')" class="nav-link text-slate-600 hover:text-klm transition-colors font-medium py-2">Crew</button>
                     
-                    <a href="https://discord.gg/Zj9BrrxU" target="_blank" class="bg-slate-900 text-white px-5 py-2 rounded font-bold hover:bg-slate-800 transition shadow flex items-center text-sm uppercase tracking-wide">
+                    <a href="https://discord.gg/vRzmhuEmBQ" target="_blank" class="bg-slate-900 text-white px-5 py-2 rounded font-bold hover:bg-slate-800 transition shadow flex items-center text-sm uppercase tracking-wide">
                         <i data-lucide="radio" class="w-4 h-4 mr-2"></i> Report In
                     </a>
                 </div>
@@ -463,37 +463,61 @@
         };
 
         const newsData = [
-            { date: "13 FEB 2026", title: "Operations Update", tag: "TECH", content: `New flight numbers implemented across the network. Website and Dispatch Bot have been updated to reflect these changes.` },
-            { date: "13 FEB 2026", title: "Staff Announcement", tag: "STAFF", content: `Co-Chairman Nihid has been appointed CEO of Qatar Airways Virtual. He remains committed to KLM VA but will be balancing both leadership roles.` },
-            { date: "10 FEB 2026", title: "Community Achievement", tag: "COMMUNITY", content: `CEO mileflight selected for international academic competition, flying Emirates A380!` },
-            { date: "08 FEB 2026", title: "OFFICIAL STATEMENT — FLIGHT KLM1016 ACCIDENT", tag: "URGENT", content: `KLM confirms that Flight KLM1016 (E190, EHAM-EGLL) was involved in a fatal accident in the North Sea. All 94 souls on board are deceased. <a href="#" onclick="router('condolences')" class="text-klm underline">Pay Condolences Here</a>.` },
-            { date: "03 FEB 2026", title: "Milano-Cortina Olympics Operations Update", tag: "EVENT", content: `During the Milano-Cortina Olympic Games, all KLM Virtual Airline flights operating to and from Milan (LIMC / LIN) will receive a <strong>1.5× flight boost</strong>.` },
-            { date: "01 FEB 2026", title: "Fleet Update | Long Term Refurbishment Plan (LTRP)", tag: "FLEET", content: `Launching LTRP ($65M investment). B737-7 and B777-300ER entering refurbishment. A330-200 phase-out confirmed.` },
-            { date: "29 JAN 2026", title: "OFFICIAL DISPATCH – WIDEBODY DELIVERY FLIGHT", tag: "DISPATCH", content: `Delivery of sold B777-300ERs to VOBL. <strong>1.5× credited flight hours</strong> for participating pilots. Deadline: 16 FEB 2026.` },
-            { date: "20 JAN 2026", title: "KLM Virtual Airlines Website v3.0", tag: "TECH", content: `Website v3.0 is live. Features new Live Map, Fleet Strategy, and SOPs. Operations-first design.` },
-            { date: "16 JAN 2026", title: "Middle East Airspace Advisory", tag: "ALERT", content: `High conflict risk. Avoid Iraqi, Iranian, and Qatari airspace. Saudi corridor is the only exception. Update SimBrief FIR avoidances.` },
-            { date: "12 JAN 2026", title: "JAL Partnership & Trip", tag: "COMMUNITY", content: `CEO mileflight heading to Narita on 787-9. Partnership with JAL strengthens Asia network.` },
-            { date: "11 JAN 2026", title: "A320neo Delivery", tag: "FLEET", content: `9x A320neo aircraft delivered to AMS from MCT. Ready for route expansion.` },
-            { date: "07 JAN 2026", title: "Chaos at Schiphol", tag: "OPS", content: `Severe weather causing major delays at EHAM. Average delay time: 72 hours.` },
-            { date: "07 JAN 2026", title: "Return to Caribbean", tag: "OPS", content: `Flights to St. Maarten resume end of March. Aruba and Curaçao pending conflict resolution.` },
-            { date: "03 JAN 2026", title: "Flight Suspension to Caribbean", tag: "OPS", content: `All flights to Caribbean suspended due to ongoing conflict.` },
-            { date: "31 DEC 2025", title: "A BRAND NEW YEAR", tag: "COMMUNITY", content: `Happy New Year 2026! We fly together with pride and courage. Thanks to our partners and pilots.` },
-            { date: "26 DEC 2025", title: "KLM Asia Subsidiary", tag: "FLEET", content: `Announcing KLM Asia! This subsidiary allows KLM to fly to Taiwan continuously without restrictions. Three 787-9s will fly with KLM Asia branding.` },
-            { date: "26 DEC 2025", title: "Aircraft Refurbishment: Premium Economy", tag: "FLEET", content: `KLM is refurbishing its fleet with the introduction of Premium Economy. More legroom than Economy, affordable Business feel.` },
-            { date: "24 DEC 2025", title: "Merry Christmas", tag: "COMMUNITY", content: `Merry Christmas from KLM VA! May everyone be safe, happy, and enjoy this holiday.` },
-            { date: "19 DEC 2025", title: "DLH Inaugural Christmas Ops", tag: "EVENT", content: `Christmas delivery flight from Svalbard to Frankfurt (DLH) or Amsterdam (KLM). 700 euro bonus for first flight!` },
-            { date: "17 DEC 2025", title: "Safety Certification (GASA)", tag: "SAFETY", content: `KLM is now officially certified by the GeoFS Aviation Safety Authority (GASA).` },
-            { date: "16 DEC 2025", title: "Lufthansa Group Merger", tag: "PARTNERSHIP", content: `KLM has officially joined the Lufthansa Group! This makes us the most dominant airline in Europe. All flights are now codeshares.` },
-            { date: "14 DEC 2025", title: "Cathay Pacific Codeshare", tag: "PARTNERSHIP", content: `KLM and Cathay Pacific have officially started a codeshare connecting Amsterdam to Hong Kong.` },
-            { date: "12 DEC 2025", title: "STARLUX Codeshare", tag: "PARTNERSHIP", content: `KLM and STARLUX Airlines have launched a mutual codeshare connecting Amsterdam (EHAM) and Taipei (RCTP).` },
-            { date: "12 DEC 2025", title: "Qatar Airways Codeshare", tag: "PARTNERSHIP", content: `KLM and Qatar Airways announce a new codeshare partnership on the Amsterdam (EHAM) ⇆ Doha (OTHH) route.` },
-            { date: "11 DEC 2025", title: "Fleet Number Update", tag: "FLEET", content: `Changing fleet numbers to current KLM numbers. Registration system and Finance update incoming.` },
-            { date: "10 DEC 2025", title: "A330 Phasing Out Begins", tag: "FLEET", content: `KLM has successfully sold 3x A330-200 to the Emirates group.` },
-            { date: "06 DEC 2025", title: "Route Changes", tag: "NETWORK", content: `Removed: Inverness, Kittilä, Bergen, Bilbao, Bologna, Dallas, Miami, Orlando, San Diego, Edmonton, Georgetown, Havana, Hyderabad, Chengdu, Muscat.` },
-            { date: "04 DEC 2025", title: "First Promotions & Growth", tag: "COMMUNITY", content: `Welcome JustFrost as Chief Fleet Manager and K777-fly as CFO! We have reached 10 human members.` },
-            { date: "25 NOV 2025", title: "First Ever Flight", tag: "MILESTONE", content: `The first flight has been completed: EHAM-EBBR!` },
-            { date: "28 OCT 2025", title: "Server Operational", tag: "LAUNCH", content: `The server is completed and operational. Invite others!` }
+            { date: "15 FEB 2026", title: "Flight Number and Systems Update", tag: "TECH", content: "New flight numbers have been issued across the network, accompanied by website and bot updates to support ongoing restructuring and operational improvements." },
+            { date: "15 FEB 2026", title: "Dual Leadership Role Announcement", tag: "STAFF", content: "Chairperson Nihid has been appointed CEO of Qatar Airways Virtual and will balance responsibilities across both airlines. KLM Virtual Airlines remains the primary focus, with ongoing leadership and operational oversight continuing as normal." },
+            { date: "11 FEB 2026", title: "Callsign Standardization Directive", tag: "OPS", content: "All pilots are required to use the callsign “KL” instead of “KLM” when operating on RadarThing to ensure standardization and realism across network operations." },
+            { date: "08 FEB 2026", title: "Official Statement on Flight KLM1016 Accident", tag: "URGENT", content: "KLM Virtual Airlines confirms that Flight KLM1016, operated by an Embraer 190 from Amsterdam to London Heathrow, was involved in a fatal accident shortly after departure, resulting in the loss of all passengers and crew. We are cooperating fully with GASA investigators, preserving operational data, and conducting an immediate internal safety review. Initial compensation has been announced, and family assistance measures are being implemented." },
+            { date: "03 FEB 2026", title: "Milano-Cortina Olympics Operations Boost", tag: "EVENT", content: "Flights operating to and from Milan during the Milano-Cortina Olympic Games will receive a 1.5× reward and experience multiplier for the duration of the event." },
+            { date: "01 FEB 2026", title: "Long-Term Refurbishment Plan (LTRP)", tag: "FLEET", content: "We are launching the Long-Term Refurbishment Plan with a $65 million investment in remaining Boeing 737-7 and 777-300ER aircraft to extend service life. The Airbus A330-200 will be fully phased out as part of this strategy." },
+            { date: "29 JAN 2026", title: "Official Widebody Delivery Dispatch", tag: "DISPATCH", content: "An official dispatch has been issued for the delivery of sold 777-300ER aircraft. Pilots completing delivery missions will receive bonus credited flight hours, and delivered aircraft will be archived from active operations." },
+            { date: "28 JAN 2026", title: "Additional 777-300ER Sale", tag: "FLEET", content: "Three additional Boeing 777-300ER aircraft have been sold, with delivery flights dispatched to Bangalore. These aircraft will be permanently retired from KLM Virtual Airlines upon delivery." },
+            { date: "23 JAN 2026", title: "Widebody Qualification System Update", tag: "STAFF", content: "We are reworking the pilot ranking and qualification system. Widebody aircraft operations are temporarily restricted to senior staff, with certification available to pilots who meet minimum flight hour requirements." },
+            { date: "20 JAN 2026", title: "Website v3.0 Launch", tag: "TECH", content: "Our redesigned KLM Virtual Airlines website v3.0 is now live, featuring real-time pilot tracking, updated fleet and route information, SOP documentation, and partner integrations. This platform reinforces our operations-first identity and professional pilot culture." },
+            { date: "20 JAN 2026", title: "Long-Term Fleet Modernization Program", tag: "FLEET", content: "KLM Virtual Airlines is initiating a long-term fleet modernization program, phasing out the Boeing 777-300ER and Airbus A330-200 while introducing Airbus A320neo aircraft and planning Airbus A350-1000 deliveries beginning Q2 2026. Full fleet transition is targeted by 2027." },
+            { date: "19 JAN 2026", title: "Sale of Boeing 777-300ER Aircraft", tag: "FLEET", content: "We have sold five Boeing 777-300ER aircraft as part of our ongoing fleet transition strategy. These aircraft will be removed from regular operations following delivery to their new operators." },
+            { date: "16 JAN 2026", title: "Middle East Airspace Restrictions", tag: "ALERT", content: "Due to escalating regional tensions, KLM Virtual Airlines has implemented mandatory restrictions on Iraqi, Iranian, and Qatari airspace. Pilots must manually adjust flight plans to avoid restricted FIRs, with Saudi corridors permitted as an exception." },
+            { date: "11 JAN 2026", title: "Airbus A320neo Fleet Deliveries", tag: "FLEET", content: "Nine Airbus A320neo aircraft have been delivered to Amsterdam and are entering service. These aircraft will support short- and medium-haul expansion and represent a key step in our fleet modernization strategy." },
+            { date: "07 JAN 2026", title: "Planned Caribbean Service Resumption", tag: "OPS", content: "We plan to resume flights to St. Maarten by the end of March, with Aruba and Curaçao targeted for late April pending regional stability. These destinations are expected to see high seasonal demand during the summer period." },
+            { date: "04 JAN 2026", title: "Schiphol Weather Disruptions", tag: "OPS", content: "Severe weather conditions at Amsterdam Schiphol have caused significant operational delays across the network. Current disruptions are affecting arrivals and departures, with extended delays impacting scheduled operations." },
+            { date: "03 JAN 2026", title: "Suspension of Caribbean Operations", tag: "OPS", content: "Due to ongoing regional instability, all KLM Virtual Airlines flights to the Caribbean have been suspended until further notice. Safety and operational realism remain our highest priorities." },
+            { date: "26 DEC 2025", title: "Launch of KLM Asia Subsidiary", tag: "FLEET", content: "We are launching KLM Asia, a subsidiary operating three Boeing 787-9 aircraft to maintain Taiwan operations without geopolitical restrictions. KLM Asia will operate under dedicated branding while remaining fully integrated into KLM Virtual Airlines operations." },
+            { date: "26 DEC 2025", title: "Introduction of Premium Economy", tag: "FLEET", content: "KLM Virtual Airlines is introducing Premium Economy seating across the fleet to enhance passenger realism and comfort. Premium Economy will be available on both narrow-body and wide-body aircraft with seat distribution varying by aircraft type." },
+            { date: "17 DEC 2025", title: "GASA Safety Certification", tag: "SAFETY", content: "We are proud to announce that KLM Virtual Airlines has been certified by the GeoFS Aviation Safety Authority (GASA). This certification establishes independent investigation procedures and formal safety oversight for all airline operations." },
+            { date: "16 DEC 2025", title: "Integration into Lufthansa Group", tag: "PARTNERSHIP", content: "KLM Virtual Airlines has officially joined the Lufthansa Group Virtual, enabling mutual codeshare operations and alignment with Lufthansa operational standards. KLM will adopt Lufthansa SOPs and Miles & More program integration for cross-logging flights between both networks." },
+            { date: "14 DEC 2025", title: "Cathay Pacific Codeshare Partnership", tag: "PARTNERSHIP", content: "KLM Virtual Airlines has launched a codeshare partnership with Cathay Pacific Virtual, expanding network connectivity across Europe, Asia, Africa, and Oceania. This agreement enables broader route availability and integrated operations between both airlines." },
+            { date: "12 DEC 2025", title: "Interim COO Appointment", tag: "STAFF", content: "During the CEO’s temporary absence, JustFrost has been appointed Chief Operating Officer to ensure continuity of leadership, operational oversight, and strategic execution until the CEO’s return." },
+            { date: "12 DEC 2025", title: "STARLUX Airlines Codeshare Partnership", tag: "PARTNERSHIP", content: "We have established a codeshare agreement with STARLUX Airlines Virtual on the Amsterdam–Taipei route. This partnership strengthens Asia–Europe connectivity and expands routing opportunities for pilots across both networks." },
+            { date: "12 DEC 2025", title: "Qatar Airways Codeshare Partnership", tag: "PARTNERSHIP", content: "KLM Virtual Airlines and Qatar Airways Virtual have launched a codeshare partnership on the Amsterdam–Doha route. This partnership expands global connectivity, improves scheduling flexibility, and enhances realism in intercontinental network operations." },
+            { date: "11 DEC 2025", title: "Fleet Data Update and ECO 2030 Initiative", tag: "FLEET", content: "We have updated fleet numbers to align with current real-world KLM data and have begun preparations for our ECO 2030 initiative, which will focus on realistic sustainability and operational modernization. Additional updates including aircraft registrations, financial system changes, and codeshare announcements will follow." },
+            { date: "10 DEC 2025", title: "Airbus A330 Fleet Reduction", tag: "FLEET", content: "As part of our long-term fleet strategy, KLM Virtual Airlines has sold three Airbus A330-200 aircraft to the Emirates Group. This marks the beginning of our phased transition away from the A330 platform in favor of modernized fleet types." },
+            { date: "09 DEC 2025", title: "Temporary Suspension of Flight Logging", tag: "OPS", content: "Due to technical issues with the GCRP logging system, we have temporarily suspended flight logging. Pilots are requested to refrain from submitting logs until the system is restored to ensure data integrity and accuracy." },
+            { date: "06 DEC 2025", title: "Route Network Restructuring", tag: "NETWORK", content: "We have updated our route network to better reflect realistic KLM operations and operational feasibility. Several destinations have been removed to focus on core routes and improve dispatch realism, network coherence, and pilot experience." },
+            { date: "04 DEC 2025", title: "Membership Milestone", tag: "COMMUNITY", content: "KLM Virtual Airlines has reached ten active human members. This milestone reflects early growth of our pilot community and continued interest in structured and realistic airline simulation operations." },
+            { date: "04 DEC 2025", title: "Leadership Appointments", tag: "STAFF", content: "We are announcing the promotion of JustFrost to Chief Fleet Manager and K777-fly to Chairperson. These appointments formalize our early leadership structure and ensure that fleet planning, governance, and operational oversight are managed at a professional level as the airline grows." },
+            { date: "25 NOV 2025", title: "First Operational Flight Completed", tag: "MILESTONE", content: "KLM Virtual Airlines has successfully completed its first recorded flight from Amsterdam Schiphol (EHAM) to Brussels (EBBR). This flight marks the beginning of official operations and establishes our initial procedures for flight logging, dispatch, and pilot activity tracking across the network." },
+            { date: "28 OCT 2025", title: "Launch of KLM Virtual Airlines Operations", tag: "LAUNCH", content: "We are pleased to announce that the KLM Virtual Airlines server infrastructure has been completed and is now fully operational. With this launch, pilots and staff can begin structured operations, route logging, and community development under the KLM Virtual Airlines framework. This marks the formal start of our virtual airline and the foundation for future operational growth." }
         ];
+
+        // --- TAG COLOR HELPER ---
+        function getTagColor(tag) {
+            const colors = {
+                'URGENT': 'border-red-500 text-red-100 bg-red-900/50',
+                'ALERT': 'border-red-500 text-red-100 bg-red-900/50',
+                'OPS': 'border-amber-500 text-amber-100 bg-amber-900/50',
+                'DISPATCH': 'border-amber-500 text-amber-100 bg-amber-900/50',
+                'FLEET': 'border-blue-500 text-blue-100 bg-blue-900/50',
+                'TECH': 'border-cyan-500 text-cyan-100 bg-cyan-900/50',
+                'STAFF': 'border-purple-500 text-purple-100 bg-purple-900/50',
+                'COMMUNITY': 'border-indigo-500 text-indigo-100 bg-indigo-900/50',
+                'PARTNERSHIP': 'border-teal-500 text-teal-100 bg-teal-900/50',
+                'EVENT': 'border-pink-500 text-pink-100 bg-pink-900/50',
+                'MILESTONE': 'border-yellow-500 text-yellow-100 bg-yellow-900/50',
+                'LAUNCH': 'border-emerald-500 text-emerald-100 bg-emerald-900/50',
+                'SAFETY': 'border-green-500 text-green-100 bg-green-900/50',
+                'NETWORK': 'border-sky-500 text-sky-100 bg-sky-900/50'
+            };
+            return colors[tag] || 'border-slate-500 text-slate-100 bg-slate-800';
+        }
 
         const pages = {
             home: `
@@ -622,10 +646,12 @@
                         </div>
                         
                         <div class="space-y-8">
-                            ${newsData.map(news => `
-                                <article class="bg-slate-800 rounded-lg p-6 border-l-4 ${news.tag === 'URGENT' ? 'border-red-500' : news.tag === 'DISPATCH' ? 'border-amber-500' : 'border-klm'} news-card shadow-lg">
+                            ${newsData.map(news => {
+                                const colorClass = getTagColor(news.tag);
+                                return `
+                                <article class="bg-slate-800 rounded-lg p-6 border-l-4 news-card shadow-lg ${colorClass.split(' ')[0]}">
                                     <div class="flex items-center gap-3 mb-3 text-xs font-mono text-slate-400 uppercase tracking-widest">
-                                        <span class="font-bold text-white bg-slate-700 px-2 py-0.5 rounded">${news.tag}</span>
+                                        <span class="font-bold px-2 py-0.5 rounded ${colorClass}">${news.tag}</span>
                                         <span>${news.date}</span>
                                     </div>
                                     <h2 class="text-xl font-bold text-white mb-3">${news.title}</h2>
@@ -633,7 +659,7 @@
                                         ${news.content}
                                     </div>
                                 </article>
-                            `).join('')}
+                            `}).join('')}
                         </div>
                     </div>
                 </div>
@@ -1221,7 +1247,7 @@
                                         You are logged in as <strong>${discordUser.username}</strong>, but the system cannot verify your membership in the KLM VA Discord.
                                     </p>
                                     <div class="flex gap-3 mt-2">
-                                        <a href="https://discord.gg/Zj9BrrxU" target="_blank" class="text-xs font-bold text-red-700 underline hover:text-red-900">1. Join Server</a>
+                                        <a href="https://discord.gg/vRzmhuEmBQ" target="_blank" class="text-xs font-bold text-red-700 underline hover:text-red-900">1. Join Server</a>
                                         <button onclick="localStorage.removeItem('klm_discord_user'); window.location.href = '${discordAuthUrl}';" class="text-xs font-bold text-blue-600 underline hover:text-blue-800">2. Already a Member? Sync Permissions</button>
                                     </div>
                                 </div>
