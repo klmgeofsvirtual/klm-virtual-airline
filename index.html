@@ -501,7 +501,7 @@
                             </div>
                         </div>
 
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
                             <div class="glass-panel p-8 rounded-3xl text-center animate-slide-up delay-100">
                                 <i data-lucide="plane-takeoff" class="w-8 h-8 text-slate-500 mx-auto mb-4"></i>
                                 <div class="text-slate-400 text-xs font-bold uppercase tracking-[0.2em] mb-2">Total Dispatches</div>
@@ -512,14 +512,6 @@
                                 <i data-lucide="check-circle" class="w-8 h-8 text-klm mx-auto mb-4"></i>
                                 <div class="text-klm text-xs font-bold uppercase tracking-[0.2em] mb-2">Flights Completed</div>
                                 <div id="stat-completed" class="text-5xl font-black text-white drop-shadow-[0_0_15px_rgba(0,161,222,0.5)]">--</div>
-                            </div>
-                            <div class="glass-panel p-8 rounded-3xl text-center animate-slide-up delay-300">
-                                <i data-lucide="award" class="w-8 h-8 text-amber-500 mx-auto mb-4"></i>
-                                <div class="text-slate-400 text-xs font-bold uppercase tracking-[0.2em] mb-2">Assigned Rank</div>
-                                <div id="stat-rank" class="text-2xl font-black text-white mt-4">--</div>
-                                <div class="w-full bg-slate-800 h-1.5 rounded-full mt-4 overflow-hidden">
-                                    <div id="rank-progress" class="bg-amber-500 h-full w-0 transition-all duration-1000"></div>
-                                </div>
                             </div>
                         </div>
 
@@ -648,7 +640,7 @@
                                 return `
                                 <div class="glass-panel rounded-2xl overflow-hidden hover-lift group animate-slide-up" style="animation-delay: ${i*50}ms;">
                                     <div class="h-48 overflow-hidden relative bg-slate-900 border-b border-white/5">
-                                        <img src="${plane.img}" class="w-full h-full object-cover opacity-60 group-hover:opacity-100 group-hover:scale-110 transition duration-700 mix-blend-luminosity group-hover:mix-blend-normal" onerror="this.src='https://upload.wikimedia.org/wikipedia/commons/thumb/a/ac/No_image_available.svg/1024px-No_image_available.svg.png'">
+                                        <img src="${plane.img}" class="w-full h-full object-cover opacity-80 group-hover:opacity-100 group-hover:scale-110 transition duration-700" onerror="this.src='https://upload.wikimedia.org/wikipedia/commons/thumb/a/ac/No_image_available.svg/1024px-No_image_available.svg.png'">
                                         <div class="absolute inset-0 bg-gradient-to-t from-[#020617] via-transparent to-transparent"></div>
                                         <div class="absolute top-4 right-4 ${statusColor} border px-2.5 py-1 rounded text-[10px] font-bold uppercase tracking-widest backdrop-blur-md shadow-sm">
                                             ${plane.status}
@@ -1045,22 +1037,6 @@
 
                 document.getElementById('stat-booked').textContent = totalBookings;
                 document.getElementById('stat-completed').textContent = completed;
-                
-                // Rank calculation
-                let rank = "Trainee";
-                let progress = (completed / 5) * 100;
-                
-                if(completed >= 5) { rank = "Junior Officer"; progress = ((completed-5) / 10) * 100; }
-                if(completed >= 15) { rank = "First Officer"; progress = ((completed-15) / 35) * 100; }
-                if(completed >= 50) { rank = "Captain"; progress = 100; }
-                
-                progress = Math.min(100, Math.max(0, progress)); // clamp 0-100
-                
-                document.getElementById('stat-rank').textContent = rank;
-                setTimeout(() => {
-                    const bar = document.getElementById('rank-progress');
-                    if(bar) bar.style.width = `${progress}%`;
-                }, 100);
 
                 const tb = document.getElementById('profile-logbook-table');
                 if(tb) {
@@ -1442,6 +1418,7 @@
         window.toggleMobileMenu = toggleMobileMenu;
 
         document.getElementById('nav-logo').src = siteImages.logo;
+        document.getElementById('footer-logo').src = siteImages.logo;
         router('home');
     </script>
 </body>
