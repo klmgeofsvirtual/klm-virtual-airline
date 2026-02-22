@@ -515,6 +515,31 @@
                             </div>
                         </div>
 
+                        <!-- Flying Blue Loyalty Card -->
+                        <div class="glass-panel p-8 rounded-3xl mb-8 animate-slide-up delay-200 relative overflow-hidden">
+                            <div class="absolute right-0 top-0 w-64 h-64 bg-klm/5 rounded-full blur-3xl -mr-10 -mt-10 pointer-events-none"></div>
+                            <div class="flex justify-between items-center border-b border-white/5 pb-4 mb-6 relative z-10">
+                                <h3 class="text-xl font-bold text-white flex items-center gap-3">
+                                    <i data-lucide="credit-card" class="text-klm"></i> Flying Blue Loyalty
+                                </h3>
+                                <span id="fb-status-badge" class="px-3 py-1 bg-slate-800 text-slate-400 border border-slate-700 text-[10px] font-bold uppercase tracking-widest rounded-full">Standard Member</span>
+                            </div>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 relative z-10">
+                                <div>
+                                    <div class="text-slate-400 text-[10px] font-bold uppercase tracking-[0.2em] mb-1">Award Miles</div>
+                                    <div id="fb-miles" class="text-4xl font-black text-white">--</div>
+                                </div>
+                                <div>
+                                    <div class="text-slate-400 text-[10px] font-bold uppercase tracking-[0.2em] mb-1">Experience Points (XP)</div>
+                                    <div id="fb-xp" class="text-4xl font-black text-white">--</div>
+                                </div>
+                                <div>
+                                    <div class="text-slate-400 text-[10px] font-bold uppercase tracking-[0.2em] mb-1">Active Boosters</div>
+                                    <div id="fb-booster" class="text-sm font-bold text-slate-500 mt-2">None</div>
+                                </div>
+                            </div>
+                        </div>
+
                         <div class="glass-panel p-8 rounded-3xl animate-slide-up delay-300">
                             <div class="flex justify-between items-center border-b border-white/5 pb-4 mb-6">
                                 <h3 class="text-xl font-bold text-white flex items-center gap-3"><i data-lucide="book" class="text-klm"></i> Recent Logbook</h3>
@@ -1037,6 +1062,33 @@
 
                 document.getElementById('stat-booked').textContent = totalBookings;
                 document.getElementById('stat-completed').textContent = completed;
+
+                // Fetch Flying Blue Data
+                try {
+                    const fbRef = doc(db, "Flying Blue", discordUser.id);
+                    const fbSnap = await getDoc(fbRef);
+                    
+                    if (fbSnap.exists()) {
+                        const fbData = fbSnap.data();
+                        document.getElementById('fb-miles').textContent = (fbData.milesBalance || 0).toLocaleString();
+                        document.getElementById('fb-xp').textContent = (fbData.xp || 0).toLocaleString();
+                        
+                        const now = Date.now();
+                        if (fbData.xpBoosterMultiplier && fbData.xpBoosterExpiry && fbData.xpBoosterExpiry > now) {
+                            document.getElementById('fb-booster').innerHTML = `<span class="text-klm">${fbData.xpBoosterMultiplier}x Multiplier Active</span>`;
+                            document.getElementById('fb-status-badge').className = "px-3 py-1 bg-klm/20 border border-klm/30 text-klm text-[10px] font-bold uppercase tracking-widest rounded-full";
+                            document.getElementById('fb-status-badge').textContent = "Boosted";
+                        } else {
+                            document.getElementById('fb-booster').textContent = "None Active";
+                        }
+                    } else {
+                        document.getElementById('fb-miles').textContent = "0";
+                        document.getElementById('fb-xp').textContent = "0";
+                        document.getElementById('fb-booster').textContent = "None Active";
+                    }
+                } catch(e) {
+                    console.error("Error fetching Flying Blue data", e);
+                }
 
                 const tb = document.getElementById('profile-logbook-table');
                 if(tb) {
