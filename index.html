@@ -520,11 +520,14 @@
                             <div class="absolute right-0 top-0 w-64 h-64 bg-klm/5 rounded-full blur-3xl -mr-10 -mt-10 pointer-events-none"></div>
                             <div class="flex justify-between items-center border-b border-white/5 pb-4 mb-6 relative z-10">
                                 <h3 class="text-xl font-bold text-white flex items-center gap-3">
-                                    <i data-lucide="credit-card" class="text-klm"></i> Flying Blue Loyalty
+                                    <i data-lucide="award" class="text-klm"></i> Flying Blue Loyalty
                                 </h3>
-                                <span id="fb-status-badge" class="px-3 py-1 bg-slate-800 text-slate-400 border border-slate-700 text-[10px] font-bold uppercase tracking-widest rounded-full">Standard Member</span>
+                                <div class="flex items-center gap-2">
+                                    <span id="fb-booster-badge" class="hidden px-3 py-1 bg-klm/20 border border-klm/30 text-klm text-[10px] font-bold uppercase tracking-widest rounded-full">Boosted</span>
+                                    <span id="fb-rank-badge" class="px-3 py-1 bg-slate-800 text-slate-400 border border-slate-700 text-[10px] font-bold uppercase tracking-widest rounded-full">Explorer</span>
+                                </div>
                             </div>
-                            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 relative z-10">
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 relative z-10 mb-8">
                                 <div>
                                     <div class="text-slate-400 text-[10px] font-bold uppercase tracking-[0.2em] mb-1">Award Miles</div>
                                     <div id="fb-miles" class="text-4xl font-black text-white">--</div>
@@ -536,6 +539,17 @@
                                 <div>
                                     <div class="text-slate-400 text-[10px] font-bold uppercase tracking-[0.2em] mb-1">Active Boosters</div>
                                     <div id="fb-booster" class="text-sm font-bold text-slate-500 mt-2">None</div>
+                                </div>
+                            </div>
+                            
+                            <!-- Rank Progress Bar -->
+                            <div class="relative z-10 bg-black/20 p-5 rounded-2xl border border-white/5">
+                                <div class="flex justify-between items-center text-[10px] font-bold uppercase tracking-widest mb-3">
+                                    <span class="text-white flex items-center gap-2" id="fb-current-rank-label">Explorer</span>
+                                    <span class="text-slate-500" id="fb-next-rank-label">Silver (50 XP)</span>
+                                </div>
+                                <div class="w-full bg-slate-900 h-2.5 rounded-full overflow-hidden border border-white/5 shadow-inner">
+                                    <div id="fb-rank-progress" class="bg-klm h-full w-0 transition-all duration-1000 ease-out shadow-[0_0_10px_rgba(255,255,255,0.2)]"></div>
                                 </div>
                             </div>
                         </div>
@@ -1068,24 +1082,102 @@
                     const fbRef = doc(db, "Flying Blue", discordUser.id);
                     const fbSnap = await getDoc(fbRef);
                     
+                    let fbXp = 0;
+                    let fbMiles = 0;
+
                     if (fbSnap.exists()) {
                         const fbData = fbSnap.data();
-                        document.getElementById('fb-miles').textContent = (fbData.milesBalance || 0).toLocaleString();
-                        document.getElementById('fb-xp').textContent = (fbData.xp || 0).toLocaleString();
+                        fbMiles = fbData.milesBalance || 0;
+                        fbXp = fbData.xp || 0;
+                        
+                        document.getElementById('fb-miles').textContent = fbMiles.toLocaleString();
+                        document.getElementById('fb-xp').textContent = fbXp.toLocaleString();
                         
                         const now = Date.now();
+                        const boosterBadge = document.getElementById('fb-booster-badge');
                         if (fbData.xpBoosterMultiplier && fbData.xpBoosterExpiry && fbData.xpBoosterExpiry > now) {
                             document.getElementById('fb-booster').innerHTML = `<span class="text-klm">${fbData.xpBoosterMultiplier}x Multiplier Active</span>`;
-                            document.getElementById('fb-status-badge').className = "px-3 py-1 bg-klm/20 border border-klm/30 text-klm text-[10px] font-bold uppercase tracking-widest rounded-full";
-                            document.getElementById('fb-status-badge').textContent = "Boosted";
+                            if(boosterBadge) boosterBadge.classList.remove('hidden');
                         } else {
                             document.getElementById('fb-booster').textContent = "None Active";
+                            if(boosterBadge) boosterBadge.classList.add('hidden');
                         }
                     } else {
                         document.getElementById('fb-miles').textContent = "0";
                         document.getElementById('fb-xp').textContent = "0";
                         document.getElementById('fb-booster').textContent = "None Active";
                     }
+
+                    // Rank Calculation Logic
+                    let rankName = "Explorer";
+                    let rankBadgeColor = "text-slate-400 bg-slate-800 border-slate-700";
+                    let barColor = "bg-slate-400";
+                    let nextRankText = "Silver (50 XP)";
+                    let rankIcon = "compass";
+                    let progressPct = 0;
+
+                    if (fbXp >= 740) {
+                        rankName = "Ultimate";
+                        rankIcon = "crown";
+                        rankBadgeColor = "text-fuchsia-400 bg-fuchsia-900/30 border-fuchsia-500/50";
+                        barColor = "bg-fuchsia-400";
+                        nextRankText = "Max Rank Reached";
+                        progressPct = 100;
+                    } else if (fbXp >= 290) {
+                        rankName = "Platinum";
+                        rankIcon = "diamond";
+                        rankBadgeColor = "text-cyan-400 bg-cyan-900/30 border-cyan-500/50";
+                        barColor = "bg-cyan-400";
+                        nextRankText = "Ultimate (740 XP)";
+                        progressPct = ((fbXp - 290) / (740 - 290)) * 100;
+                    } else if (fbXp >= 140) {
+                        rankName = "Gold";
+                        rankIcon = "medal";
+                        rankBadgeColor = "text-amber-400 bg-amber-900/30 border-amber-500/50";
+                        barColor = "bg-amber-400";
+                        nextRankText = "Platinum (290 XP)";
+                        progressPct = ((fbXp - 140) / (290 - 140)) * 100;
+                    } else if (fbXp >= 50) {
+                        rankName = "Silver";
+                        rankIcon = "medal";
+                        rankBadgeColor = "text-slate-200 bg-slate-700/50 border-slate-500/50";
+                        barColor = "bg-slate-300";
+                        nextRankText = "Gold (140 XP)";
+                        progressPct = ((fbXp - 50) / (140 - 50)) * 100;
+                    } else {
+                        rankName = "Explorer";
+                        rankIcon = "compass";
+                        rankBadgeColor = "text-emerald-400 bg-emerald-900/30 border-emerald-500/50";
+                        barColor = "bg-emerald-400";
+                        nextRankText = "Silver (50 XP)";
+                        progressPct = (fbXp / 50) * 100;
+                    }
+
+                    const rankBadge = document.getElementById('fb-rank-badge');
+                    if (rankBadge) {
+                        rankBadge.textContent = rankName;
+                        rankBadge.className = `px-3 py-1 text-[10px] font-bold uppercase tracking-widest rounded-full border ${rankBadgeColor}`;
+                    }
+                    
+                    const currentRankLabel = document.getElementById('fb-current-rank-label');
+                    if (currentRankLabel) {
+                        currentRankLabel.innerHTML = `<i data-lucide="${rankIcon}" class="w-3 h-3"></i> ${rankName}`;
+                    }
+                    
+                    const nextRankLabel = document.getElementById('fb-next-rank-label');
+                    if (nextRankLabel) nextRankLabel.textContent = nextRankText;
+                    
+                    setTimeout(() => {
+                        const bar = document.getElementById('fb-rank-progress');
+                        if(bar) {
+                            bar.className = `h-full w-0 transition-all duration-1000 ease-out ${barColor} shadow-[0_0_10px_currentColor]`;
+                            bar.style.width = `${Math.min(100, Math.max(0, progressPct))}%`;
+                        }
+                    }, 100);
+
+                    // Re-initialize dynamic Lucide icons
+                    if (window.lucide) window.lucide.createIcons();
+
                 } catch(e) {
                     console.error("Error fetching Flying Blue data", e);
                 }
