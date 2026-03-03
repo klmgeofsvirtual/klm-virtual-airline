@@ -1,176 +1,447 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>KLM Virtual Airline | Operations Center</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
-    
+
     <!-- Leaflet Map CSS -->
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap"
+        rel="stylesheet">
 
     <style>
-        /* Modernized KLM Brand Colors & Variables */
+        /* ================================================
+           KLM VA Operations Center - Premium Design System
+           ================================================ */
         :root {
-            --klm-blue: #00A1DE; 
+            --klm-blue: #00A1DE;
             --klm-dark: #0077A3;
-            --klm-glow: rgba(0, 161, 222, 0.4);
+            --klm-light: #38bdf8;
+            --klm-glow: rgba(0, 161, 222, 0.5);
+            --klm-glow-soft: rgba(0, 161, 222, 0.15);
             --discord: #5865F2;
             --discord-dark: #4752C4;
-            --bg-base: #020617; /* slate-950 */
+            --bg-base: #020617;
+            --bg-card: rgba(15, 23, 42, 0.5);
+            --border-subtle: rgba(255, 255, 255, 0.06);
+            --border-hover: rgba(255, 255, 255, 0.15);
+            --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
         }
-        
-        body { 
-            font-family: 'Inter', sans-serif; 
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
             background-color: var(--bg-base);
             color: #f8fafc;
             overflow-x: hidden;
+            background-image:
+                radial-gradient(ellipse at 15% 50%, rgba(0, 161, 222, 0.07) 0%, transparent 50%),
+                radial-gradient(ellipse at 85% 20%, rgba(99, 102, 241, 0.05) 0%, transparent 50%),
+                radial-gradient(ellipse at 50% 100%, rgba(0, 161, 222, 0.03) 0%, transparent 40%);
+            background-attachment: fixed;
         }
 
-        /* Custom Scrollbar */
-        ::-webkit-scrollbar { width: 8px; }
-        ::-webkit-scrollbar-track { background: var(--bg-base); }
-        ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: #334155; }
+        /* Smooth Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
 
-        /* Sleek Utility Classes */
-        .text-klm { color: var(--klm-blue); }
-        .bg-klm { background-color: var(--klm-blue); }
-        .glow-klm { box-shadow: 0 0 20px var(--klm-glow); }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(180deg, rgba(0, 161, 222, 0.4), rgba(99, 102, 241, 0.3));
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(0, 161, 222, 0.7);
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        /* Brand Utility Classes */
+        .text-klm {
+            color: var(--klm-blue);
+        }
+
+        .bg-klm {
+            background-color: var(--klm-blue);
+            transition: all 0.3s var(--ease-out-expo);
+        }
+
+        .bg-klm:hover {
+            background-color: var(--klm-light);
+            box-shadow: 0 0 30px var(--klm-glow);
+        }
+
+        .glow-klm {
+            box-shadow: 0 0 40px var(--klm-glow), 0 0 80px rgba(0, 161, 222, 0.15);
+        }
+
         .text-gradient {
             background-clip: text;
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            background-image: linear-gradient(90deg, #fff, #94a3b8);
+            background-image: linear-gradient(135deg, #fff 0%, #94a3b8 100%);
         }
+
         .text-gradient-klm {
             background-clip: text;
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            background-image: linear-gradient(90deg, #00A1DE, #38bdf8);
+            background-image: linear-gradient(135deg, #00A1DE, #38bdf8, #818cf8, #00A1DE);
+            background-size: 300% auto;
+            animation: shimmer 6s ease-in-out infinite;
         }
 
-        /* Glassmorphism Panels */
+        @keyframes shimmer {
+            0% {
+                background-position: 0% 50%;
+            }
+
+            50% {
+                background-position: 100% 50%;
+            }
+
+            100% {
+                background-position: 0% 50%;
+            }
+        }
+
+        /* === GLASSMORPHISM === */
         .glass-panel {
-            background: rgba(15, 23, 42, 0.4);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
-        }
-        .glass-nav {
-            background: rgba(2, 6, 23, 0.8);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            background: linear-gradient(135deg, rgba(15, 23, 42, 0.7) 0%, rgba(15, 23, 42, 0.3) 100%);
+            backdrop-filter: blur(20px) saturate(130%);
+            -webkit-backdrop-filter: blur(20px) saturate(130%);
+            border: 1px solid var(--border-subtle);
+            box-shadow:
+                0 8px 32px rgba(0, 0, 0, 0.3),
+                inset 0 1px 0 rgba(255, 255, 255, 0.05);
+            transition: all 0.5s var(--ease-out-expo);
         }
 
-        /* Animations */
+        .glass-panel:hover {
+            border-color: var(--border-hover);
+            box-shadow:
+                0 16px 48px rgba(0, 0, 0, 0.4),
+                0 0 30px var(--klm-glow-soft),
+                inset 0 1px 0 rgba(255, 255, 255, 0.08);
+            transform: translateY(-4px);
+        }
+
+        .glass-nav {
+            background: rgba(2, 6, 23, 0.75);
+            backdrop-filter: blur(30px) saturate(180%);
+            -webkit-backdrop-filter: blur(30px) saturate(180%);
+            border-bottom: 1px solid var(--border-subtle);
+            transition: all 0.4s ease;
+        }
+
+        /* === ANIMATIONS === */
         .animate-slide-up {
-            animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+            animation: slideUp 0.9s var(--ease-out-expo) forwards;
             opacity: 0;
-            transform: translateY(20px);
+            transform: translateY(40px) scale(0.97);
         }
+
         .animate-fade-in {
-            animation: fadeIn 0.8s ease-out forwards;
+            animation: fadeIn 1.2s var(--ease-out-expo) forwards;
             opacity: 0;
         }
-        
-        /* Staggered animation delays */
-        .delay-100 { animation-delay: 100ms; }
-        .delay-200 { animation-delay: 200ms; }
-        .delay-300 { animation-delay: 300ms; }
+
+        .delay-100 {
+            animation-delay: 120ms;
+        }
+
+        .delay-200 {
+            animation-delay: 240ms;
+        }
+
+        .delay-300 {
+            animation-delay: 360ms;
+        }
 
         @keyframes slideUp {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
+            from {
+                opacity: 0;
+                transform: translateY(40px) scale(0.97);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
         }
+
         @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
+            from {
+                opacity: 0;
+                transform: scale(0.99);
+            }
+
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        /* Breathing ambient glow */
+        @keyframes breathe {
+
+            0%,
+            100% {
+                opacity: 0.3;
+                transform: scale(1);
+            }
+
+            50% {
+                opacity: 0.6;
+                transform: scale(1.15);
+            }
+        }
+
+        .ambient-glow {
+            animation: breathe 10s ease-in-out infinite;
+        }
+
+        /* Floating hero text */
+        @keyframes float {
+
+            0%,
+            100% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(-12px);
+            }
+        }
+
+        .animate-float {
+            animation: float 7s ease-in-out infinite;
+        }
+
+        /* Smooth page transitions */
+        @keyframes pageEnter {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+                filter: blur(4px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+                filter: blur(0);
+            }
+        }
+
+        #app-content>div {
+            animation: pageEnter 0.6s var(--ease-out-expo) forwards;
         }
 
         /* Nav Active State */
-        .nav-link { position: relative; }
+        .nav-link {
+            position: relative;
+            transition: color 0.3s ease;
+            padding-bottom: 6px;
+        }
+
         .nav-link::after {
             content: '';
             position: absolute;
             width: 0%;
             height: 2px;
-            bottom: -4px;
-            left: 0;
-            background-color: var(--klm-blue);
-            transition: width 0.3s ease;
+            bottom: -6px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: linear-gradient(90deg, transparent, var(--klm-blue), transparent);
+            transition: width 0.5s var(--ease-out-expo);
+            border-radius: 4px;
         }
-        .nav-link:hover::after, .nav-link.active::after { width: 100%; }
-        .nav-link.active { color: #fff !important; font-weight: 600; }
 
-        /* Map Styles */
-        #fleet-map { width: 100%; height: 600px; background: #0f172a; z-index: 1; }
+        .nav-link:hover::after,
+        .nav-link.active::after {
+            width: 100%;
+        }
 
-        /* FIDS Board */
+        .nav-link.active {
+            color: #fff !important;
+            font-weight: 600;
+            text-shadow: 0 0 20px var(--klm-glow-soft);
+        }
+
+        .nav-link:hover {
+            color: var(--klm-blue) !important;
+        }
+
+        /* Map */
+        #fleet-map {
+            width: 100%;
+            height: 600px;
+            background: transparent;
+            z-index: 1;
+            border-radius: inherit;
+        }
+
+        /* === FIDS DISPATCH BOARD === */
         .fids-board {
             font-family: 'JetBrains Mono', 'Courier New', Courier, monospace;
-            background: rgba(15, 23, 42, 0.6);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255,255,255,0.05);
-            border-radius: 12px;
+            background: linear-gradient(180deg, rgba(15, 23, 42, 0.85), rgba(2, 6, 23, 0.98));
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 20px;
             overflow: hidden;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            box-shadow:
+                0 25px 60px -15px rgba(0, 0, 0, 0.7),
+                inset 0 1px 0 rgba(255, 255, 255, 0.08),
+                0 0 40px rgba(0, 161, 222, 0.05);
         }
+
         .fids-header {
-            background: rgba(2, 6, 23, 0.8);
+            background: rgba(0, 0, 0, 0.5);
             color: #64748b;
             font-weight: 700;
-            padding: 16px 20px;
+            padding: 18px 24px;
             display: grid;
             grid-template-columns: 1.5fr 1fr 1fr 1.5fr 1fr 1fr;
             text-transform: uppercase;
-            font-size: 0.75rem;
-            letter-spacing: 2px;
-            border-bottom: 1px solid rgba(255,255,255,0.05);
+            font-size: 0.70rem;
+            letter-spacing: 0.18em;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.04);
         }
+
         .fids-row {
-            padding: 16px 20px;
+            padding: 16px 24px;
             display: grid;
             grid-template-columns: 1.5fr 1fr 1fr 1.5fr 1fr 1fr;
             color: #e2e8f0;
-            border-bottom: 1px solid rgba(255,255,255,0.02);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.02);
             font-size: 0.85rem;
             align-items: center;
-            transition: all 0.2s ease;
+            transition: all 0.4s var(--ease-out-expo);
+            position: relative;
+            overflow: hidden;
         }
-        .fids-row:hover { background-color: rgba(255,255,255,0.03); transform: scale(1.01); }
-        .fids-row:last-child { border-bottom: none; }
-        #dispatch-rows { max-height: 350px; overflow-y: auto; }
-        
-        /* Modern Inputs */
+
+        .fids-row::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            height: 100%;
+            width: 3px;
+            background: linear-gradient(180deg, var(--klm-blue), var(--klm-light));
+            transform: scaleY(0);
+            transition: transform 0.4s var(--ease-out-expo);
+            border-radius: 2px;
+        }
+
+        .fids-row::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(90deg, rgba(0, 161, 222, 0.02), transparent);
+            opacity: 0;
+            transition: opacity 0.4s ease;
+        }
+
+        .fids-row:hover {
+            background-color: rgba(255, 255, 255, 0.03);
+            transform: translateX(8px);
+        }
+
+        .fids-row:hover::before {
+            transform: scaleY(1);
+        }
+
+        .fids-row:hover::after {
+            opacity: 1;
+        }
+
+        .fids-row:last-child {
+            border-bottom: none;
+        }
+
+        #dispatch-rows {
+            max-height: 400px;
+            overflow-y: auto;
+            scroll-behavior: smooth;
+        }
+
+        /* === FORM INPUTS === */
         .sleek-input {
-            background: rgba(15, 23, 42, 0.5);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.06);
             color: white;
-            transition: all 0.3s ease;
+            transition: all 0.4s var(--ease-out-expo);
+            border-radius: 12px;
         }
+
         .sleek-input:focus {
             border-color: var(--klm-blue);
-            box-shadow: 0 0 0 2px rgba(0, 161, 222, 0.2);
+            box-shadow:
+                0 0 0 3px rgba(0, 161, 222, 0.15),
+                0 0 20px rgba(0, 161, 222, 0.1),
+                inset 0 1px 0 rgba(255, 255, 255, 0.05);
             outline: none;
+            background: rgba(15, 23, 42, 0.85);
+        }
+
+        /* === HOVER LIFT === */
+        .hover-lift {
+            transition: all 0.5s var(--ease-out-expo);
+        }
+
+        .hover-lift:hover {
+            transform: translateY(-8px);
+            box-shadow:
+                0 24px 48px -12px rgba(0, 0, 0, 0.5),
+                0 0 30px var(--klm-glow-soft);
+        }
+
+        /* === BUTTONS === */
+        button,
+        a {
+            transition: all 0.3s var(--ease-out-expo);
+        }
+
+        button:active {
+            transform: scale(0.97);
         }
     </style>
 </head>
+
 <body class="flex flex-col min-h-screen">
 
     <!-- Background Ambient Glow -->
     <div class="fixed inset-0 z-[-1] pointer-events-none overflow-hidden">
-        <div class="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-klm/10 rounded-full blur-[120px]"></div>
-        <div class="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-indigo-500/10 rounded-full blur-[120px]"></div>
+        <div class="ambient-glow absolute top-[-20%] left-[-15%] w-[65%] h-[65%] rounded-full"
+            style="background: radial-gradient(circle, rgba(0,161,222,0.18) 0%, transparent 70%); filter: blur(80px);">
+        </div>
+        <div class="ambient-glow absolute bottom-[-20%] right-[-15%] w-[65%] h-[65%] rounded-full"
+            style="background: radial-gradient(circle, rgba(99,102,241,0.14) 0%, transparent 70%); filter: blur(80px); animation-delay: -5s;">
+        </div>
+        <div class="absolute top-[40%] left-[50%] w-[40%] h-[40%] rounded-full"
+            style="background: radial-gradient(circle, rgba(0,161,222,0.06) 0%, transparent 70%); filter: blur(100px); animation: breathe 15s ease-in-out infinite; animation-delay: -3s;">
+        </div>
     </div>
 
     <!-- ERROR BANNER -->
-    <div id="db-error-banner" class="hidden bg-red-900/90 backdrop-blur-md border-b border-red-500/50 text-white px-4 py-3 text-center shadow-2xl z-[100] fixed w-full top-0">
+    <div id="db-error-banner"
+        class="hidden bg-red-900/90 backdrop-blur-md border-b border-red-500/50 text-white px-4 py-3 text-center shadow-2xl z-[100] fixed w-full top-0">
         <div class="flex items-center justify-center gap-2">
             <i data-lucide="alert-triangle" class="w-5 h-5 text-red-400"></i>
             <span class="font-bold tracking-wide">SYSTEM ALERT:</span>
@@ -183,7 +454,8 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between h-20">
                 <div class="flex items-center cursor-pointer group" onclick="router('home')">
-                    <img id="nav-logo" src="" alt="KLM Logo" class="h-8 md:h-10 mr-3 brightness-0 invert opacity-90 group-hover:opacity-100 transition-opacity">
+                    <img id="nav-logo" src="" alt="KLM Logo"
+                        class="h-8 md:h-10 mr-3 brightness-0 invert opacity-90 group-hover:opacity-100 transition-opacity">
                     <div class="hidden md:flex flex-col leading-tight border-l border-white/10 pl-3 ml-2">
                         <span class="font-black text-white text-sm tracking-widest uppercase">Operations</span>
                         <span class="text-[10px] text-klm font-bold uppercase tracking-[0.2em]">Command Center</span>
@@ -192,22 +464,34 @@
 
                 <!-- Desktop Menu -->
                 <div class="hidden lg:flex items-center space-x-8">
-                    <button onclick="router('home')" class="nav-link text-slate-300 hover:text-white transition-colors text-sm font-medium py-2">Home</button>
-                    <button onclick="router('booking')" class="nav-link text-slate-300 hover:text-white transition-colors text-sm font-medium py-2">Dispatch</button>
-                    <button onclick="router('livemap')" class="nav-link text-slate-300 hover:text-white transition-colors text-sm font-medium py-2">Live Radar</button>
-                    <button onclick="router('fleet')" class="nav-link text-slate-300 hover:text-white transition-colors text-sm font-medium py-2">Fleet</button>
-                    <button onclick="router('routes')" class="nav-link text-slate-300 hover:text-white transition-colors text-sm font-medium py-2">Network</button>
-                    <button onclick="router('news')" class="nav-link text-slate-300 hover:text-white transition-colors text-sm font-medium py-2">Intel</button>
-                    <button onclick="router('partners')" class="nav-link text-slate-300 hover:text-white transition-colors text-sm font-medium py-2">Partners</button>
-                    
+                    <button onclick="router('home')"
+                        class="nav-link text-slate-300 hover:text-white transition-colors text-sm font-medium py-2">Home</button>
+                    <button onclick="router('booking')"
+                        class="nav-link text-slate-300 hover:text-white transition-colors text-sm font-medium py-2">Dispatch</button>
+                    <button onclick="router('livemap')"
+                        class="nav-link text-slate-300 hover:text-white transition-colors text-sm font-medium py-2">Live
+                        Radar</button>
+                    <button onclick="router('fleet')"
+                        class="nav-link text-slate-300 hover:text-white transition-colors text-sm font-medium py-2">Fleet</button>
+                    <button onclick="router('routes')"
+                        class="nav-link text-slate-300 hover:text-white transition-colors text-sm font-medium py-2">Network</button>
+                    <button onclick="router('news')"
+                        class="nav-link text-slate-300 hover:text-white transition-colors text-sm font-medium py-2">Intel</button>
+                    <button onclick="router('partners')"
+                        class="nav-link text-slate-300 hover:text-white transition-colors text-sm font-medium py-2">Partners</button>
+
                     <div class="h-6 w-px bg-white/10 mx-2"></div>
 
                     <button onclick="router('profile')" class="flex items-center gap-2 group">
-                        <div class="w-8 h-8 rounded-full bg-slate-800 border border-white/10 flex items-center justify-center overflow-hidden group-hover:border-klm transition-colors">
-                            <i id="nav-avatar-fallback" data-lucide="user" class="w-4 h-4 text-slate-400 group-hover:text-klm transition-colors"></i>
+                        <div
+                            class="w-8 h-8 rounded-full bg-slate-800 border border-white/10 flex items-center justify-center overflow-hidden group-hover:border-klm transition-colors">
+                            <i id="nav-avatar-fallback" data-lucide="user"
+                                class="w-4 h-4 text-slate-400 group-hover:text-klm transition-colors"></i>
                             <img id="nav-avatar-img" src="" class="w-full h-full object-cover hidden">
                         </div>
-                        <span id="nav-username" class="text-sm font-medium text-slate-300 group-hover:text-white transition-colors">Pilot Login</span>
+                        <span id="nav-username"
+                            class="text-sm font-medium text-slate-300 group-hover:text-white transition-colors">Pilot
+                            Login</span>
                     </button>
                 </div>
 
@@ -221,14 +505,24 @@
         <!-- Mobile Menu -->
         <div id="mobile-menu" class="hidden lg:hidden glass-nav absolute w-full left-0 z-40 border-b border-white/5">
             <div class="p-4 space-y-1">
-                <button onclick="router('home'); toggleMobileMenu()" class="block w-full text-left px-4 py-3 rounded-lg hover:bg-white/5 font-medium text-white">Home</button>
-                <button onclick="router('profile'); toggleMobileMenu()" class="block w-full text-left px-4 py-3 rounded-lg hover:bg-white/5 font-medium text-klm">Pilot Profile</button>
-                <button onclick="router('booking'); toggleMobileMenu()" class="block w-full text-left px-4 py-3 rounded-lg hover:bg-white/5 font-medium text-slate-300">Dispatch</button>
-                <button onclick="router('livemap'); toggleMobileMenu()" class="block w-full text-left px-4 py-3 rounded-lg hover:bg-white/5 font-medium text-slate-300">Live Radar</button>
-                <button onclick="router('fleet'); toggleMobileMenu()" class="block w-full text-left px-4 py-3 rounded-lg hover:bg-white/5 font-medium text-slate-300">Fleet</button>
-                <button onclick="router('routes'); toggleMobileMenu()" class="block w-full text-left px-4 py-3 rounded-lg hover:bg-white/5 font-medium text-slate-300">Network</button>
-                <button onclick="router('news'); toggleMobileMenu()" class="block w-full text-left px-4 py-3 rounded-lg hover:bg-white/5 font-medium text-slate-300">Intel</button>
-                <button onclick="router('partners'); toggleMobileMenu()" class="block w-full text-left px-4 py-3 rounded-lg hover:bg-white/5 font-medium text-slate-300">Partners</button>
+                <button onclick="router('home'); toggleMobileMenu()"
+                    class="block w-full text-left px-4 py-3 rounded-lg hover:bg-white/5 font-medium text-white">Home</button>
+                <button onclick="router('profile'); toggleMobileMenu()"
+                    class="block w-full text-left px-4 py-3 rounded-lg hover:bg-white/5 font-medium text-klm">Pilot
+                    Profile</button>
+                <button onclick="router('booking'); toggleMobileMenu()"
+                    class="block w-full text-left px-4 py-3 rounded-lg hover:bg-white/5 font-medium text-slate-300">Dispatch</button>
+                <button onclick="router('livemap'); toggleMobileMenu()"
+                    class="block w-full text-left px-4 py-3 rounded-lg hover:bg-white/5 font-medium text-slate-300">Live
+                    Radar</button>
+                <button onclick="router('fleet'); toggleMobileMenu()"
+                    class="block w-full text-left px-4 py-3 rounded-lg hover:bg-white/5 font-medium text-slate-300">Fleet</button>
+                <button onclick="router('routes'); toggleMobileMenu()"
+                    class="block w-full text-left px-4 py-3 rounded-lg hover:bg-white/5 font-medium text-slate-300">Network</button>
+                <button onclick="router('news'); toggleMobileMenu()"
+                    class="block w-full text-left px-4 py-3 rounded-lg hover:bg-white/5 font-medium text-slate-300">Intel</button>
+                <button onclick="router('partners'); toggleMobileMenu()"
+                    class="block w-full text-left px-4 py-3 rounded-lg hover:bg-white/5 font-medium text-slate-300">Partners</button>
             </div>
         </div>
     </nav>
@@ -241,31 +535,46 @@
                 <div class="col-span-1 md:col-span-2">
                     <img id="footer-logo" src="" alt="KLM Logo" class="h-8 mb-6 brightness-0 invert opacity-70">
                     <p class="text-sm leading-relaxed max-w-sm text-slate-400 font-light">
-                        A non-profit virtual aviation community. Setting the standard for realism, discipline, and operational excellence.<br>
+                        A non-profit virtual aviation community. Setting the standard for realism, discipline, and
+                        operational excellence.<br>
                         Not affiliated with KLM Royal Dutch Airlines.
                     </p>
                 </div>
                 <div>
                     <h4 class="text-white font-bold mb-6 uppercase text-xs tracking-[0.2em]">Flight Operations</h4>
                     <ul class="space-y-3 text-sm text-slate-400">
-                        <li><button onclick="router('sop')" class="hover:text-klm transition-colors flex items-center gap-2"><i data-lucide="book-open" class="w-4 h-4"></i> SOP Documentation</button></li>
-                        <li><button onclick="router('fleet')" class="hover:text-klm transition-colors flex items-center gap-2"><i data-lucide="plane" class="w-4 h-4"></i> Fleet Manifest</button></li>
-                        <li><button onclick="router('routes')" class="hover:text-klm transition-colors flex items-center gap-2"><i data-lucide="globe" class="w-4 h-4"></i> Network Hub</button></li>
+                        <li><button onclick="router('sop')"
+                                class="hover:text-klm transition-colors flex items-center gap-2"><i
+                                    data-lucide="book-open" class="w-4 h-4"></i> SOP Documentation</button></li>
+                        <li><button onclick="router('fleet')"
+                                class="hover:text-klm transition-colors flex items-center gap-2"><i data-lucide="plane"
+                                    class="w-4 h-4"></i> Fleet Manifest</button></li>
+                        <li><button onclick="router('routes')"
+                                class="hover:text-klm transition-colors flex items-center gap-2"><i data-lucide="globe"
+                                    class="w-4 h-4"></i> Network Hub</button></li>
                     </ul>
                 </div>
                 <div>
                     <h4 class="text-white font-bold mb-6 uppercase text-xs tracking-[0.2em]">Command Staff</h4>
                     <ul class="space-y-3 text-sm font-mono text-slate-300">
-                        <li class="flex justify-between items-center bg-white/5 px-3 py-2 rounded"><span>mileflight</span> <span class="text-[10px] text-klm uppercase">CEO</span></li>
-                        <li class="flex justify-between items-center bg-white/5 px-3 py-2 rounded"><span>JustFrost</span> <span class="text-[10px] text-slate-400 uppercase">Chairman</span></li>
-                        <li class="flex justify-between items-center bg-white/5 px-3 py-2 rounded"><span>Nihid9044</span> <span class="text-[10px] text-slate-400 uppercase">Chairman</span></li>
+                        <li class="flex justify-between items-center bg-white/5 px-3 py-2 rounded">
+                            <span>mileflight</span> <span class="text-[10px] text-klm uppercase">CEO</span>
+                        </li>
+                        <li class="flex justify-between items-center bg-white/5 px-3 py-2 rounded">
+                            <span>JustFrost</span> <span class="text-[10px] text-slate-400 uppercase">Chairman</span>
+                        </li>
+                        <li class="flex justify-between items-center bg-white/5 px-3 py-2 rounded">
+                            <span>Nihid9044</span> <span class="text-[10px] text-slate-400 uppercase">Chairman</span>
+                        </li>
                     </ul>
                 </div>
             </div>
             <div class="flex flex-col md:flex-row justify-between items-center text-xs text-slate-500 font-mono">
                 <div>&copy; 2026 KLM Virtual Airline Operations.</div>
                 <div class="flex gap-4 mt-4 md:mt-0">
-                    <a href="https://discord.gg/vRzmhuEmBQ" target="_blank" class="hover:text-white transition-colors flex items-center gap-1"><i data-lucide="message-square" class="w-4 h-4"></i> COMMS</a>
+                    <a href="https://discord.gg/vRzmhuEmBQ" target="_blank"
+                        class="hover:text-white transition-colors flex items-center gap-1"><i
+                            data-lucide="message-square" class="w-4 h-4"></i> COMMS</a>
                 </div>
             </div>
         </div>
@@ -290,8 +599,8 @@
             messagingSenderId: "805612664938",
             appId: "1:805612664938:web:7a794aaaa0c184dcf6f213"
         };
-        
-        const REQUIRED_GUILD_ID = "1432591913915125824"; 
+
+        const REQUIRED_GUILD_ID = "1432591913915125824";
 
         let db;
         try {
@@ -304,9 +613,9 @@
             logo: "https://upload.wikimedia.org/wikipedia/commons/c/c7/KLM_logo.svg",
             homeHero: "https://content.r9cdn.net/rimg/dimg/aa/3f/bf32fc29-al-KL-168342f6d92.jpg?width=1366&height=768&xhint=1075&yhint=770&crop=true"
         };
-        
-        let discordUser = null; 
-        
+
+        let discordUser = null;
+
         window.doLogout = () => {
             localStorage.removeItem('klm_discord_user');
             window.location.reload();
@@ -320,20 +629,20 @@
             if (accessToken) {
                 window.history.replaceState({}, document.title, window.location.pathname);
                 fetch('https://discord.com/api/users/@me', { headers: { authorization: `${tokenType} ${accessToken}` } })
-                .then(res => res.json())
-                .then(user => {
-                    return fetch('https://discord.com/api/users/@me/guilds', { headers: { authorization: `${tokenType} ${accessToken}` } })
                     .then(res => res.json())
-                    .then(guilds => {
-                        const isMember = Array.isArray(guilds) && guilds.some(g => g.id === REQUIRED_GUILD_ID);
-                        const userData = { ...user, isMember: isMember };
-                        localStorage.setItem('klm_discord_user', JSON.stringify(userData));
-                        discordUser = userData;
-                        updateNavUser();
-                        if(document.getElementById('login-section')) initBookingPage(); 
-                        if(document.getElementById('profile-content')) initProfile();
-                    });
-                }).catch(console.error);
+                    .then(user => {
+                        return fetch('https://discord.com/api/users/@me/guilds', { headers: { authorization: `${tokenType} ${accessToken}` } })
+                            .then(res => res.json())
+                            .then(guilds => {
+                                const isMember = Array.isArray(guilds) && guilds.some(g => g.id === REQUIRED_GUILD_ID);
+                                const userData = { ...user, isMember: isMember };
+                                localStorage.setItem('klm_discord_user', JSON.stringify(userData));
+                                discordUser = userData;
+                                updateNavUser();
+                                if (document.getElementById('login-section')) initBookingPage();
+                                if (document.getElementById('profile-content')) initProfile();
+                            });
+                    }).catch(console.error);
             } else {
                 const stored = localStorage.getItem('klm_discord_user');
                 if (stored) {
@@ -347,8 +656,8 @@
             const fallback = document.getElementById('nav-avatar-fallback');
             const img = document.getElementById('nav-avatar-img');
             const name = document.getElementById('nav-username');
-            
-            if(discordUser) {
+
+            if (discordUser) {
                 fallback.classList.add('hidden');
                 img.classList.remove('hidden');
                 img.src = `https://cdn.discordapp.com/avatars/${discordUser.id}/${discordUser.avatar}.png`;
@@ -359,7 +668,7 @@
                 name.textContent = "Pilot Login";
             }
         }
-        
+
         checkDiscordAuth();
 
         const fleetData = [
@@ -376,12 +685,12 @@
         ];
 
         const routeData = {
-            "Europe": [ { city: "London Heathrow", code: "EGLL", out: "KL1006, KL1007, KL1008, KL1009, KL1010", in: "KL1001, KL1002, KL1003, KL1004, KL1005" }, { city: "Paris CDG", code: "LFPG", out: "KL1016, KL1017, KL1018, KL1019, KL1020", in: "KL1011, KL1012, KL1013, KL1014, KL1015" }, { city: "Berlin", code: "EDDB", out: "KL1026, KL1027, KL1028, KL1029, KL1030", in: "KL1021, KL1022, KL1023, KL1024, KL1025" }, { city: "Rome", code: "LIRF", out: "KL1036, KL1037, KL1038, KL1039, KL1040", in: "KL1031, KL1032, KL1033, KL1034, KL1035" }, { city: "Madrid", code: "LEMD", out: "KL1046, KL1047, KL1048, KL1049, KL1050", in: "KL1041, KL1042, KL1043, KL1044, KL1045" }, { city: "Vienna", code: "LOWW", out: "KL1056, KL1057, KL1058, KL1059, KL1060", in: "KL1051, KL1052, KL1053, KL1054, KL1055" }, { city: "Brussels", code: "EBBR", out: "KL1066, KL1067, KL1068, KL1069, KL1070", in: "KL1061, KL1062, KL1063, KL1064, KL1065" }, { city: "Zurich", code: "LSZH", out: "KL1076, KL1077, KL1078, KL1079, KL1080", in: "KL1071, KL1072, KL1073, KL1074, KL1075" }, { city: "Geneva", code: "LSGG", out: "KL1086, KL1087, KL1088, KL1089, KL1090", in: "KL1081, KL1082, KL1083, KL1084, KL1085" }, { city: "Stockholm", code: "ESSA", out: "KL1096, KL1097, KL1098, KL1099, KL1100", in: "KL1091, KL1092, KL1093, KL1094, KL1095" }, { city: "Copenhagen", code: "EKCH", out: "KL1106, KL1107, KL1108, KL1109, KL1110", in: "KL1101, KL1102, KL1103, KL1104, KL1105" }, { city: "Oslo", code: "ENGM", out: "KL1116, KL1117, KL1118, KL1119, KL1120", in: "KL1111, KL1112, KL1113, KL1114, KL1115" }, { city: "Helsinki", code: "EFHK", out: "KL1126, KL1127, KL1128, KL1129, KL1130", in: "KL1121, KL1122, KL1123, KL1124, KL1125" }, { city: "Riga", code: "EVRA", out: "KL1136, KL1137, KL1138, KL1139, KL1140", in: "KL1131, KL1132, KL1133, KL1134, KL1135" }, { city: "Tallinn", code: "EETN", out: "KL1146, KL1147, KL1148, KL1149, KL1150", in: "KL1141, KL1142, KL1143, KL1144, KL1145" }, { city: "Vilnius", code: "EYVI", out: "KL1156, KL1157, KL1158, KL1159, KL1160", in: "KL1151, KL1152, KL1153, KL1154, KL1155" }, { city: "Porto", code: "LPPR", out: "KL1166, KL1167, KL1168, KL1169, KL1170", in: "KL1161, KL1162, KL1163, KL1164, KL1165" }, { city: "Lisbon", code: "LPPT", out: "KL1176, KL1177, KL1178, KL1179, KL1180", in: "KL1171, KL1172, KL1173, KL1174, KL1175" }, { city: "Kraków", code: "EPKK", out: "KL1186, KL1187, KL1188, KL1189, KL1190", in: "KL1181, KL1182, KL1183, KL1184, KL1185" }, { city: "Warsaw", code: "EPWA", out: "KL1196, KL1197, KL1198, KL1199, KL1200", in: "KL1191, KL1192, KL1193, KL1194, KL1195" }, { city: "Prague", code: "LKPR", out: "KL1206, KL1207, KL1208, KL1209, KL1210", in: "KL1201, KL1202, KL1203, KL1204, KL1205" }, { city: "Budapest", code: "LHBP", out: "KL1216, KL1217, KL1218, KL1219, KL1220", in: "KL1211, KL1212, KL1213, KL1214, KL1215" }, { city: "Bucharest", code: "LROP", out: "KL1226, KL1227, KL1228, KL1229, KL1230", in: "KL1221, KL1222, KL1223, KL1224, KL1225" }, { city: "Marseille", code: "LFML", out: "KL1236, KL1237, KL1238, KL1239, KL1240", in: "KL1231, KL1232, KL1233, KL1234, KL1235" }, { city: "Nice", code: "LFMN", out: "KL1246, KL1247, KL1248, KL1249, KL1250", in: "KL1241, KL1242, KL1243, KL1244, KL1245" }, { city: "Athens", code: "LGAV", out: "KL1256, KL1257, KL1258, KL1259, KL1260", in: "KL1251, KL1252, KL1253, KL1254, KL1255" } ],
-            "North America": [ { city: "New York JFK", code: "KJFK", out: "KL2006, KL2007, KL2008, KL2009, KL2010", in: "KL2001, KL2002, KL2003, KL2004, KL2005" }, { city: "Atlanta", code: "KATL", out: "KL2016, KL2017, KL2018, KL2019, KL2020", in: "KL2011, KL2012, KL2013, KL2014, KL2015" }, { city: "Los Angeles", code: "KLAX", out: "KL2026, KL2027, KL2028, KL2029, KL2030", in: "KL2021, KL2022, KL2023, KL2024, KL2025" }, { city: "San Francisco", code: "KSFO", out: "KL2036, KL2037, KL2038, KL2039, KL2040", in: "KL2031, KL2032, KL2033, KL2034, KL2035" }, { city: "Chicago", code: "KORD", out: "KL2046, KL2047, KL2048, KL2049, KL2050", in: "KL2041, KL2042, KL2043, KL2044, KL2045" }, { city: "Washington", code: "KIAD", out: "KL2056, KL2057, KL2058, KL2059, KL2060", in: "KL2051, KL2052, KL2053, KL2054, KL2055" }, { city: "Boston", code: "KBOS", out: "KL2066, KL2067, KL2068, KL2069, KL2070", in: "KL2061, KL2062, KL2063, KL2064, KL2065" }, { city: "Houston", code: "KIAH", out: "KL2076, KL2077, KL2078, KL2079, KL2080", in: "KL2071, KL2072, KL2073, KL2074, KL2075" }, { city: "Toronto", code: "CYYZ", out: "KL2086, KL2087, KL2088, KL2089, KL2090", in: "KL2081, KL2082, KL2083, KL2084, KL2085" }, { city: "Montreal", code: "CYUL", out: "KL2096, KL2097, KL2098, KL2099, KL2100", in: "KL2091, KL2092, KL2093, KL2094, KL2095" }, { city: "Calgary", code: "CYYC", out: "KL2106, KL2107, KL2108, KL2109, KL2110", in: "KL2101, KL2102, KL2103, KL2104, KL2105" }, { city: "Vancouver", code: "CYVR", out: "KL2116, KL2117, KL2118, KL2119, KL2120", in: "KL2111, KL2112, KL2113, KL2114, KL2115" }, { city: "Mexico City", code: "MMMX", out: "KL2126, KL2127, KL2128, KL2129, KL2130", in: "KL2121, KL2122, KL2123, KL2124, KL2125" } ],
-             "South America": [ { city: "São Paulo", code: "SBGR", out: "KL3006, KL3007, KL3008, KL3009, KL3010", in: "KL3001, KL3002, KL3003, KL3004, KL3005" }, { city: "Rio de Janeiro", code: "SBGL", out: "KL3016, KL3017, KL3018, KL3019, KL3020", in: "KL3011, KL3012, KL3013, KL3014, KL3015" }, { city: "Buenos Aires", code: "SAEZ", out: "KL3026, KL3027, KL3028, KL3029, KL3030", in: "KL3021, KL3022, KL3023, KL3024, KL3025" }, { city: "Lima", code: "SPJC", out: "KL3036, KL3037, KL3038, KL3039, KL3040", in: "KL3031, KL3032, KL3033, KL3034, KL3035" }, { city: "Bogotá", code: "SKBO", out: "KL3046, KL3047, KL3048, KL3049, KL3050", in: "KL3041, KL3042, KL3043, KL3044, KL3045" }, { city: "Quito", code: "SEQM", out: "KL3056, KL3057, KL3058, KL3059, KL3060", in: "KL3051, KL3052, KL3053, KL3054, KL3055" }, { city: "Guayaquil", code: "SEGU", out: "KL3066, KL3067, KL3068, KL3069, KL3070", in: "KL3061, KL3062, KL3063, KL3064, KL3065" }, { city: "Paramaribo", code: "SMJP", out: "KL3076, KL3077, KL3078, KL3079, KL3080", in: "KL3071, KL3072, KL3073, KL3074, KL3075" }, { city: "Aruba", code: "TNCA", out: "KL3086, KL3087, KL3088, KL3089, KL3090", in: "KL3081, KL3082, KL3083, KL3084, KL3085" }, { city: "Curaçao", code: "TNCC", out: "KL3096, KL3097, KL3098, KL3099, KL3100", in: "KL3091, KL3092, KL3093, KL3094, KL3095" }, { city: "Bonaire", code: "TNCB", out: "KL3106, KL3107, KL3108, KL3109, KL3110", in: "KL3101, KL3102, KL3103, KL3104, KL3105" }, { city: "St. Maarten", code: "TNCM", out: "KL3116, KL3117, KL3118, KL3119, KL3120", in: "KL3111, KL3112, KL3113, KL3114, KL3115" } ],
-            "Africa": [ { city: "Nairobi", code: "HKJK", out: "KL4006, KL4007, KL4008, KL4009, KL4010", in: "KL4001, KL4002, KL4003, KL4004, KL4005" }, { city: "Dar es Salaam", code: "HTDA", out: "KL4016, KL4017, KL4018, KL4019, KL4020", in: "KL4011, KL4012, KL4013, KL4014, KL4015" }, { city: "Johannesburg", code: "FAOR", out: "KL4026, KL4027, KL4028, KL4029, KL4030", in: "KL4021, KL4022, KL4023, KL4024, KL4025" }, { city: "Cape Town", code: "FACT", out: "KL4036, KL4037, KL4038, KL4039, KL4040", in: "KL4031, KL4032, KL4033, KL4034, KL4035" }, { city: "Accra", code: "DGAA", out: "KL4046, KL4047, KL4048, KL4049, KL4050", in: "KL4041, KL4042, KL4043, KL4044, KL4045" }, { city: "Lagos", code: "DNMM", out: "KL4056, KL4057, KL4058, KL4059, KL4060", in: "KL4051, KL4052, KL4053, KL4054, KL4055" }, { city: "Kigali", code: "HRYR", out: "KL4066, KL4067, KL4068, KL4069, KL4070", in: "KL4061, KL4062, KL4063, KL4064, KL4065" }, { city: "Entebbe", code: "HUEN", out: "KL4076, KL4077, KL4078, KL4079, KL4080", in: "KL4071, KL4072, KL4073, KL4074, KL4075" } ],
-            "Asia": [ { city: "Delhi", code: "VIDP", out: "KL5006, KL5007, KL5008, KL5009, KL5010", in: "KL5001, KL5002, KL5003, KL5004, KL5005" }, { city: "Mumbai", code: "VABB", out: "KL5016, KL5017, KL5018, KL5019, KL5020", in: "KL5011, KL5012, KL5013, KL5014, KL5015" }, { city: "Bangalore", code: "VOBL", out: "KL5026, KL5027, KL5028, KL5029, KL5030", in: "KL5021, KL5022, KL5023, KL5024, KL5025" }, { city: "Beijing", code: "ZBAA", out: "KL5036, KL5037, KL5038, KL5039, KL5040", in: "KL5031, KL5032, KL5033, KL5034, KL5035" }, { city: "Shanghai", code: "ZSPD", out: "KL5046, KL5047, KL5048, KL5049, KL5050", in: "KL5041, KL5042, KL5043, KL5044, KL5045" }, { city: "Hong Kong", code: "VHHH", out: "KL5056, KL5057, KL5058, KL5059, KL5060", in: "KL5051, KL5052, KL5053, KL5054, KL5055" }, { city: "Tokyo Narita", code: "RJAA", out: "KL5066, KL5067, KL5068, KL5069, KL5070", in: "KL5061, KL5062, KL5063, KL5064, KL5065" }, { city: "Osaka Kansai", code: "RJBB", out: "KL5076, KL5077, KL5078, KL5079, KL5080", in: "KL5071, KL5072, KL5073, KL5074, KL5075" }, { city: "Seoul Incheon", code: "RKSI", out: "KL5086, KL5087, KL5088, KL5089, KL5090", in: "KL5081, KL5082, KL5083, KL5084, KL5085" }, { city: "Bangkok", code: "VTBS", out: "KL5096, KL5097, KL5098, KL5099, KL5100", in: "KL5091, KL5092, KL5093, KL5094, KL5095" }, { city: "Singapore", code: "WSSS", out: "KL5106, KL5107, KL5108, KL5109, KL5110", in: "KL5101, KL5102, KL5103, KL5104, KL5105" }, { city: "Kuala Lumpur", code: "WMKK", out: "KL5116, KL5117, KL5118, KL5119, KL5120", in: "KL5111, KL5112, KL5113, KL5114, KL5115" }, { city: "Jakarta", code: "WIII", out: "KL5126, KL5127, KL5128, KL5129, KL5130", in: "KL5121, KL5122, KL5123, KL5124, KL5125" }, { city: "Manila", code: "RPLL", out: "KL5136, KL5137, KL5138, KL5139, KL5140", in: "KL5131, KL5132, KL5133, KL5134, KL5135" }, { city: "Taipei", code: "RCTP", out: "KL5146, KL5147, KL5148, KL5149, KL5150", in: "KL5141, KL5142, KL5143, KL5144, KL5145" }, { city: "Denpasar Bali", code: "WADD", out: "KL5156, KL5157, KL5158, KL5159, KL5160", in: "KL5151, KL5152, KL5153, KL5154, KL5155" } ],
-            "Middle East": [ { city: "Dubai", code: "OMDB", out: "KL6006, KL6007, KL6008, KL6009, KL6010", in: "KL6001, KL6002, KL6003, KL6004, KL6005" }, { city: "Abu Dhabi", code: "OMAA", out: "KL6016, KL6017, KL6018, KL6019, KL6020", in: "KL6011, KL6012, KL6013, KL6014, KL6015" }, { city: "Kuwait City", code: "OKBK", out: "KL6026, KL6027, KL6028, KL6029, KL6030", in: "KL6021, KL6022, KL6023, KL6024, KL6025" }, { city: "Doha", code: "OTHH", out: "KL6036, KL6037, KL6038, KL6039, KL6040", in: "KL6031, KL6032, KL6033, KL6034, KL6035" }, { city: "Tel Aviv", code: "LLBG", out: "KL6046, KL6047, KL6048, KL6049, KL6050", in: "KL6041, KL6042, KL6043, KL6044, KL6045" }, { city: "Riyadh", code: "OERK", out: "KL6056, KL6057, KL6058, KL6059, KL6060", in: "KL6051, KL6052, KL6053, KL6054, KL6055" }, { city: "Cairo", code: "HECA", out: "KL6066, KL6067, KL6068, KL6069, KL6070", in: "KL6061, KL6062, KL6063, KL6064, KL6065" } ]
+            "Europe": [{ city: "London Heathrow", code: "EGLL", out: "KL1006, KL1007, KL1008, KL1009, KL1010", in: "KL1001, KL1002, KL1003, KL1004, KL1005" }, { city: "Paris CDG", code: "LFPG", out: "KL1016, KL1017, KL1018, KL1019, KL1020", in: "KL1011, KL1012, KL1013, KL1014, KL1015" }, { city: "Berlin", code: "EDDB", out: "KL1026, KL1027, KL1028, KL1029, KL1030", in: "KL1021, KL1022, KL1023, KL1024, KL1025" }, { city: "Rome", code: "LIRF", out: "KL1036, KL1037, KL1038, KL1039, KL1040", in: "KL1031, KL1032, KL1033, KL1034, KL1035" }, { city: "Madrid", code: "LEMD", out: "KL1046, KL1047, KL1048, KL1049, KL1050", in: "KL1041, KL1042, KL1043, KL1044, KL1045" }, { city: "Vienna", code: "LOWW", out: "KL1056, KL1057, KL1058, KL1059, KL1060", in: "KL1051, KL1052, KL1053, KL1054, KL1055" }, { city: "Brussels", code: "EBBR", out: "KL1066, KL1067, KL1068, KL1069, KL1070", in: "KL1061, KL1062, KL1063, KL1064, KL1065" }, { city: "Zurich", code: "LSZH", out: "KL1076, KL1077, KL1078, KL1079, KL1080", in: "KL1071, KL1072, KL1073, KL1074, KL1075" }, { city: "Geneva", code: "LSGG", out: "KL1086, KL1087, KL1088, KL1089, KL1090", in: "KL1081, KL1082, KL1083, KL1084, KL1085" }, { city: "Stockholm", code: "ESSA", out: "KL1096, KL1097, KL1098, KL1099, KL1100", in: "KL1091, KL1092, KL1093, KL1094, KL1095" }, { city: "Copenhagen", code: "EKCH", out: "KL1106, KL1107, KL1108, KL1109, KL1110", in: "KL1101, KL1102, KL1103, KL1104, KL1105" }, { city: "Oslo", code: "ENGM", out: "KL1116, KL1117, KL1118, KL1119, KL1120", in: "KL1111, KL1112, KL1113, KL1114, KL1115" }, { city: "Helsinki", code: "EFHK", out: "KL1126, KL1127, KL1128, KL1129, KL1130", in: "KL1121, KL1122, KL1123, KL1124, KL1125" }, { city: "Riga", code: "EVRA", out: "KL1136, KL1137, KL1138, KL1139, KL1140", in: "KL1131, KL1132, KL1133, KL1134, KL1135" }, { city: "Tallinn", code: "EETN", out: "KL1146, KL1147, KL1148, KL1149, KL1150", in: "KL1141, KL1142, KL1143, KL1144, KL1145" }, { city: "Vilnius", code: "EYVI", out: "KL1156, KL1157, KL1158, KL1159, KL1160", in: "KL1151, KL1152, KL1153, KL1154, KL1155" }, { city: "Porto", code: "LPPR", out: "KL1166, KL1167, KL1168, KL1169, KL1170", in: "KL1161, KL1162, KL1163, KL1164, KL1165" }, { city: "Lisbon", code: "LPPT", out: "KL1176, KL1177, KL1178, KL1179, KL1180", in: "KL1171, KL1172, KL1173, KL1174, KL1175" }, { city: "Kraków", code: "EPKK", out: "KL1186, KL1187, KL1188, KL1189, KL1190", in: "KL1181, KL1182, KL1183, KL1184, KL1185" }, { city: "Warsaw", code: "EPWA", out: "KL1196, KL1197, KL1198, KL1199, KL1200", in: "KL1191, KL1192, KL1193, KL1194, KL1195" }, { city: "Prague", code: "LKPR", out: "KL1206, KL1207, KL1208, KL1209, KL1210", in: "KL1201, KL1202, KL1203, KL1204, KL1205" }, { city: "Budapest", code: "LHBP", out: "KL1216, KL1217, KL1218, KL1219, KL1220", in: "KL1211, KL1212, KL1213, KL1214, KL1215" }, { city: "Bucharest", code: "LROP", out: "KL1226, KL1227, KL1228, KL1229, KL1230", in: "KL1221, KL1222, KL1223, KL1224, KL1225" }, { city: "Marseille", code: "LFML", out: "KL1236, KL1237, KL1238, KL1239, KL1240", in: "KL1231, KL1232, KL1233, KL1234, KL1235" }, { city: "Nice", code: "LFMN", out: "KL1246, KL1247, KL1248, KL1249, KL1250", in: "KL1241, KL1242, KL1243, KL1244, KL1245" }, { city: "Athens", code: "LGAV", out: "KL1256, KL1257, KL1258, KL1259, KL1260", in: "KL1251, KL1252, KL1253, KL1254, KL1255" }],
+            "North America": [{ city: "New York JFK", code: "KJFK", out: "KL2006, KL2007, KL2008, KL2009, KL2010", in: "KL2001, KL2002, KL2003, KL2004, KL2005" }, { city: "Atlanta", code: "KATL", out: "KL2016, KL2017, KL2018, KL2019, KL2020", in: "KL2011, KL2012, KL2013, KL2014, KL2015" }, { city: "Los Angeles", code: "KLAX", out: "KL2026, KL2027, KL2028, KL2029, KL2030", in: "KL2021, KL2022, KL2023, KL2024, KL2025" }, { city: "San Francisco", code: "KSFO", out: "KL2036, KL2037, KL2038, KL2039, KL2040", in: "KL2031, KL2032, KL2033, KL2034, KL2035" }, { city: "Chicago", code: "KORD", out: "KL2046, KL2047, KL2048, KL2049, KL2050", in: "KL2041, KL2042, KL2043, KL2044, KL2045" }, { city: "Washington", code: "KIAD", out: "KL2056, KL2057, KL2058, KL2059, KL2060", in: "KL2051, KL2052, KL2053, KL2054, KL2055" }, { city: "Boston", code: "KBOS", out: "KL2066, KL2067, KL2068, KL2069, KL2070", in: "KL2061, KL2062, KL2063, KL2064, KL2065" }, { city: "Houston", code: "KIAH", out: "KL2076, KL2077, KL2078, KL2079, KL2080", in: "KL2071, KL2072, KL2073, KL2074, KL2075" }, { city: "Toronto", code: "CYYZ", out: "KL2086, KL2087, KL2088, KL2089, KL2090", in: "KL2081, KL2082, KL2083, KL2084, KL2085" }, { city: "Montreal", code: "CYUL", out: "KL2096, KL2097, KL2098, KL2099, KL2100", in: "KL2091, KL2092, KL2093, KL2094, KL2095" }, { city: "Calgary", code: "CYYC", out: "KL2106, KL2107, KL2108, KL2109, KL2110", in: "KL2101, KL2102, KL2103, KL2104, KL2105" }, { city: "Vancouver", code: "CYVR", out: "KL2116, KL2117, KL2118, KL2119, KL2120", in: "KL2111, KL2112, KL2113, KL2114, KL2115" }, { city: "Mexico City", code: "MMMX", out: "KL2126, KL2127, KL2128, KL2129, KL2130", in: "KL2121, KL2122, KL2123, KL2124, KL2125" }],
+            "South America": [{ city: "São Paulo", code: "SBGR", out: "KL3006, KL3007, KL3008, KL3009, KL3010", in: "KL3001, KL3002, KL3003, KL3004, KL3005" }, { city: "Rio de Janeiro", code: "SBGL", out: "KL3016, KL3017, KL3018, KL3019, KL3020", in: "KL3011, KL3012, KL3013, KL3014, KL3015" }, { city: "Buenos Aires", code: "SAEZ", out: "KL3026, KL3027, KL3028, KL3029, KL3030", in: "KL3021, KL3022, KL3023, KL3024, KL3025" }, { city: "Lima", code: "SPJC", out: "KL3036, KL3037, KL3038, KL3039, KL3040", in: "KL3031, KL3032, KL3033, KL3034, KL3035" }, { city: "Bogotá", code: "SKBO", out: "KL3046, KL3047, KL3048, KL3049, KL3050", in: "KL3041, KL3042, KL3043, KL3044, KL3045" }, { city: "Quito", code: "SEQM", out: "KL3056, KL3057, KL3058, KL3059, KL3060", in: "KL3051, KL3052, KL3053, KL3054, KL3055" }, { city: "Guayaquil", code: "SEGU", out: "KL3066, KL3067, KL3068, KL3069, KL3070", in: "KL3061, KL3062, KL3063, KL3064, KL3065" }, { city: "Paramaribo", code: "SMJP", out: "KL3076, KL3077, KL3078, KL3079, KL3080", in: "KL3071, KL3072, KL3073, KL3074, KL3075" }, { city: "Aruba", code: "TNCA", out: "KL3086, KL3087, KL3088, KL3089, KL3090", in: "KL3081, KL3082, KL3083, KL3084, KL3085" }, { city: "Curaçao", code: "TNCC", out: "KL3096, KL3097, KL3098, KL3099, KL3100", in: "KL3091, KL3092, KL3093, KL3094, KL3095" }, { city: "Bonaire", code: "TNCB", out: "KL3106, KL3107, KL3108, KL3109, KL3110", in: "KL3101, KL3102, KL3103, KL3104, KL3105" }, { city: "St. Maarten", code: "TNCM", out: "KL3116, KL3117, KL3118, KL3119, KL3120", in: "KL3111, KL3112, KL3113, KL3114, KL3115" }],
+            "Africa": [{ city: "Nairobi", code: "HKJK", out: "KL4006, KL4007, KL4008, KL4009, KL4010", in: "KL4001, KL4002, KL4003, KL4004, KL4005" }, { city: "Dar es Salaam", code: "HTDA", out: "KL4016, KL4017, KL4018, KL4019, KL4020", in: "KL4011, KL4012, KL4013, KL4014, KL4015" }, { city: "Johannesburg", code: "FAOR", out: "KL4026, KL4027, KL4028, KL4029, KL4030", in: "KL4021, KL4022, KL4023, KL4024, KL4025" }, { city: "Cape Town", code: "FACT", out: "KL4036, KL4037, KL4038, KL4039, KL4040", in: "KL4031, KL4032, KL4033, KL4034, KL4035" }, { city: "Accra", code: "DGAA", out: "KL4046, KL4047, KL4048, KL4049, KL4050", in: "KL4041, KL4042, KL4043, KL4044, KL4045" }, { city: "Lagos", code: "DNMM", out: "KL4056, KL4057, KL4058, KL4059, KL4060", in: "KL4051, KL4052, KL4053, KL4054, KL4055" }, { city: "Kigali", code: "HRYR", out: "KL4066, KL4067, KL4068, KL4069, KL4070", in: "KL4061, KL4062, KL4063, KL4064, KL4065" }, { city: "Entebbe", code: "HUEN", out: "KL4076, KL4077, KL4078, KL4079, KL4080", in: "KL4071, KL4072, KL4073, KL4074, KL4075" }],
+            "Asia": [{ city: "Delhi", code: "VIDP", out: "KL5006, KL5007, KL5008, KL5009, KL5010", in: "KL5001, KL5002, KL5003, KL5004, KL5005" }, { city: "Mumbai", code: "VABB", out: "KL5016, KL5017, KL5018, KL5019, KL5020", in: "KL5011, KL5012, KL5013, KL5014, KL5015" }, { city: "Bangalore", code: "VOBL", out: "KL5026, KL5027, KL5028, KL5029, KL5030", in: "KL5021, KL5022, KL5023, KL5024, KL5025" }, { city: "Beijing", code: "ZBAA", out: "KL5036, KL5037, KL5038, KL5039, KL5040", in: "KL5031, KL5032, KL5033, KL5034, KL5035" }, { city: "Shanghai", code: "ZSPD", out: "KL5046, KL5047, KL5048, KL5049, KL5050", in: "KL5041, KL5042, KL5043, KL5044, KL5045" }, { city: "Hong Kong", code: "VHHH", out: "KL5056, KL5057, KL5058, KL5059, KL5060", in: "KL5051, KL5052, KL5053, KL5054, KL5055" }, { city: "Tokyo Narita", code: "RJAA", out: "KL5066, KL5067, KL5068, KL5069, KL5070", in: "KL5061, KL5062, KL5063, KL5064, KL5065" }, { city: "Osaka Kansai", code: "RJBB", out: "KL5076, KL5077, KL5078, KL5079, KL5080", in: "KL5071, KL5072, KL5073, KL5074, KL5075" }, { city: "Seoul Incheon", code: "RKSI", out: "KL5086, KL5087, KL5088, KL5089, KL5090", in: "KL5081, KL5082, KL5083, KL5084, KL5085" }, { city: "Bangkok", code: "VTBS", out: "KL5096, KL5097, KL5098, KL5099, KL5100", in: "KL5091, KL5092, KL5093, KL5094, KL5095" }, { city: "Singapore", code: "WSSS", out: "KL5106, KL5107, KL5108, KL5109, KL5110", in: "KL5101, KL5102, KL5103, KL5104, KL5105" }, { city: "Kuala Lumpur", code: "WMKK", out: "KL5116, KL5117, KL5118, KL5119, KL5120", in: "KL5111, KL5112, KL5113, KL5114, KL5115" }, { city: "Jakarta", code: "WIII", out: "KL5126, KL5127, KL5128, KL5129, KL5130", in: "KL5121, KL5122, KL5123, KL5124, KL5125" }, { city: "Manila", code: "RPLL", out: "KL5136, KL5137, KL5138, KL5139, KL5140", in: "KL5131, KL5132, KL5133, KL5134, KL5135" }, { city: "Taipei", code: "RCTP", out: "KL5146, KL5147, KL5148, KL5149, KL5150", in: "KL5141, KL5142, KL5143, KL5144, KL5145" }, { city: "Denpasar Bali", code: "WADD", out: "KL5156, KL5157, KL5158, KL5159, KL5160", in: "KL5151, KL5152, KL5153, KL5154, KL5155" }],
+            "Middle East": [{ city: "Dubai", code: "OMDB", out: "KL6006, KL6007, KL6008, KL6009, KL6010", in: "KL6001, KL6002, KL6003, KL6004, KL6005" }, { city: "Abu Dhabi", code: "OMAA", out: "KL6016, KL6017, KL6018, KL6019, KL6020", in: "KL6011, KL6012, KL6013, KL6014, KL6015" }, { city: "Kuwait City", code: "OKBK", out: "KL6026, KL6027, KL6028, KL6029, KL6030", in: "KL6021, KL6022, KL6023, KL6024, KL6025" }, { city: "Doha", code: "OTHH", out: "KL6036, KL6037, KL6038, KL6039, KL6040", in: "KL6031, KL6032, KL6033, KL6034, KL6035" }, { city: "Tel Aviv", code: "LLBG", out: "KL6046, KL6047, KL6048, KL6049, KL6050", in: "KL6041, KL6042, KL6043, KL6044, KL6045" }, { city: "Riyadh", code: "OERK", out: "KL6056, KL6057, KL6058, KL6059, KL6060", in: "KL6051, KL6052, KL6053, KL6054, KL6055" }, { city: "Cairo", code: "HECA", out: "KL6066, KL6067, KL6068, KL6069, KL6070", in: "KL6061, KL6062, KL6063, KL6064, KL6065" }]
         };
 
         const newsData = [
@@ -423,7 +732,7 @@
                     </div>
                     
                     <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 flex-grow flex flex-col justify-center animate-slide-up">
-                        <h1 class="text-6xl md:text-8xl font-black tracking-tighter mb-6 leading-none text-white drop-shadow-2xl">
+                        <h1 class="text-6xl md:text-8xl font-black tracking-tighter mb-6 leading-none text-white drop-shadow-2xl animate-float">
                             Flying the World, <br><span class="text-gradient-klm glow-klm">Virtually.</span>
                         </h1>
                         <p class="text-xl text-slate-300 mb-12 max-w-2xl font-light leading-relaxed">
@@ -578,7 +887,7 @@
                     </div>
                 </div>
             `,
-            
+
             condolences: `
                 <div class="relative min-h-[80vh] flex flex-col justify-center py-24 animate-fade-in">
                     <!-- Subtle memorial background -->
@@ -643,9 +952,9 @@
                         
                         <div class="space-y-6">
                             ${newsData.map((news, i) => {
-                                const colorClass = getTagColor(news.tag);
-                                const delay = 100 + (Math.min(i, 5) * 100);
-                                return `
+                const colorClass = getTagColor(news.tag);
+                const delay = 100 + (Math.min(i, 5) * 100);
+                return `
                                 <article class="glass-panel rounded-2xl p-6 border-l-2 ${colorClass.split(' ')[0]} animate-slide-up" style="animation-delay: ${delay}ms;">
                                     <div class="flex items-center gap-3 mb-4 text-[10px] font-mono uppercase tracking-widest">
                                         <span class="font-bold px-2.5 py-1 rounded-sm border ${colorClass}">${news.tag}</span>
@@ -672,12 +981,12 @@
                         
                         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                             ${fleetData.map((plane, i) => {
-                                let statusColor = plane.status === 'Active' ? 'text-emerald-400 border-emerald-500/30 bg-emerald-500/10' : 
-                                                  plane.status === 'Phasing Out' ? 'text-amber-400 border-amber-500/30 bg-amber-500/10' : 
-                                                  plane.status === 'LTRP' ? 'text-purple-400 border-purple-500/30 bg-purple-500/10' :
-                                                  'text-indigo-400 border-indigo-500/30 bg-indigo-500/10';
-                                return `
-                                <div class="glass-panel rounded-2xl overflow-hidden hover-lift group animate-slide-up" style="animation-delay: ${i*50}ms;">
+                let statusColor = plane.status === 'Active' ? 'text-emerald-400 border-emerald-500/30 bg-emerald-500/10' :
+                    plane.status === 'Phasing Out' ? 'text-amber-400 border-amber-500/30 bg-amber-500/10' :
+                        plane.status === 'LTRP' ? 'text-purple-400 border-purple-500/30 bg-purple-500/10' :
+                            'text-indigo-400 border-indigo-500/30 bg-indigo-500/10';
+                return `
+                                <div class="glass-panel rounded-2xl overflow-hidden hover-lift group animate-slide-up" style="animation-delay: ${i * 50}ms;">
                                     <div class="h-48 overflow-hidden relative bg-slate-900 border-b border-white/5">
                                         <img src="${plane.img}" class="w-full h-full object-cover opacity-80 group-hover:opacity-100 group-hover:scale-110 transition duration-700" onerror="this.src='https://upload.wikimedia.org/wikipedia/commons/thumb/a/ac/No_image_available.svg/1024px-No_image_available.svg.png'">
                                         <div class="absolute inset-0 bg-gradient-to-t from-[#020617] via-transparent to-transparent"></div>
@@ -698,7 +1007,7 @@
                                     </div>
                                 </div>
                                 `
-                            }).join('')}
+            }).join('')}
                         </div>
                     </div>
                 </div>
@@ -1021,7 +1330,7 @@
 
         // --- PROFILE / FIREBASE LOGIC ---
         async function initProfile() {
-            if(!discordUser) {
+            if (!discordUser) {
                 document.getElementById('profile-login-prompt')?.classList.remove('hidden');
                 document.getElementById('profile-content')?.classList.add('hidden');
                 return;
@@ -1033,34 +1342,34 @@
             document.getElementById('profile-name').textContent = discordUser.username;
             document.getElementById('profile-id').textContent = discordUser.id.substring(0, 8); // Just show a part of it
 
-            if(!db) return;
+            if (!db) return;
 
             try {
                 // Fetch bookings for this pilot
                 const q = query(collection(db, "bookings"), where("pilot.discordId", "==", discordUser.id));
                 const snapshot = await getDocs(q);
-                
+
                 // Sort client-side to avoid needing composite indexes on firebase
                 const logs = [];
                 snapshot.forEach(doc => logs.push(doc.data()));
-                logs.sort((a,b) => (b.createdAt?.toMillis() || 0) - (a.createdAt?.toMillis() || 0));
+                logs.sort((a, b) => (b.createdAt?.toMillis() || 0) - (a.createdAt?.toMillis() || 0));
 
                 const totalBookings = logs.length;
                 let completed = 0;
                 let logbookHTML = '';
 
                 logs.forEach((data, index) => {
-                    if(data.status === 'LOGGED' || data.status === 'ARRIVED') completed++;
-                    
-                    if(index < 5) { // Show top 5 recent
+                    if (data.status === 'LOGGED' || data.status === 'ARRIVED') completed++;
+
+                    if (index < 5) { // Show top 5 recent
                         let dateStr = '--/--';
                         if (data.scheduledDeparture) {
-                            try { dateStr = new Date(data.scheduledDeparture).toLocaleDateString('en-GB', {day: '2-digit', month: 'short'}).toUpperCase(); } catch (e) {}
+                            try { dateStr = new Date(data.scheduledDeparture).toLocaleDateString('en-GB', { day: '2-digit', month: 'short' }).toUpperCase(); } catch (e) { }
                         }
-                        
+
                         let statusColor = 'text-slate-400';
-                        if(data.status === 'LOGGED' || data.status === 'ARRIVED') statusColor = 'text-klm';
-                        if(data.status === 'BOOKED') statusColor = 'text-emerald-400';
+                        if (data.status === 'LOGGED' || data.status === 'ARRIVED') statusColor = 'text-klm';
+                        if (data.status === 'BOOKED') statusColor = 'text-emerald-400';
 
                         logbookHTML += `
                             <tr class="border-b border-white/5 hover:bg-white/5 transition-colors">
@@ -1081,7 +1390,7 @@
                 try {
                     const fbRef = doc(db, "Flying Blue", discordUser.id);
                     const fbSnap = await getDoc(fbRef);
-                    
+
                     let fbXp = 0;
                     let fbMiles = 0;
 
@@ -1089,18 +1398,18 @@
                         const fbData = fbSnap.data();
                         fbMiles = fbData.milesBalance || 0;
                         fbXp = fbData.xp || 0;
-                        
+
                         document.getElementById('fb-miles').textContent = fbMiles.toLocaleString();
                         document.getElementById('fb-xp').textContent = fbXp.toLocaleString();
-                        
+
                         const now = Date.now();
                         const boosterBadge = document.getElementById('fb-booster-badge');
                         if (fbData.xpBoosterMultiplier && fbData.xpBoosterExpiry && fbData.xpBoosterExpiry > now) {
                             document.getElementById('fb-booster').innerHTML = `<span class="text-klm">${fbData.xpBoosterMultiplier}x Multiplier Active</span>`;
-                            if(boosterBadge) boosterBadge.classList.remove('hidden');
+                            if (boosterBadge) boosterBadge.classList.remove('hidden');
                         } else {
                             document.getElementById('fb-booster').textContent = "None Active";
-                            if(boosterBadge) boosterBadge.classList.add('hidden');
+                            if (boosterBadge) boosterBadge.classList.add('hidden');
                         }
                     } else {
                         document.getElementById('fb-miles').textContent = "0";
@@ -1158,18 +1467,18 @@
                         rankBadge.textContent = rankName;
                         rankBadge.className = `px-3 py-1 text-[10px] font-bold uppercase tracking-widest rounded-full border ${rankBadgeColor}`;
                     }
-                    
+
                     const currentRankLabel = document.getElementById('fb-current-rank-label');
                     if (currentRankLabel) {
                         currentRankLabel.innerHTML = `<i data-lucide="${rankIcon}" class="w-3 h-3"></i> ${rankName}`;
                     }
-                    
+
                     const nextRankLabel = document.getElementById('fb-next-rank-label');
                     if (nextRankLabel) nextRankLabel.textContent = nextRankText;
-                    
+
                     setTimeout(() => {
                         const bar = document.getElementById('fb-rank-progress');
-                        if(bar) {
+                        if (bar) {
                             bar.className = `h-full w-0 transition-all duration-1000 ease-out ${barColor} shadow-[0_0_10px_currentColor]`;
                             bar.style.width = `${Math.min(100, Math.max(0, progressPct))}%`;
                         }
@@ -1178,20 +1487,20 @@
                     // Re-initialize dynamic Lucide icons
                     if (window.lucide) window.lucide.createIcons();
 
-                } catch(e) {
+                } catch (e) {
                     console.error("Error fetching Flying Blue data", e);
                 }
 
                 const tb = document.getElementById('profile-logbook-table');
-                if(tb) {
-                    if(logs.length === 0) tb.innerHTML = `<tr><td colspan="5" class="py-8 text-center text-slate-500">No flight records found in the database.</td></tr>`;
+                if (tb) {
+                    if (logs.length === 0) tb.innerHTML = `<tr><td colspan="5" class="py-8 text-center text-slate-500">No flight records found in the database.</td></tr>`;
                     else tb.innerHTML = logbookHTML;
                 }
 
             } catch (e) {
                 console.error("Error fetching profile stats", e);
                 const tb = document.getElementById('profile-logbook-table');
-                if(tb) tb.innerHTML = `<tr><td colspan="5" class="py-8 text-center text-red-400">Database connection error.</td></tr>`;
+                if (tb) tb.innerHTML = `<tr><td colspan="5" class="py-8 text-center text-red-400">Database connection error.</td></tr>`;
             }
         }
 
@@ -1219,7 +1528,7 @@
             if (localStorage.getItem('klm_condolence_submitted')) {
                 const btn = document.getElementById('condolence-btn');
                 const btnText = document.getElementById('condolence-btn-text');
-                if(btn && btnText) { btn.disabled = true; btnText.textContent = "Respects Paid"; }
+                if (btn && btnText) { btn.disabled = true; btnText.textContent = "Respects Paid"; }
             }
             condolenceUnsubscribe = onSnapshot(ref, (docSnap) => {
                 const countEl = document.getElementById('condolence-count');
@@ -1228,7 +1537,7 @@
         }
 
         // --- ROUTER LOGIC ---
-        let dispatchUnsubscribe = null; 
+        let dispatchUnsubscribe = null;
 
         function router(pageName) {
             if (dispatchUnsubscribe) { dispatchUnsubscribe(); dispatchUnsubscribe = null; }
@@ -1236,7 +1545,7 @@
 
             const contentDiv = document.getElementById('app-content');
             contentDiv.innerHTML = pages[pageName] || pages['home'];
-            
+
             if (pageName === 'routes') { setTimeout(() => { initFleetMap(); renderRouteGrid('Europe'); }, 100); }
             if (pageName === 'booking') { setTimeout(initBookingPage, 100); }
             if (pageName === 'home') { setTimeout(initDispatchBoard, 500); }
@@ -1245,9 +1554,9 @@
 
             lucide.createIcons();
             window.scrollTo(0, 0);
-            
+
             document.querySelectorAll('.nav-link').forEach(btn => {
-                if(btn.getAttribute('onclick').includes(pageName)) {
+                if (btn.getAttribute('onclick').includes(pageName)) {
                     btn.classList.add('active');
                 } else {
                     btn.classList.remove('active');
@@ -1267,11 +1576,11 @@
             const bookingFormBtn = document.querySelector('#booking-form button[type="submit"]');
 
             const regions = Object.keys(routeData);
-            if(regionSelect) regionSelect.innerHTML = regions.map(r => `<option value="${r}">${r}</option>`).join('');
-            if(acSelect) acSelect.innerHTML = fleetData.filter(f => f.status === 'Active' || f.status === 'Phasing Out' || f.status === 'LTRP').map(f => `<option value="${f.type}">${f.type}</option>`).join('');
-            
-            if(loginSection) {
-                if(discordUser) {
+            if (regionSelect) regionSelect.innerHTML = regions.map(r => `<option value="${r}">${r}</option>`).join('');
+            if (acSelect) acSelect.innerHTML = fleetData.filter(f => f.status === 'Active' || f.status === 'Phasing Out' || f.status === 'LTRP').map(f => `<option value="${f.type}">${f.type}</option>`).join('');
+
+            if (loginSection) {
+                if (discordUser) {
                     if (discordUser.isMember) {
                         loginSection.innerHTML = `
                             <div class="flex items-center gap-4 bg-emerald-500/10 p-5 rounded-2xl border border-emerald-500/20">
@@ -1283,10 +1592,10 @@
                                  </div>
                             </div>
                         `;
-                        if(bookingFormBtn) { bookingFormBtn.disabled = false; }
+                        if (bookingFormBtn) { bookingFormBtn.disabled = false; }
                     } else {
                         const discordAuthUrl = "https://discord.com/oauth2/authorize?client_id=1464272995542634566&response_type=token&redirect_uri=https%3A%2F%2Fklmgeofsvirtual.github.io%2Fklm-virtual-airline%2F&scope=identify+guilds";
-                         loginSection.innerHTML = `
+                        loginSection.innerHTML = `
                             <div class="bg-red-500/10 p-5 rounded-2xl border border-red-500/20 flex flex-col md:flex-row md:items-center gap-4">
                                 <i data-lucide="alert-circle" class="w-8 h-8 text-red-500 shrink-0"></i>
                                 <div>
@@ -1299,7 +1608,7 @@
                                 </div>
                             </div>
                         `;
-                        if(bookingFormBtn) { bookingFormBtn.disabled = true; }
+                        if (bookingFormBtn) { bookingFormBtn.disabled = true; }
                     }
                     lucide.createIcons();
                 } else {
@@ -1319,7 +1628,7 @@
             currentDirection = dir;
             const btnOut = document.getElementById('btn-out');
             const btnIn = document.getElementById('btn-in');
-            if(dir === 'out') {
+            if (dir === 'out') {
                 btnOut.className = "flex-1 py-2 rounded-md font-bold text-xs uppercase tracking-wide bg-klm text-white shadow-lg transition-all";
                 btnIn.className = "flex-1 py-2 rounded-md font-bold text-xs uppercase tracking-wide text-slate-500 hover:text-white transition-all";
             } else {
@@ -1333,14 +1642,14 @@
         function updateDestinations() {
             const region = document.getElementById('region-select').value;
             const destSelect = document.getElementById('dest-select');
-            if(routeData[region]) {
+            if (routeData[region]) {
                 bookingRouteList = routeData[region];
                 destSelect.innerHTML = bookingRouteList.map((route, index) => `<option value="${index}">${route.city} (${route.code})</option>`).join('');
                 updateFlightDetails();
             }
         }
         window.updateDestinations = updateDestinations;
-        
+
         window.toggleCustomRoute = () => {
             const isCustom = document.getElementById('custom-route-toggle').checked;
             if (isCustom) {
@@ -1400,7 +1709,7 @@
             e.preventDefault();
             const btn = e.target.querySelector('button[type="submit"]');
             const originalText = btn.innerHTML;
-            
+
             if (!discordUser || !discordUser.isMember) return;
 
             btn.innerHTML = `<i data-lucide="loader" class="w-5 h-5 mr-3 animate-spin"></i> TRANSMITTING...`;
@@ -1408,7 +1717,7 @@
 
             const isCustom = document.getElementById('custom-route-toggle').checked;
             let flightNumber, departure, destination;
-            
+
             if (isCustom) {
                 flightNumber = document.getElementById('custom-flight').value.toUpperCase();
                 departure = document.getElementById('custom-dep').value.toUpperCase();
@@ -1422,7 +1731,7 @@
                 destination = document.getElementById('disp-arr').textContent;
                 departure = document.getElementById('disp-dep').textContent;
             }
-            
+
             const selectedFleet = fleetData.find(f => f.type === document.getElementById('aircraft-select').value);
             const timeVal = document.getElementById('dep-time').value;
             const today = new Date();
@@ -1454,7 +1763,7 @@
         // --- DISPATCH BOARD ---
         function initDispatchBoard() {
             const board = document.getElementById('dispatch-rows');
-            if(!board || !db) return;
+            if (!board || !db) return;
             const statusColors = { 'TEST': 'text-amber-500', 'LOGGED': 'text-slate-500', 'BOOKED': 'text-klm', 'DEPARTED': 'text-sky-400', 'ENROUTE': 'text-indigo-400', 'ARRIVED': 'text-emerald-400', 'CANCELED': 'text-red-500' };
 
             const q = query(collection(db, "bookings"), orderBy("createdAt", "desc"), limit(20));
@@ -1462,15 +1771,15 @@
                 const sl = document.getElementById('db-status-light');
                 const st = document.getElementById('db-status-text');
                 if (sl) { sl.classList.replace('bg-red-500', 'bg-emerald-500'); sl.classList.remove('animate-pulse'); st.textContent = "SECURE LINK ACTIVE"; }
-                
+
                 board.innerHTML = "";
-                if(querySnapshot.empty) { board.innerHTML = '<div class="p-8 text-center text-slate-500">Awaiting dispatch orders.</div>'; return; }
-                
+                if (querySnapshot.empty) { board.innerHTML = '<div class="p-8 text-center text-slate-500">Awaiting dispatch orders.</div>'; return; }
+
                 querySnapshot.forEach((doc) => {
                     const d = doc.data();
                     let dateStr = '--/--';
-                    if (d.scheduledDeparture) try { dateStr = new Date(d.scheduledDeparture).toLocaleDateString('en-GB', {day: '2-digit', month: 'short'}).toUpperCase(); } catch (e) {}
-                    
+                    if (d.scheduledDeparture) try { dateStr = new Date(d.scheduledDeparture).toLocaleDateString('en-GB', { day: '2-digit', month: 'short' }).toUpperCase(); } catch (e) { }
+
                     const row = document.createElement('div');
                     row.className = 'fids-row';
                     row.innerHTML = `
@@ -1492,40 +1801,40 @@
         // --- MAP LOGIC ---
         let mapInstance = null, flightLinesLayer = null;
         const routeManifest = [
-          { "origin": "EHAM", "originCoords": [4.7639, 52.3091], "destination": "EGLL", "destinationCoords": [-0.4543, 51.4700] },
-          { "origin": "EHAM", "originCoords": [4.7639, 52.3091], "destination": "LFPG", "destinationCoords": [2.5479, 49.0097] },
-          { "origin": "EHAM", "originCoords": [4.7639, 52.3091], "destination": "EDDB", "destinationCoords": [13.5033, 52.3667] },
-          { "origin": "EHAM", "originCoords": [4.7639, 52.3091], "destination": "LIRF", "destinationCoords": [12.2389, 41.8003] },
-          { "origin": "EHAM", "originCoords": [4.7639, 52.3091], "destination": "LEMD", "destinationCoords": [-3.5679, 40.4936] },
-          { "origin": "EHAM", "originCoords": [4.7639, 52.3091], "destination": "LOWW", "destinationCoords": [16.5697, 48.1103] },
-          { "origin": "EHAM", "originCoords": [4.7639, 52.3091], "destination": "ESSA", "destinationCoords": [17.9186, 59.6519] },
-          { "origin": "EHAM", "originCoords": [4.7639, 52.3091], "destination": "ENGM", "destinationCoords": [11.1004, 60.1939] },
-          { "origin": "EHAM", "originCoords": [4.7639, 52.3091], "destination": "EKCH", "destinationCoords": [12.6560, 55.6180] },
-          { "origin": "EHAM", "originCoords": [4.7639, 52.3091], "destination": "LGAV", "destinationCoords": [23.9445, 37.9364] },
-          { "origin": "EHAM", "originCoords": [4.7639, 52.3091], "destination": "KJFK", "destinationCoords": [-73.7781, 40.6413] },
-          { "origin": "EHAM", "originCoords": [4.7639, 52.3091], "destination": "KATL", "destinationCoords": [-84.4277, 33.6407] },
-          { "origin": "EHAM", "originCoords": [4.7639, 52.3091], "destination": "KLAX", "destinationCoords": [-118.4085, 33.9416] },
-          { "origin": "EHAM", "originCoords": [4.7639, 52.3091], "destination": "KORD", "destinationCoords": [-87.9048, 41.9742] },
-          { "origin": "EHAM", "originCoords": [4.7639, 52.3091], "destination": "CYYZ", "destinationCoords": [-79.6248, 43.6777] },
-          { "origin": "EHAM", "originCoords": [4.7639, 52.3091], "destination": "MMMX", "destinationCoords": [-99.0721, 19.4361] },
-          { "origin": "EHAM", "originCoords": [4.7639, 52.3091], "destination": "SBGR", "destinationCoords": [-46.4731, -23.4356] },
-          { "origin": "EHAM", "originCoords": [4.7639, 52.3091], "destination": "SAEZ", "destinationCoords": [-58.5358, -34.8222] },
-          { "origin": "EHAM", "originCoords": [4.7639, 52.3091], "destination": "SKBO", "destinationCoords": [-74.1469, 4.7016] },
-          { "origin": "EHAM", "originCoords": [4.7639, 52.3091], "destination": "SPJC", "destinationCoords": [-77.1143, -12.0219] },
-          { "origin": "EHAM", "originCoords": [4.7639, 52.3091], "destination": "FAOR", "destinationCoords": [28.2411, -26.1367] },
-          { "origin": "EHAM", "originCoords": [4.7639, 52.3091], "destination": "HKJK", "destinationCoords": [36.9275, -1.3192] },
-          { "origin": "EHAM", "originCoords": [4.7639, 52.3091], "destination": "FACT", "destinationCoords": [18.6017, -33.9715] },
-          { "origin": "EHAM", "originCoords": [4.7639, 52.3091], "destination": "DGAA", "destinationCoords": [-0.1667, 5.6052] },
-          { "origin": "EHAM", "originCoords": [4.7639, 52.3091], "destination": "OMDB", "destinationCoords": [55.3644, 25.2532] },
-          { "origin": "EHAM", "originCoords": [4.7639, 52.3091], "destination": "OTHH", "destinationCoords": [51.6080, 25.2730] },
-          { "origin": "EHAM", "originCoords": [4.7639, 52.3091], "destination": "LLBG", "destinationCoords": [34.8867, 32.0114] },
-          { "origin": "EHAM", "originCoords": [4.7639, 52.3091], "destination": "RJAA", "destinationCoords": [140.3929, 35.7719] },
-          { "origin": "EHAM", "originCoords": [4.7639, 52.3091], "destination": "WSSS", "destinationCoords": [103.9940, 1.3644] },
-          { "origin": "EHAM", "originCoords": [4.7639, 52.3091], "destination": "VIDP", "destinationCoords": [77.1000, 28.5562] },
-          { "origin": "EHAM", "originCoords": [4.7639, 52.3091], "destination": "ZBAA", "destinationCoords": [116.5845, 40.0799] },
-          { "origin": "EHAM", "originCoords": [4.7639, 52.3091], "destination": "VTBS", "destinationCoords": [100.7501, 13.6811] },
-          { "origin": "EHAM", "originCoords": [4.7639, 52.3091], "destination": "RKSI", "destinationCoords": [126.4407, 37.4602] },
-          { "origin": "EHAM", "originCoords": [4.7639, 52.3091], "destination": "WIII", "destinationCoords": [106.6559, -6.1256] }
+            { "origin": "EHAM", "originCoords": [4.7639, 52.3091], "destination": "EGLL", "destinationCoords": [-0.4543, 51.4700] },
+            { "origin": "EHAM", "originCoords": [4.7639, 52.3091], "destination": "LFPG", "destinationCoords": [2.5479, 49.0097] },
+            { "origin": "EHAM", "originCoords": [4.7639, 52.3091], "destination": "EDDB", "destinationCoords": [13.5033, 52.3667] },
+            { "origin": "EHAM", "originCoords": [4.7639, 52.3091], "destination": "LIRF", "destinationCoords": [12.2389, 41.8003] },
+            { "origin": "EHAM", "originCoords": [4.7639, 52.3091], "destination": "LEMD", "destinationCoords": [-3.5679, 40.4936] },
+            { "origin": "EHAM", "originCoords": [4.7639, 52.3091], "destination": "LOWW", "destinationCoords": [16.5697, 48.1103] },
+            { "origin": "EHAM", "originCoords": [4.7639, 52.3091], "destination": "ESSA", "destinationCoords": [17.9186, 59.6519] },
+            { "origin": "EHAM", "originCoords": [4.7639, 52.3091], "destination": "ENGM", "destinationCoords": [11.1004, 60.1939] },
+            { "origin": "EHAM", "originCoords": [4.7639, 52.3091], "destination": "EKCH", "destinationCoords": [12.6560, 55.6180] },
+            { "origin": "EHAM", "originCoords": [4.7639, 52.3091], "destination": "LGAV", "destinationCoords": [23.9445, 37.9364] },
+            { "origin": "EHAM", "originCoords": [4.7639, 52.3091], "destination": "KJFK", "destinationCoords": [-73.7781, 40.6413] },
+            { "origin": "EHAM", "originCoords": [4.7639, 52.3091], "destination": "KATL", "destinationCoords": [-84.4277, 33.6407] },
+            { "origin": "EHAM", "originCoords": [4.7639, 52.3091], "destination": "KLAX", "destinationCoords": [-118.4085, 33.9416] },
+            { "origin": "EHAM", "originCoords": [4.7639, 52.3091], "destination": "KORD", "destinationCoords": [-87.9048, 41.9742] },
+            { "origin": "EHAM", "originCoords": [4.7639, 52.3091], "destination": "CYYZ", "destinationCoords": [-79.6248, 43.6777] },
+            { "origin": "EHAM", "originCoords": [4.7639, 52.3091], "destination": "MMMX", "destinationCoords": [-99.0721, 19.4361] },
+            { "origin": "EHAM", "originCoords": [4.7639, 52.3091], "destination": "SBGR", "destinationCoords": [-46.4731, -23.4356] },
+            { "origin": "EHAM", "originCoords": [4.7639, 52.3091], "destination": "SAEZ", "destinationCoords": [-58.5358, -34.8222] },
+            { "origin": "EHAM", "originCoords": [4.7639, 52.3091], "destination": "SKBO", "destinationCoords": [-74.1469, 4.7016] },
+            { "origin": "EHAM", "originCoords": [4.7639, 52.3091], "destination": "SPJC", "destinationCoords": [-77.1143, -12.0219] },
+            { "origin": "EHAM", "originCoords": [4.7639, 52.3091], "destination": "FAOR", "destinationCoords": [28.2411, -26.1367] },
+            { "origin": "EHAM", "originCoords": [4.7639, 52.3091], "destination": "HKJK", "destinationCoords": [36.9275, -1.3192] },
+            { "origin": "EHAM", "originCoords": [4.7639, 52.3091], "destination": "FACT", "destinationCoords": [18.6017, -33.9715] },
+            { "origin": "EHAM", "originCoords": [4.7639, 52.3091], "destination": "DGAA", "destinationCoords": [-0.1667, 5.6052] },
+            { "origin": "EHAM", "originCoords": [4.7639, 52.3091], "destination": "OMDB", "destinationCoords": [55.3644, 25.2532] },
+            { "origin": "EHAM", "originCoords": [4.7639, 52.3091], "destination": "OTHH", "destinationCoords": [51.6080, 25.2730] },
+            { "origin": "EHAM", "originCoords": [4.7639, 52.3091], "destination": "LLBG", "destinationCoords": [34.8867, 32.0114] },
+            { "origin": "EHAM", "originCoords": [4.7639, 52.3091], "destination": "RJAA", "destinationCoords": [140.3929, 35.7719] },
+            { "origin": "EHAM", "originCoords": [4.7639, 52.3091], "destination": "WSSS", "destinationCoords": [103.9940, 1.3644] },
+            { "origin": "EHAM", "originCoords": [4.7639, 52.3091], "destination": "VIDP", "destinationCoords": [77.1000, 28.5562] },
+            { "origin": "EHAM", "originCoords": [4.7639, 52.3091], "destination": "ZBAA", "destinationCoords": [116.5845, 40.0799] },
+            { "origin": "EHAM", "originCoords": [4.7639, 52.3091], "destination": "VTBS", "destinationCoords": [100.7501, 13.6811] },
+            { "origin": "EHAM", "originCoords": [4.7639, 52.3091], "destination": "RKSI", "destinationCoords": [126.4407, 37.4602] },
+            { "origin": "EHAM", "originCoords": [4.7639, 52.3091], "destination": "WIII", "destinationCoords": [106.6559, -6.1256] }
         ];
 
         function initFleetMap() {
@@ -1535,10 +1844,10 @@
             mapInstance = L.map('fleet-map', { center: [30, 0], zoom: 2, minZoom: 2, maxBounds: [[-90, -180], [90, 180]], zoomControl: false, attributionControl: false });
             L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', { subdomains: 'abcd', maxZoom: 19 }).addTo(mapInstance);
             flightLinesLayer = L.layerGroup().addTo(mapInstance);
-            
+
             const hubIcon = L.divIcon({ className: 'custom-div-icon', html: "<div style='background-color:#00A1DE;width:8px;height:8px;border-radius:50%;box-shadow:0 0 20px #00A1DE;'></div>", iconSize: [8, 8], iconAnchor: [4, 4] });
             L.marker([52.3091, 4.7639], { icon: hubIcon }).addTo(flightLinesLayer);
-            
+
             routeManifest.forEach(route => {
                 const start = [route.originCoords[1], route.originCoords[0]];
                 const end = [route.destinationCoords[1], route.destinationCoords[0]];
@@ -1552,13 +1861,13 @@
             const lat1 = start[0], lng1 = start[1], lat2 = end[0], lng2 = end[1];
             const midLat = (lat1 + lat2) / 2, midLng = (lng1 + lng2) / 2;
             const dist = Math.sqrt(Math.pow(lat2 - lat1, 2) + Math.pow(lng2 - lng1, 2));
-            const controlLat = midLat + (dist * 0.25), controlLng = midLng; 
+            const controlLat = midLat + (dist * 0.25), controlLng = midLng;
             const points = [];
-            for(let t=0; t<=1; t+=0.02) {
+            for (let t = 0; t <= 1; t += 0.02) {
                 const invT = 1 - t;
-                points.push([ (invT * invT * lat1) + (2 * invT * t * controlLat) + (t * t * lat2), (invT * invT * lng1) + (2 * invT * t * controlLng) + (t * t * lng2) ]);
+                points.push([(invT * invT * lat1) + (2 * invT * t * controlLat) + (t * t * lat2), (invT * invT * lng1) + (2 * invT * t * controlLng) + (t * t * lng2)]);
             }
-            points.push([lat2, lng2]); 
+            points.push([lat2, lng2]);
             return points;
         }
 
@@ -1566,7 +1875,7 @@
             const grid = document.getElementById('route-grid');
             const data = routeData[region] || [];
             document.querySelectorAll('.route-btn').forEach(btn => {
-                if(btn.id === `btn-${region}`) { btn.classList.add('bg-klm', 'text-white'); btn.classList.remove('bg-white/5', 'text-slate-400'); }
+                if (btn.id === `btn-${region}`) { btn.classList.add('bg-klm', 'text-white'); btn.classList.remove('bg-white/5', 'text-slate-400'); }
                 else { btn.classList.remove('bg-klm', 'text-white'); btn.classList.add('bg-white/5', 'text-slate-400'); }
             });
             grid.innerHTML = data.map(route => `
@@ -1592,4 +1901,5 @@
         router('home');
     </script>
 </body>
+
 </html>
