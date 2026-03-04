@@ -33,6 +33,407 @@
             --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
         }
 
+        /* ================================================
+           LIGHT MODE — KLM Sky Edition
+           A crisp, bright theme with KLM blue accents.
+           Hero section stays dark for readability.
+           ================================================ */
+        [data-theme="light"] {
+            --bg-base: #f8fafc;
+            --bg-card: rgba(255, 255, 255, 0.92);
+            --border-subtle: rgba(0, 80, 140, 0.08);
+            --border-hover: rgba(0, 80, 140, 0.18);
+            --klm-glow: rgba(0, 119, 163, 0.20);
+            --klm-glow-soft: rgba(0, 119, 163, 0.06);
+        }
+
+        [data-theme="light"] body {
+            background-color: #f1f5f9;
+            color: #1e293b;
+            background-image:
+                radial-gradient(ellipse at 20% 0%, rgba(0, 161, 222, 0.08) 0%, transparent 50%),
+                radial-gradient(ellipse at 80% 100%, rgba(56, 189, 248, 0.06) 0%, transparent 50%);
+            background-attachment: fixed;
+        }
+
+        [data-theme="light"] ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+
+        [data-theme="light"] ::-webkit-scrollbar-thumb {
+            background: linear-gradient(180deg, var(--klm-blue), var(--klm-dark));
+            border-radius: 10px;
+        }
+
+        /* ---- NAV ---- */
+        [data-theme="light"] .glass-nav {
+            background: rgba(255, 255, 255, 0.92);
+            backdrop-filter: blur(20px) saturate(140%);
+            border-bottom: 1px solid rgba(0, 80, 140, 0.10);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+        }
+
+        [data-theme="light"] .nav-link {
+            color: #475569 !important;
+        }
+
+        [data-theme="light"] .nav-link.active {
+            color: var(--klm-dark) !important;
+            text-shadow: none;
+        }
+
+        [data-theme="light"] .nav-link:hover {
+            color: var(--klm-blue) !important;
+        }
+
+        [data-theme="light"] .nav-link::after {
+            background: linear-gradient(90deg, transparent, var(--klm-blue), transparent);
+        }
+
+        /* ---- GLASS PANELS / CARDS ---- */
+        [data-theme="light"] .glass-panel {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(0, 80, 140, 0.09);
+            box-shadow:
+                0 4px 24px rgba(0, 80, 140, 0.06),
+                0 1px 3px rgba(0, 0, 0, 0.04);
+        }
+
+        [data-theme="light"] .glass-panel:hover {
+            border-color: rgba(0, 161, 222, 0.22);
+            box-shadow:
+                0 12px 40px rgba(0, 80, 140, 0.10),
+                0 0 0 1px rgba(0, 161, 222, 0.08);
+            transform: translateY(-4px);
+        }
+
+        /* ---- FIDS DISPATCH BOARD ---- */
+        [data-theme="light"] .fids-board {
+            background: #ffffff;
+            border: 1px solid rgba(0, 80, 140, 0.10);
+            box-shadow: 0 8px 40px rgba(0, 80, 140, 0.08);
+        }
+
+        [data-theme="light"] .fids-header {
+            background: linear-gradient(90deg, rgba(0, 161, 222, 0.06), rgba(0, 161, 222, 0.02));
+            color: #475569;
+            border-bottom: 1px solid rgba(0, 80, 140, 0.08);
+        }
+
+        [data-theme="light"] .fids-row {
+            color: #1e293b;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.04);
+        }
+
+        [data-theme="light"] .fids-row:hover {
+            background-color: rgba(0, 161, 222, 0.04);
+        }
+
+        [data-theme="light"] .fids-row::before {
+            background: linear-gradient(180deg, var(--klm-blue), var(--klm-dark));
+        }
+
+        [data-theme="light"] .fids-row::after {
+            background: linear-gradient(90deg, rgba(0, 161, 222, 0.03), transparent);
+        }
+
+        /* ---- FORM INPUTS ---- */
+        [data-theme="light"] .sleek-input {
+            background: #ffffff;
+            border: 1px solid rgba(0, 80, 140, 0.14);
+            color: #0f172a;
+        }
+
+        [data-theme="light"] .sleek-input:focus {
+            background: #ffffff;
+            border-color: var(--klm-blue);
+            box-shadow: 0 0 0 3px rgba(0, 161, 222, 0.15), 0 2px 8px rgba(0, 161, 222, 0.08);
+        }
+
+        /* ---- TEXT GRADIENT ---- */
+        [data-theme="light"] .text-gradient {
+            background-image: linear-gradient(135deg, #0f172a 0%, #334155 100%);
+        }
+
+        /* ---- BROAD TAILWIND OVERRIDES ---- */
+        /* Text colors */
+        [data-theme="light"] .text-white {
+            color: #0f172a;
+        }
+
+        [data-theme="light"] .text-slate-100 {
+            color: #1e293b;
+        }
+
+        [data-theme="light"] .text-slate-200 {
+            color: #334155;
+        }
+
+        [data-theme="light"] .text-slate-300 {
+            color: #475569;
+        }
+
+        [data-theme="light"] .text-slate-400 {
+            color: #64748b;
+        }
+
+        [data-theme="light"] .text-slate-500 {
+            color: #94a3b8;
+        }
+
+        /* Background colors */
+        [data-theme="light"] .bg-slate-900 {
+            background-color: #f1f5f9;
+        }
+
+        [data-theme="light"] .bg-slate-800 {
+            background-color: #f1f5f9;
+        }
+
+        [data-theme="light"] .bg-\[\#020617\] {
+            background-color: #f1f5f9;
+        }
+
+        [data-theme="light"] .bg-\[\#0f172a\] {
+            background-color: #e2e8f0;
+        }
+
+        [data-theme="light"] .bg-black\/20 {
+            background-color: rgba(0, 80, 140, 0.03);
+        }
+
+        [data-theme="light"] .bg-black\/40 {
+            background-color: rgba(0, 80, 140, 0.04);
+        }
+
+        [data-theme="light"] .bg-white\/5 {
+            background-color: rgba(0, 80, 140, 0.03);
+        }
+
+        [data-theme="light"] .bg-white\/10 {
+            background-color: rgba(0, 80, 140, 0.05);
+        }
+
+        /* Border colors */
+        [data-theme="light"] .border-white\/5 {
+            border-color: rgba(0, 80, 140, 0.06);
+        }
+
+        [data-theme="light"] .border-white\/10 {
+            border-color: rgba(0, 80, 140, 0.10);
+        }
+
+        [data-theme="light"] .border-white\/15 {
+            border-color: rgba(0, 80, 140, 0.12);
+        }
+
+        /* Hover overrides */
+        [data-theme="light"] .hover\:bg-white\/5:hover {
+            background-color: rgba(0, 161, 222, 0.06);
+        }
+
+        [data-theme="light"] .hover\:bg-white\/10:hover {
+            background-color: rgba(0, 161, 222, 0.08);
+        }
+
+        /* Logo — show original KLM blue, remove dark-mode invert */
+        [data-theme="light"] .brightness-0 {
+            filter: none;
+        }
+
+        [data-theme="light"] .invert {
+            filter: none;
+        }
+
+        /* Ambient blobs — turn into a soft sky tint */
+        [data-theme="light"] .ambient-glow {
+            opacity: 0;
+        }
+
+        /* ---- HERO SECTION STAYS DARK ---- */
+        [data-theme="light"] .min-h-\[90vh\] {
+            background-color: #020617;
+        }
+
+        /* Keep the hero/home page readable over the background photo */
+        [data-theme="light"] .min-h-\[90vh\] .text-white,
+        [data-theme="light"] .min-h-\[90vh\] .text-slate-300,
+        [data-theme="light"] .min-h-\[90vh\] .text-slate-400 {
+            color: inherit;
+        }
+
+        [data-theme="light"] .min-h-\[90vh\] .text-white {
+            color: #ffffff;
+        }
+
+        [data-theme="light"] .min-h-\[90vh\] .text-slate-300 {
+            color: #cbd5e1;
+        }
+
+        /* Keep hero gradient dark so text is visible over photo */
+        [data-theme="light"] .min-h-\[90vh\] .from-slate-950 {
+            --tw-gradient-from: #020617;
+        }
+
+        [data-theme="light"] .min-h-\[90vh\] .via-slate-950\/80 {
+            --tw-gradient-via: rgba(2, 6, 23, 0.80);
+        }
+
+        [data-theme="light"] .min-h-\[90vh\] .bg-gradient-to-t {
+            background: linear-gradient(to top, #020617 0%, rgba(2, 6, 23, 0.85) 40%, transparent 100%);
+        }
+
+        /* FIDS board inside hero should also stay dark-themed */
+        [data-theme="light"] .min-h-\[90vh\] .fids-board {
+            background: linear-gradient(180deg, rgba(15, 23, 42, 0.90), rgba(2, 6, 23, 0.98));
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.5);
+        }
+
+        [data-theme="light"] .min-h-\[90vh\] .fids-header {
+            background: rgba(0, 0, 0, 0.4);
+            color: #64748b;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+        }
+
+        [data-theme="light"] .min-h-\[90vh\] .fids-row {
+            color: #e2e8f0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.02);
+        }
+
+        [data-theme="light"] .min-h-\[90vh\] .fids-row:hover {
+            background-color: rgba(255, 255, 255, 0.03);
+        }
+
+        [data-theme="light"] .min-h-\[90vh\] .fids-row .text-white,
+        [data-theme="light"] .min-h-\[90vh\] .fids-row .font-bold.text-white {
+            color: #ffffff;
+        }
+
+        [data-theme="light"] .min-h-\[90vh\] .fids-row .text-slate-300 {
+            color: #cbd5e1;
+        }
+
+        [data-theme="light"] .min-h-\[90vh\] .fids-row .text-slate-400 {
+            color: #94a3b8;
+        }
+
+        [data-theme="light"] .min-h-\[90vh\] .fids-row .text-slate-500 {
+            color: #64748b;
+        }
+
+        [data-theme="light"] .min-h-\[90vh\] .bg-black\/20 {
+            background-color: rgba(0, 0, 0, 0.20);
+        }
+
+        /* Status live indicator in hero */
+        [data-theme="light"] .min-h-\[90vh\] .bg-slate-900\/80 {
+            background-color: rgba(15, 23, 42, 0.80);
+        }
+
+        [data-theme="light"] .min-h-\[90vh\] .text-slate-400.uppercase {
+            color: #94a3b8;
+        }
+
+        /* ---- FOOTER: keep dark ---- */
+        [data-theme="light"] footer.glass-nav {
+            background: #0f172a;
+            border-top: 1px solid rgba(255, 255, 255, 0.06);
+        }
+
+        [data-theme="light"] footer .text-white {
+            color: #f8fafc;
+        }
+
+        [data-theme="light"] footer .text-slate-300 {
+            color: #94a3b8;
+        }
+
+        [data-theme="light"] footer .text-slate-400 {
+            color: #64748b;
+        }
+
+        [data-theme="light"] footer .text-slate-500 {
+            color: #475569;
+        }
+
+        [data-theme="light"] footer .bg-white\/5 {
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+
+        [data-theme="light"] footer .border-white\/5 {
+            border-color: rgba(255, 255, 255, 0.06);
+        }
+
+        [data-theme="light"] footer .brightness-0 {
+            filter: brightness(0);
+        }
+
+        [data-theme="light"] footer .invert {
+            filter: invert(1);
+        }
+
+        [data-theme="light"] footer .opacity-70 {
+            opacity: 0.7;
+        }
+
+        /* ---- CONDOLENCES PAGE: keep dark/memorial toned ---- */
+        [data-theme="light"] .min-h-\[80vh\] .text-white {
+            color: #f8fafc;
+        }
+
+        [data-theme="light"] .min-h-\[80vh\] .text-slate-300 {
+            color: #94a3b8;
+        }
+
+        [data-theme="light"] .min-h-\[80vh\] .text-slate-400 {
+            color: #64748b;
+        }
+
+        /* Gradient overlays for non-hero areas */
+        [data-theme="light"] .from-\[\#020617\] {
+            --tw-gradient-from: #f1f5f9;
+        }
+
+        /* ---- HOVER LIFT ---- */
+        [data-theme="light"] .hover-lift:hover {
+            box-shadow: 0 20px 48px -12px rgba(0, 80, 140, 0.12), 0 0 0 1px rgba(0, 161, 222, 0.08);
+        }
+
+        /* Theme toggle styling */
+        .theme-toggle-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #94a3b8;
+            cursor: pointer;
+            transition: all 0.3s var(--ease-out-expo);
+        }
+
+        .theme-toggle-btn:hover {
+            background: rgba(0, 161, 222, 0.1);
+            border-color: var(--klm-blue);
+            color: var(--klm-blue);
+        }
+
+        [data-theme="light"] .theme-toggle-btn {
+            background: rgba(0, 0, 0, 0.04);
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            color: #64748b;
+        }
+
+        [data-theme="light"] .theme-toggle-btn:hover {
+            background: rgba(0, 161, 222, 0.08);
+            border-color: var(--klm-dark);
+            color: var(--klm-dark);
+        }
+
         * {
             box-sizing: border-box;
         }
@@ -482,6 +883,13 @@
 
                     <div class="h-6 w-px bg-white/10 mx-2"></div>
 
+                    <button id="theme-toggle-desktop" onclick="window.toggleTheme()" class="theme-toggle-btn"
+                        title="Toggle Light/Dark Mode">
+                        <i id="theme-icon-desktop" data-lucide="moon" class="w-4 h-4"></i>
+                    </button>
+
+                    <div class="h-6 w-px bg-white/10 mx-1"></div>
+
                     <button onclick="router('profile')" class="flex items-center gap-2 group">
                         <div
                             class="w-8 h-8 rounded-full bg-slate-800 border border-white/10 flex items-center justify-center overflow-hidden group-hover:border-klm transition-colors">
@@ -523,6 +931,12 @@
                     class="block w-full text-left px-4 py-3 rounded-lg hover:bg-white/5 font-medium text-slate-300">Intel</button>
                 <button onclick="router('partners'); toggleMobileMenu()"
                     class="block w-full text-left px-4 py-3 rounded-lg hover:bg-white/5 font-medium text-slate-300">Partners</button>
+                <div class="border-t border-white/5 my-2"></div>
+                <button onclick="window.toggleTheme(); toggleMobileMenu()" id="theme-toggle-mobile"
+                    class="flex items-center gap-3 w-full text-left px-4 py-3 rounded-lg hover:bg-white/5 font-medium text-slate-300">
+                    <i id="theme-icon-mobile" data-lucide="moon" class="w-4 h-4"></i>
+                    <span id="theme-label-mobile">Light Mode</span>
+                </button>
             </div>
         </div>
     </nav>
@@ -2015,6 +2429,37 @@
 
         function toggleMobileMenu() { document.getElementById('mobile-menu').classList.toggle('hidden'); }
         window.toggleMobileMenu = toggleMobileMenu;
+
+        // --- THEME TOGGLE LOGIC ---
+        function applyTheme(theme) {
+            document.documentElement.setAttribute('data-theme', theme);
+            const isDark = theme !== 'light';
+            const iconName = isDark ? 'moon' : 'sun';
+            const labelText = isDark ? 'Light Mode' : 'Dark Mode';
+
+            // Update desktop icon
+            const desktopIcon = document.getElementById('theme-icon-desktop');
+            if (desktopIcon) desktopIcon.setAttribute('data-lucide', iconName);
+
+            // Update mobile icon and label
+            const mobileIcon = document.getElementById('theme-icon-mobile');
+            if (mobileIcon) mobileIcon.setAttribute('data-lucide', iconName);
+            const mobileLabel = document.getElementById('theme-label-mobile');
+            if (mobileLabel) mobileLabel.textContent = labelText;
+
+            if (window.lucide) lucide.createIcons();
+        }
+
+        window.toggleTheme = () => {
+            const current = document.documentElement.getAttribute('data-theme');
+            const next = current === 'light' ? '' : 'light';
+            localStorage.setItem('klm_theme', next);
+            applyTheme(next);
+        };
+
+        // Apply saved theme on load
+        const savedTheme = localStorage.getItem('klm_theme') || '';
+        applyTheme(savedTheme);
 
         document.getElementById('nav-logo').src = siteImages.logo;
         document.getElementById('footer-logo').src = siteImages.logo;
